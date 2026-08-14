@@ -450,8 +450,8 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
         <div class="card">
           <div class="eq-hero eq-block" id="s1-eq"></div>
           <div class="eq-sub eq-block" id="s1-eq-nums"></div>
-          <p class="formula-note" style="margin-bottom:20px">The ceiling in the discovery
-            population, evaluated at the values in the panel. Every number moves as you drag.</p>
+          <p class="formula-note" style="margin-bottom:20px">The ceiling for this population,
+            evaluated at the values in the panel. Every number moves as you drag.</p>
           <h3>The phenotypic variance of one individual, split in two</h3>
           <p class="legend">
             <span class="legend-item"><span class="legend-box" style="background:var(--c-gen)"></span>genetic, <span id="l-gen-sym"></span></span>
@@ -492,11 +492,14 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
   <section id="s2" data-tone="2">
     <div class="section-head"><span class="section-num">02</span><h2>Transferability is a ratio of two ceilings</h2>
       <span class="pill" id="s2-pill"></span></div>
-    <p class="section-sub">Build the optimal predictor in discovery population A and apply it in
-      target population B. Because the predictor is already perfect, the only thing that changes is
-      which population you are measuring in. Transferability is therefore the target's ceiling
-      divided by the discovery population's ceiling, and there is no reason for that ratio to be at
-      most one.</p>
+    <p class="section-sub">Now there are two populations, so from here on the quantities carry a
+      subscript. The population you tuned in section 1 becomes the discovery population A, and a
+      second one, B, is added as the target. Build the optimal predictor in A and apply it in B.
+      Because the predictor is already perfect, the only thing that changes is which population you
+      are measuring in. Transferability is therefore the target's ceiling divided by the discovery
+      population's ceiling, and there is no reason for that ratio to be at most one. Under
+      Hardy&ndash;Weinberg equilibrium both ceilings are heritabilities, so transferability is
+      exactly <span data-tex="h^2_B / h^2_A"></span>.</p>
     <div class="sec-grid">
       <div class="panel" id="panel-2"></div>
       <div>
@@ -1051,11 +1054,20 @@ const VARS = {
   pB: { pop: 'B', kind: 'p', tex: '\\overline{\\Phi}_B', min: 0.5, max: 1.0, step: 0.005 },
   tB: { pop: 'B', kind: 't', tex: '\\tau^2_B', min: 0.3, max: 3.0, step: 0.01 }
 };
+/* `tex` is the symbol WITHOUT a population subscript, and `part` says which side of
+   the variance the quantity feeds. Section 1 concerns a single population, so it uses
+   both: bare symbols, and dot colours that match the genetic and non-genetic blocks of
+   its bar rather than the discovery-and-target colours, which would assert a
+   distinction the section has not introduced yet. */
 const KIND = {
-  s: { name: 'additive genetic variance', blurb: 'How much of the trait is heritable. It is set by the causal effect sizes together with the allele frequencies, so demography enters here.' },
-  p: { name: 'average self-kinship', blurb: 'The chance an individual’s two alleles at a site are identical by descent, averaged over the sample. Exactly one half when the sample is unrelated and in Hardy–Weinberg equilibrium, and larger under inbreeding or structure.' },
-  t: { name: 'non-genetic variance', blurb: 'Everything that varies the trait and cannot be read from the genotype. No predictor built from genotype can touch it.' }
+  s: { name: 'additive genetic variance', tex: '\\sigma^2', part: 'gen',
+       blurb: 'How much of the trait is heritable. It is set by the causal effect sizes together with the allele frequencies, so demography enters here.' },
+  p: { name: 'average self-kinship', tex: '\\overline{\\Phi}', part: 'gen',
+       blurb: 'The chance an individual’s two alleles at a site are identical by descent, averaged over the sample. Exactly one half when the sample is unrelated and in Hardy–Weinberg equilibrium, and larger under inbreeding or structure.' },
+  t: { name: 'non-genetic variance', tex: '\\tau^2', part: 'env',
+       blurb: 'Everything that varies the trait and cannot be read from the genotype. No predictor built from genotype can touch it.' }
 };
+const partColour = kind => (KIND[kind].part === 'gen' ? 'var(--c-gen)' : 'var(--c-env)');
 const popColour = pop => (pop === 'A' ? 'var(--c-disc)' : 'var(--c-targ)');
 const popName = pop => (pop === 'A' ? 'discovery, A' : 'target, B');
 
@@ -1091,13 +1103,18 @@ function buildTheoryPanel(hostId, keys, opts) {
       lastPop = v.pop;
     }
     const rid = hostId + '-r-' + key, nid = hostId + '-n-' + key;
-    html += '<div class="row" style="--knob:' + popColour(v.pop) + '">' +
-      '<span class="sym"><span class="dot" style="background:' + popColour(v.pop) + '"></span>' +
-      '<span data-tex="' + v.tex + '"></span></span>' +
+    // In plain mode there is only one population, so the symbol carries no subscript
+    // and the control is described without naming a discovery or target role.
+    const colour = o.plain ? partColour(v.kind) : popColour(v.pop);
+    const tex = o.plain ? k.tex : v.tex;
+    const where = o.plain ? '' : ' in the ' + popName(v.pop) + ' population';
+    html += '<div class="row" style="--knob:' + colour + '">' +
+      '<span class="sym"><span class="dot" style="background:' + colour + '"></span>' +
+      '<span data-tex="' + tex + '"></span></span>' +
       '<input type="range" id="' + rid + '" data-key="' + key + '" min="' + v.min + '" max="' + v.max +
-      '" step="' + v.step + '" value="' + theory[key] + '" aria-label="' + k.name + ' in the ' + popName(v.pop) + ' population">' +
+      '" step="' + v.step + '" value="' + theory[key] + '" aria-label="' + k.name + where + '">' +
       '<input type="number" id="' + nid + '" data-key="' + key + '" step="' + v.step +
-      '" min="' + v.min + '" max="' + v.max + '" value="' + theory[key] + '" aria-label="' + k.name + ' in the ' + popName(v.pop) + ' population, typed">' +
+      '" min="' + v.min + '" max="' + v.max + '" value="' + theory[key] + '" aria-label="' + k.name + where + ', typed">' +
       '<span class="row-def">' + k.name + (o.defs ? '. ' + k.blurb : '') + '</span></div>';
   }
   if (o.reset !== false) {
@@ -1164,11 +1181,12 @@ function drawSection1() {
     'total phenotypic variance = ' + fmt(total, 3)));
 
   /* The section's headline equation, symbolic above and substituted below. The
-     substitution line carries no leading PA_A because the line above it ends in
-     one, so the two read as a single continued expression. */
+     substitution line carries no leading PA because the line above it ends in one,
+     so the two read as a single continued expression. No population subscripts here:
+     this section has one population, and A and B arrive in section 2. */
   $('s1-eq').innerHTML = mh(
-    '\\mathrm{PA}_A \\;=\\; \\frac{2\\sigma^{2}_A\\overline{\\Phi}_A}' +
-    '{2\\sigma^{2}_A\\overline{\\Phi}_A + \\tau^{2}_A}', true);
+    '\\mathrm{PA} \\;=\\; \\frac{2\\sigma^{2}\\overline{\\Phi}}' +
+    '{2\\sigma^{2}\\overline{\\Phi} + \\tau^{2}}', true);
   const n = v => fmt(v, 3);
   $('s1-eq-nums').innerHTML = mh(
     '=\\;\\frac{2 \\times ' + n(theory.sA) + ' \\times ' + n(theory.pA) + '}' +
@@ -1177,9 +1195,9 @@ function drawSection1() {
 
   // The calc block now names the two parts only; the equation above states the result.
   $('s1-calc').innerHTML =
-    '<div class="r">genetic part &nbsp;' + mh('2\\sigma^2_A\\overline{\\Phi}_A') + ' &nbsp;=&nbsp; 2 &times; ' +
+    '<div class="r">genetic part &nbsp;' + mh('2\\sigma^2\\overline{\\Phi}') + ' &nbsp;=&nbsp; 2 &times; ' +
       fmt(theory.sA, 3) + ' &times; ' + fmt(theory.pA, 3) + ' = <b>' + fmt(g, 3) + '</b></div>' +
-    '<div class="r">non-genetic part &nbsp;' + mh('\\tau^2_A') + ' &nbsp;=&nbsp; <b>' + fmt(e, 3) + '</b></div>' +
+    '<div class="r">non-genetic part &nbsp;' + mh('\\tau^2') + ' &nbsp;=&nbsp; <b>' + fmt(e, 3) + '</b></div>' +
     '<div class="r tot">total phenotypic variance = ' + fmt(g, 3) + ' + ' + fmt(e, 3) +
       ' = <b>' + fmt(total, 3) + '</b></div>';
 
@@ -2401,14 +2419,15 @@ function renderHeroEquations() {
   /* The symbols named in the opening paragraph. Scoped to the masthead on purpose:
      a document-wide pass would overwrite the spark titles, whose builder sets
      innerHTML to the rendered symbol PLUS a trailing label. */
-  document.querySelectorAll('.masthead [data-tex]').forEach(n => {
+  document.querySelectorAll('.masthead [data-tex], .section-sub [data-tex]').forEach(n => {
     n.innerHTML = mh(n.dataset.tex, false);
   });
-  $('l-gen-sym').innerHTML = mh('2\\sigma^2_A\\overline{\\Phi}_A');
-  $('l-env-sym').innerHTML = mh('\\tau^2_A');
+  $('l-gen-sym').innerHTML = mh('2\\sigma^2\\overline{\\Phi}');
+  $('l-env-sym').innerHTML = mh('\\tau^2');
+  /* No transferability here. This section has one population, so the ratio of
+     heritabilities belongs in section 2, where A and B are introduced. */
   $('s1-hwe-eq').innerHTML = mh('\\overline{\\Phi} = \\tfrac{1}{2} \\;\\Longrightarrow\\; ' +
-    '\\mathrm{PA} = \\frac{\\sigma^{2}}{\\sigma^{2}+\\tau^{2}} = h^{2} \\qquad\\text{and}\\qquad ' +
-    'T_{A\\to B} = \\frac{h^{2}_{B}}{h^{2}_{A}}', true);
+    '\\mathrm{PA} = \\frac{\\sigma^{2}}{\\sigma^{2}+\\tau^{2}} = h^{2}', true);
   $('s10-eq').innerHTML = mh('\\underbrace{T_{\\text{observed}}}_{\\text{a real score}} \\;=\\; ' +
     '\\underbrace{T_{\\text{intrinsic}}}_{\\text{unavoidable}} \\;\\times\\; ' +
     '\\underbrace{R}_{\\text{recoverable}}', true);
@@ -2417,7 +2436,8 @@ function renderHeroEquations() {
 function boot() {
   renderHeroEquations();
 
-  buildTheoryPanel('panel-1', ['sA', 'pA', 'tA'], { outLabel: 'Prediction accuracy ceiling', defs: true });
+  buildTheoryPanel('panel-1', ['sA', 'pA', 'tA'],
+    { outLabel: 'Prediction accuracy ceiling', defs: true, plain: true });
   buildTheoryPanel('panel-2', ['sA', 'pA', 'tA', 'sB', 'pB', 'tB'], { outLabel: 'Transferability, A into B' });
   buildTheoryPanel('panel-3', ['sA', 'pA', 'tA', 'sB', 'pB', 'tB'], { outLabel: 'Transferability, A into B' });
   buildTheoryPanel('panel-4', ['sA', 'pA', 'tA', 'sB', 'pB', 'tB'], { outLabel: 'Transferability, A into B' });
