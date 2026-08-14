@@ -521,8 +521,8 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
       <div>
         <div class="card">
           <p class="legend">
-            <span class="legend-item"><span class="legend-key" style="background:var(--c-targ)"></span>varied in the target, B</span>
-            <span class="legend-item"><span class="legend-key" style="background:var(--c-disc)"></span>varied in the discovery population, A</span>
+            <span class="legend-item"><span class="legend-key" style="background:var(--c-targ)"></span>varied in the target B</span>
+            <span class="legend-item"><span class="legend-key" style="background:var(--c-disc)"></span>varied in the discovery population A</span>
             <span class="legend-item"><span class="legend-key" style="background:var(--axis)"></span>transferability of one</span>
           </p>
           <div class="spark-grid" id="s3-sparks"></div>
@@ -1052,7 +1052,7 @@ const KIND = {
 };
 const partColour = kind => (KIND[kind].part === 'gen' ? 'var(--c-gen)' : 'var(--c-env)');
 const popColour = pop => (pop === 'A' ? 'var(--c-disc)' : 'var(--c-targ)');
-const popName = pop => (pop === 'A' ? 'discovery, A' : 'target, B');
+const popName = pop => (pop === 'A' ? 'discovery A' : 'target B');
 
 const theoryListeners = [];
 const onTheory = fn => { theoryListeners.push(fn); };
@@ -1212,8 +1212,8 @@ function drawSection2() {
   const svg = clearSvg($('s2-bars'));
   const x0 = 128, x1 = 700, scale = (x1 - x0) / Math.max(vA, vB);
   const rows = [
-    { lab: 'discovery, A', g: gA, t: theory.tA, pa: paA, c: 'var(--c-disc)', y: 34 },
-    { lab: 'target, B', g: gB, t: theory.tB, pa: paB, c: 'var(--c-targ)', y: 116 }
+    { lab: 'discovery A', g: gA, t: theory.tA, pa: paA, c: 'var(--c-disc)', y: 34 },
+    { lab: 'target B', g: gB, t: theory.tB, pa: paB, c: 'var(--c-targ)', y: 116 }
   ];
   for (const r of rows) {
     const gw = r.g * scale, tw = r.t * scale, h = 42;
