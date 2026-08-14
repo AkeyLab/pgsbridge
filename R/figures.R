@@ -220,7 +220,9 @@ figure_04 <- function(data_dir) {
         }))))
 
     decomposition$pop <- factor(decomposition$pop, levels = c("ASN", "EUR", "AFR"))
-    decomposition$type <- factor(decomposition$type, levels = c("rare", "common"))
+    # "common" first so that `position = "stack"` draws the rare contribution
+    # against the axis, as the manuscript figure does.
+    decomposition$type <- factor(decomposition$type, levels = c("common", "rare"))
     decomposition$ratio <- factor(decomposition$ratio, levels = ratios)
     decomposition$h2_level <- factor(decomposition$h2_level, levels = heritabilities)
     decomposition$ratio_title <- factor("Effect Size Ratio")
