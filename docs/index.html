@@ -63,21 +63,12 @@
   --caution-wash: rgba(214,137,16,0.10); --caution-edge: rgba(214,137,16,0.55);
   --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    color-scheme: dark;
-    --surface-1: #1a1a19;  --surface-2: #232322;  --page: #0d0d0d;
-    --text-primary: #ffffff;  --text-secondary: #c3c2b7;  --text-muted: #918f88;
-    --grid: #2c2c2a;  --axis: #4a4a46;  --border: rgba(255,255,255,0.11);
-    --c-disc: #F07A22; --c-targ: #3D9BE0; --c-asn: #14BC8C;
-    --c-gen: #14BC8C;  --c-env: #9d9b94;
-    --c-T: #C07DB6;    --c-T-wash: rgba(192,125,182,0.15);
-    --c-common: #3D9BE0; --c-rare: #F0B23A;
-    --c-r1: #6FC2F0; --c-r2: #3D9BE0; --c-r5: #F0B23A; --c-r10: #F07A22;
-    --highlight: #3a3417;  --highlight-edge: #6b5f24;  --crit: #e06b5c;
-    --caution-wash: rgba(240,178,58,0.12); --caution-edge: rgba(240,178,58,0.5);
-  }
-}
+/* DELIBERATELY NO prefers-color-scheme BLOCK.
+   The page defaults to light for every reader regardless of their system setting,
+   because it is a figure-led document meant to match the manuscript's own figures,
+   which are drawn on white. Dark is available on request through the toggle, which
+   sets data-theme="dark". Do not reintroduce an automatic dark switch here: it would
+   silently override the intended default. */
 :root[data-theme="dark"] {
   color-scheme: dark;
   --surface-1: #1a1a19;  --surface-2: #232322;  --page: #0d0d0d;
@@ -278,19 +269,6 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
 [data-tone="8"] { --tone: #93949f; --tone-wash: rgba(147,148,159,0.11); }
 [data-tone="9"] { --tone: #a3a08c; --tone-wash: rgba(163,160,140,0.11); }
 [data-tone="10"] { --tone: #a08f95; --tone-wash: rgba(160,143,149,0.11); }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) [data-tone] { --tone-wash: rgba(255,255,255,0.045); }
-  :root:not([data-theme="light"]) [data-tone="1"] { --tone: #a3ae9e; }
-  :root:not([data-theme="light"]) [data-tone="2"] { --tone: #c4a29a; }
-  :root:not([data-theme="light"]) [data-tone="3"] { --tone: #a0aebd; }
-  :root:not([data-theme="light"]) [data-tone="4"] { --tone: #c4b89e; }
-  :root:not([data-theme="light"]) [data-tone="5"] { --tone: #aea2b7; }
-  :root:not([data-theme="light"]) [data-tone="6"] { --tone: #a6b5af; }
-  :root:not([data-theme="light"]) [data-tone="7"] { --tone: #c6afa2; }
-  :root:not([data-theme="light"]) [data-tone="8"] { --tone: #a6a7b2; }
-  :root:not([data-theme="light"]) [data-tone="9"] { --tone: #b6b39e; }
-  :root:not([data-theme="light"]) [data-tone="10"] { --tone: #b3a2a8; }
-}
 :root[data-theme="dark"] [data-tone] { --tone-wash: rgba(255,255,255,0.045); }
 :root[data-theme="dark"] [data-tone="1"] { --tone: #a3ae9e; }
 :root[data-theme="dark"] [data-tone="2"] { --tone: #c4a29a; }
@@ -374,7 +352,7 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
       of the trait is heritable; the average self-kinship <span data-tex="\overline{\Phi}"></span>,
       which summarises relatedness and structure within the sample; and the non-genetic variance
       <span data-tex="\tau^2"></span>, which is everything about the trait that no genotype can
-      reach. The second says that transferability from a discovery population A into a target
+      reach. The second says that transferability from a discovery population A to a target
       population B is the target's ceiling divided by the discovery population's. Section 1 takes
       the first expression apart and section 2 the second, so nothing here has to be absorbed at
       once.</p>
@@ -462,7 +440,10 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
           </svg>
           <p class="fig-cap">Prediction accuracy is the genetic share of the bar. It is the fraction
             of phenotypic variance a perfect genotype-based predictor removes, and nothing can remove
-            more.</p>
+            more. <b>The whole bar is the baseline</b>: the error left by a predictor that ignores
+            genotype entirely and gives every individual the population mean. That is the comparison
+            the manuscript measures accuracy against, and its expected loss is exactly the total
+            phenotypic variance.</p>
           <div class="calc" id="s1-calc"></div>
         </div>
         <div class="card" style="margin-top:16px">
@@ -509,7 +490,7 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
             <button type="button" data-preset="equal">identical populations</button>
             <button type="button" data-preset="gt">target more predictable</button>
             <button type="button" data-preset="lt">target less predictable</button>
-            <button type="button" data-preset="paper">the paper's baseline</button>
+            <button type="button" data-preset="paper">the symmetric reference point</button>
           </div>
           <svg id="s2-bars" viewBox="0 0 720 180" role="img" aria-labelledby="s2-bars-t">
             <title id="s2-bars-t">The variance split and resulting ceiling for the discovery and target populations side by side</title>
@@ -537,7 +518,8 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
       curve varies it in the <span style="color:var(--c-targ);font-weight:620">target</span>
       population; the dashed curve varies it in the
       <span style="color:var(--c-disc);font-weight:620">discovery</span> population. The two always
-      move in opposite directions, because the discovery population sits in the denominator. This is
+      move in opposite directions, because the discovery population sits in the denominator, and they
+      cross at the symmetric reference point where the two populations are identical. This is
       Figure 1b to 1d of the manuscript, except that you can move the point the curves are drawn
       around.</p>
     <div class="sec-grid">
@@ -636,7 +618,7 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
             <b id="s5-nm"></b>, averaged over <b id="s5-R"></b>.</p>
         </div>
         <div class="insight">
-          <span class="k">Why the baseline is the true mean and not the sample mean</span>
+          <span class="k">Why the baseline predictor uses the true mean, not the sample mean</span>
           <p>These simulated individuals are related to one another, so the sample mean of the trait
             carries a term in the average off-diagonal kinship that the closed form, which concerns a
             single individual's variance, does not. Comparing against the true population mean removes
@@ -1039,9 +1021,12 @@ const hideTip = () => { tip.dataset.show = '0'; };
 
 /* ═══ THEORY STATE ═════════════════════════════════════════════════════════
    Sections 1 to 4 read one shared six-parameter state, so moving a slider in
-   section 1 moves the curves in section 3 and the map in section 4. The ranges
-   and the symmetric baseline are the ones the manuscript's Methods specify for
-   Figure 1b to 1d.
+   section 1 moves the curves in section 3 and the map in section 4. The ranges and
+   the symmetric reference point are the ones the manuscript's Methods specify for
+   Figure 1b to 1d. Note the manuscript uses "baseline" in two senses: the BASELINE
+   PREDICTOR, which gives everyone the population mean and whose loss is the total
+   phenotypic variance, and the SYMMETRIC baseline or reference point, which is this
+   parameter starting point. On this page only the first is ever called a baseline.
    ═══════════════════════════════════════════════════════════════════════════ */
 const BASE = { sA: 0.3, pA: 0.6, tA: 1.0, sB: 0.3, pB: 0.6, tB: 1.0 };
 const theory = Object.assign({}, BASE);
@@ -1119,7 +1104,7 @@ function buildTheoryPanel(hostId, keys, opts) {
   }
   if (o.reset !== false) {
     html += '<div class="btn-row" style="margin-top:6px"><button type="button" data-reset="1">' +
-            'Reset to the paper’s baseline</button></div>';
+            'Reset to the symmetric reference point</button></div>';
   }
   host.innerHTML = html;
 
@@ -1219,7 +1204,7 @@ function drawSection2() {
   const vA = gA + theory.tA, vB = gB + theory.tB;
 
   $('panel-2-out').textContent = fmt(T, 3);
-  $('panel-2-sub').textContent = 'transferability from A into B';
+  $('panel-2-sub').textContent = 'transferability A to B';
   const pill = $('s2-pill');
   if (Math.abs(T - 1) < 5e-4) { pill.textContent = 'transferability is one'; pill.className = 'pill'; }
   else if (T > 1) { pill.textContent = 'above one: the target is more predictable'; pill.className = 'pill hot'; }
@@ -1392,8 +1377,9 @@ const hmState = { x: 'sB', y: 'tB' };
    surface so that "no difference" reads as no colour. */
 function rampColour(u) { // u in [-1, 1]
   const A = [213, 94, 0], B = [0, 114, 178];
-  const mid = document.documentElement.dataset.theme === 'dark' ||
-    (!document.documentElement.dataset.theme && window.matchMedia('(prefers-color-scheme: dark)').matches)
+  // Light unless the reader has explicitly chosen dark; the system setting is not
+  // consulted, so this must match the stylesheet's single [data-theme="dark"] rule.
+  const mid = document.documentElement.dataset.theme === 'dark'
     ? [40, 40, 38] : [248, 248, 245];
   const end = u < 0 ? A : B, t = Math.min(1, Math.abs(u));
   const g = Math.pow(t, 0.85);
@@ -2438,9 +2424,9 @@ function boot() {
 
   buildTheoryPanel('panel-1', ['sA', 'pA', 'tA'],
     { outLabel: 'Prediction accuracy ceiling', defs: true, plain: true });
-  buildTheoryPanel('panel-2', ['sA', 'pA', 'tA', 'sB', 'pB', 'tB'], { outLabel: 'Transferability, A into B' });
-  buildTheoryPanel('panel-3', ['sA', 'pA', 'tA', 'sB', 'pB', 'tB'], { outLabel: 'Transferability, A into B' });
-  buildTheoryPanel('panel-4', ['sA', 'pA', 'tA', 'sB', 'pB', 'tB'], { outLabel: 'Transferability, A into B' });
+  buildTheoryPanel('panel-2', ['sA', 'pA', 'tA', 'sB', 'pB', 'tB'], { outLabel: 'Transferability, A to B' });
+  buildTheoryPanel('panel-3', ['sA', 'pA', 'tA', 'sB', 'pB', 'tB'], { outLabel: 'Transferability, A to B' });
+  buildTheoryPanel('panel-4', ['sA', 'pA', 'tA', 'sB', 'pB', 'tB'], { outLabel: 'Transferability, A to B' });
   buildSparks();
   buildHeatControls();
   wireHeatHover();
@@ -2473,20 +2459,16 @@ function boot() {
   drawSection6(); drawSection7(); drawSection8();
   drawSection10();
 
-  // theme
+  /* Theme. The page is light unless the reader asks for dark, and the system
+     setting is deliberately not consulted, matching the stylesheet. */
   const toggle = $('theme-toggle');
-  const systemDark = () => window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const isDark = () => (document.documentElement.dataset.theme
-    ? document.documentElement.dataset.theme === 'dark' : systemDark());
+  const isDark = () => document.documentElement.dataset.theme === 'dark';
   const label = () => { toggle.textContent = isDark() ? 'Light' : 'Dark'; };
   toggle.addEventListener('click', () => {
     document.documentElement.dataset.theme = isDark() ? 'light' : 'dark';
     label();
     // the canvas is painted with resolved colours, so it has to be repainted
     drawHeat();
-  });
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-    if (!document.documentElement.dataset.theme) { label(); drawHeat(); }
   });
   label();
 }
