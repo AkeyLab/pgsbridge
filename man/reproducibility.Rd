@@ -11,9 +11,9 @@ reader is never left guessing whether a mismatch is their mistake.
 \section{What reproduces}{
 
 
-All twelve figures redraw from the replicate-level results in \verb{data/} by
-calling \code{\link[=figure_01]{figure_01()}} through \code{\link[=figure_S8]{figure_S8()}}, with no genotypes and no
-cluster.  The simulation scripts regenerate those results from the coalescent
+Eleven of the twelve figures redraw from the replicate-level results in
+\verb{data/}, with no genotypes and no cluster.  S3 Fig is the exception and no
+function for it is provided; see below.  The simulation scripts regenerate those results from the coalescent
 genotypes: \code{\link[=figure_02]{figure_02()}}'s inputs have been checked directly against the
 distributed files and agree within Monte Carlo error at every heritability.
 }
@@ -22,14 +22,16 @@ distributed files and agree within Monte Carlo error at every heritability.
 
 
 The published S3 Fig draws two series, one from the coalescent simulation and
-one from the 1000 Genomes Project.  \code{\link[=figure_S3]{figure_S3()}} draws only the first.
+one from the 1000 Genomes Project.  Neither can be regenerated here, so no
+function for this figure is shipped: drawing a plausible-looking substitute
+would be worse than drawing nothing.
 
 The reason is that no 1000 Genomes allele frequencies are distributed with
 this repository, and no script here computes them.  The published series
 therefore cannot be regenerated from what is here; it would have to be
 recomputed from the 1000 Genomes Project data itself.
 
-The simulated series is also not an exact match.  Read off the published
+The simulated series would not have matched either.  Read off the published
 figure it runs at roughly 0.125, 0.089 and 0.086 for the African, European
 and East Asian samples.  From the distributed frequencies the pooled
 definition of a common variant gives 0.1244, 0.1101 and 0.1034, and the

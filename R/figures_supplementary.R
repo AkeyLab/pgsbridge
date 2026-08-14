@@ -67,80 +67,6 @@ figure_S2 <- function(data_dir) {
     fixed / normal
 }
 
-#' S3 Fig: average minor allele frequency in the three populations
-#'
-#' The ordering of the average minor allele frequency across populations is what
-#' sets the additive genetic variance, and through it the heritability ceiling
-#' that drives every later figure.
-#'
-#' Two definitions of a common variant are in use and they do not give the same
-#' ordering, so both are drawn.  Under the pooled definition, which is the panel
-#' the trait simulations draw from, the African sample has the highest average.
-#' Requiring a variant to be common in every population instead selects against
-#' variation private to any one of them, and reverses the ordering.
-#'
-#' This function reproduces only the simulated series.  The published figure also
-#' shows a 1000 Genomes Project series, which cannot be regenerated from this
-#' repository; see [reproducibility] for what is missing and why.
-#'
-#' @param data_dir Directory holding the pre-computed results.
-#' @param maf_common The minor allele frequency defining a common variant.
-#'
-#' @return A `ggplot` object.
-#'
-#' @examples
-#' \dontrun{
-#' figure_S3("data")
-#' }
-#'
-#' @export
-figure_S3 <- function(data_dir, maf_common = 0.01) {
-    if (missing(data_dir))
-        stop('`data_dir` is required!')
-
-    stored_names <- c(af_eur_001 = "EUR", af_afr_001 = "AFR", af_asi_001 = "ASN")
-    frequencies <- readRDS(file.path(data_dir, "allele_frequencies",
-                                     "simulated_common_variants.RDS"))
-    if (!setequal(names(frequencies), names(stored_names)))
-        stop('`simulated_common_variants.RDS` does not have the expected names!')
-    names(frequencies) <- unname(stored_names[names(frequencies)])
-
-    populations <- c("AFR", "EUR", "ASN")
-    minor <- function(p) pmin(p, 1 - p)
-    common_everywhere <- Reduce(`&`, lapply(frequencies,
-                                            function(p) minor(p) >= maf_common))
-
-    summarise_under <- function(keep, definition) {
-        data.frame(
-            population = factor(populations, levels = populations),
-            mean_maf = vapply(populations,
-                              function(p) mean(minor(frequencies[[p]][keep])),
-                              numeric(1)),
-            definition = definition,
-            stringsAsFactors = FALSE)
-    }
-
-    summary_df <- rbind(
-        summarise_under(rep(TRUE, length(common_everywhere)),
-                        "Common in the pooled sample"),
-        summarise_under(common_everywhere, "Common in every population"))
-
-    ggplot2::ggplot(summary_df,
-                    ggplot2::aes(x = .data$population, y = .data$mean_maf,
-                                 colour = .data$definition,
-                                 group = .data$definition)) +
-        ggplot2::geom_line(linewidth = 1) +
-        ggplot2::geom_point(size = 2.5) +
-        ggplot2::scale_colour_manual(
-            values = unname(okabe_ito[c("vermillion", "blue")]),
-            name = "Variant definition") +
-        ggplot2::labs(x = "Population", y = "Average minor allele frequency") +
-        ggplot2::expand_limits(y = 0) +
-        ggplot2::guides(colour = ggplot2::guide_legend(nrow = 2, byrow = TRUE)) +
-        ggplot2::theme_minimal(base_size = PGS_BASE_SIZE) +
-        ggplot2::theme(legend.position = "bottom")
-}
-
 #' S4 to S6 Figs: rare-variant sweeps for the remaining population pairs
 #'
 #' Figure 3 shows the African and European pair at heritability 0.1.  These show
@@ -306,10 +232,13 @@ figure_S8 <- function(data_dir) {
     type_pal <- unname(decomp_pal[c("common", "rare")])
     names(type_pal) <- c("Common", "Rare")
 
+    # A variant counts as lost when it is present in the African sample and has
+    # drifted to zero frequency in the other one.  Variants that have instead
+    # gone to fixation in the other sample are not counted, which is what the
+    # published figure does; note that they too contribute no genetic variance
+    # there, so this is the narrower of the two reasonable rules.
     percent_lost <- function(african, other) {
-        segregating <- african > 0 & african < 1
-        monomorphic <- other == 0 | other == 1
-        round(100 * sum(segregating & monomorphic) / length(african), 2)
+        round(100 * sum(african > 0 & other == 0) / length(african), 2)
     }
 
     loss_panel <- function(percent_common, percent_rare, target, tag) {
@@ -326,7 +255,7 @@ figure_S8 <- function(data_dir) {
                 expand = ggplot2::expansion(mult = c(0, 0.12))) +
             ggplot2::labs(
                 x = "Type",
-                y = sprintf("Percentage of variants monomorphic in %s", target),
+                y = sprintf("Allele frequency %% in AFR becomes 0 in %s", target),
                 title = sprintf("From AFR to %s", target), tag = tag) +
             ggplot2::theme_minimal(base_size = PGS_BASE_SIZE) +
             ggplot2::theme(legend.position = "none",

@@ -14,9 +14,6 @@
 #   common_af.RDS   a list of three vectors, one per population, holding the
 #                   reference-allele frequency of every common variant
 #   rare_af.RDS     the same for the rare pool
-#   simulated_common_variants.RDS   the common-pool frequencies again, named
-#                   af_eur_001, af_afr_001 and af_asi_001, which is what S3 Fig
-#                   reads
 #
 # In all of these files the vectors are aligned: position k refers to the same
 # variant in all three populations.
@@ -54,12 +51,6 @@ saveRDS(list(pafr_rare = frequencies$rare$AFR,
              peur_rare = frequencies$rare$EUR,
              pasi_rare = frequencies$rare$ASN),
         file.path(output_dir, "rare_af.RDS"))
-
-# The simulated frequencies used by S3 Fig, over the common pool.
-saveRDS(list(af_eur_001 = frequencies$common$EUR,
-             af_afr_001 = frequencies$common$AFR,
-             af_asi_001 = frequencies$common$ASN),
-        file.path(output_dir, "simulated_common_variants.RDS"))
 
 # A short summary, printed so that the numbers quoted in the text can be checked
 # without opening the files.
