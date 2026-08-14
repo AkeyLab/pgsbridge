@@ -490,7 +490,6 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
             <button type="button" data-preset="equal">identical populations</button>
             <button type="button" data-preset="gt">target more predictable</button>
             <button type="button" data-preset="lt">target less predictable</button>
-            <button type="button" data-preset="paper">the symmetric reference point</button>
           </div>
           <svg id="s2-bars" viewBox="0 0 720 180" role="img" aria-labelledby="s2-bars-t">
             <title id="s2-bars-t">The variance split and resulting ceiling for the discovery and target populations side by side</title>
@@ -519,9 +518,8 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
       population; the dashed curve varies it in the
       <span style="color:var(--c-disc);font-weight:620">discovery</span> population. The two always
       move in opposite directions, because the discovery population sits in the denominator, and they
-      cross at the symmetric reference point where the two populations are identical. This is
-      Figure 1b to 1d of the manuscript, except that you can move the point the curves are drawn
-      around.</p>
+      cross wherever the two populations are identical. This is Figure 1b to 1d of the manuscript,
+      except that you can move the point the curves are drawn around.</p>
     <div class="sec-grid">
       <div class="panel" id="panel-3"></div>
       <div>
@@ -532,6 +530,10 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
             <span class="legend-item"><span class="legend-key" style="background:var(--axis)"></span>transferability of one</span>
           </p>
           <div class="spark-grid" id="s3-sparks"></div>
+          <p class="fig-cap">The sliders start where the manuscript's Figure 1b to 1d starts, with
+            both populations identical at an additive genetic variance of 0.3, an average
+            self-kinship of 0.6 and a non-genetic variance of 1, which is why the curves cross at a
+            transferability of one. <b>Reset the sliders</b> returns to those values.</p>
           <details class="tableview"><summary>as a table</summary>
             <div class="tbl-scroll"><table class="data" id="s3-table"></table></div></details>
         </div>
@@ -1104,7 +1106,7 @@ function buildTheoryPanel(hostId, keys, opts) {
   }
   if (o.reset !== false) {
     html += '<div class="btn-row" style="margin-top:6px"><button type="button" data-reset="1">' +
-            'Reset to the symmetric reference point</button></div>';
+            'Reset the sliders</button></div>';
   }
   host.innerHTML = html;
 
@@ -2440,10 +2442,9 @@ function boot() {
   document.querySelectorAll('[data-preset]').forEach(btn => {
     btn.addEventListener('click', () => {
       const p = btn.dataset.preset;
-      if (p === 'equal') setTheoryAll(BASE);
-      else if (p === 'gt') setTheoryAll({ sA: 0.3, pA: 0.6, tA: 1.0, sB: 0.55, pB: 0.6, tB: 1.0 });
+      if (p === 'gt') setTheoryAll({ sA: 0.3, pA: 0.6, tA: 1.0, sB: 0.55, pB: 0.6, tB: 1.0 });
       else if (p === 'lt') setTheoryAll({ sA: 0.55, pA: 0.6, tA: 1.0, sB: 0.3, pB: 0.6, tB: 1.0 });
-      else setTheoryAll(BASE);
+      else setTheoryAll(BASE);   // 'equal', which is also the reset target
     });
   });
 
