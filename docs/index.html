@@ -1,0 +1,2462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Intrinsic PGS Transferability</title>
+<meta name="description" content="An interactive companion to a study of the population-genetic and environmental determinants of polygenic score transferability.">
+
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"
+      integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV"
+      crossorigin="anonymous">
+<script defer
+        src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"
+        integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8"
+        crossorigin="anonymous"></script>
+
+<style>
+/* ═══════════════════════════════════════════════════════════════════════════
+   COLOUR
+
+   Every hue on this page is taken from the Okabe and Ito eight-colour set that
+   the paper's own figures use, so a colour means the same thing here as it does
+   in the manuscript. The assignments come straight from repo_build/R/theme.R.
+
+     vermillion  discovery population A, and the African sample
+     blue        target population B, and the European sample, and common variants
+     green       the East Asian sample, and the genetic share of variance in the
+                 single-population section where no A/B distinction exists
+     orange      rare variants
+     purple      transferability itself, the quantity the page is about
+
+   Two hues therefore carry two roles each. That is deliberate and it is safe,
+   because the roles never appear in the same figure: sections 1 to 5 have no
+   populations, and sections 6 to 8 have no discovery/target abstraction. Colour
+   is reinforcement in any case; every mark on this page sits beside a written
+   label, and nothing is identified by hue alone.
+
+   The one place a ramp is used, the section 4 heat map, is DIVERGING about
+   T = 1 and is computed on log T. That is not a stylistic choice: transferability
+   from A to B is the reciprocal of transferability from B to A, so log T is the
+   scale on which the two directions are symmetric, and equal visual distance
+   from the centre means an equal factor.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root {
+  color-scheme: light;
+  --surface-1: #fcfcfb;  --surface-2: #f4f4f1;  --page: #f9f9f7;
+  --text-primary: #0b0b0b;  --text-secondary: #52514e;  --text-muted: #898781;
+  --grid: #e1e0d9;  --axis: #b9b8ad;  --border: rgba(11,11,11,0.10);
+
+  --c-disc:  #D55E00;   /* discovery population A   ·  African sample   */
+  --c-targ:  #0072B2;   /* target population B      ·  European sample  */
+  --c-asn:   #009E73;   /* East Asian sample                            */
+  --c-gen:   #009E73;   /* genetic share of variance (section 1 only)   */
+  --c-env:   #8d8b84;   /* non-genetic share of variance                */
+  --c-T:     #8E4585;   /* transferability, the result                  */
+  --c-T-wash: rgba(142,69,133,0.10);
+  --c-common: #0072B2;  /* common variants                              */
+  --c-rare:   #E69F00;  /* rare variants                                */
+  --c-r1: #56B4E9; --c-r2: #0072B2; --c-r5: #E69F00; --c-r10: #D55E00;
+
+  --highlight: #fdf3c4;  --highlight-edge: #e8d67a;  --crit: #c0392b;
+  --caution-wash: rgba(214,137,16,0.10); --caution-edge: rgba(214,137,16,0.55);
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --surface-1: #1a1a19;  --surface-2: #232322;  --page: #0d0d0d;
+    --text-primary: #ffffff;  --text-secondary: #c3c2b7;  --text-muted: #918f88;
+    --grid: #2c2c2a;  --axis: #4a4a46;  --border: rgba(255,255,255,0.11);
+    --c-disc: #F07A22; --c-targ: #3D9BE0; --c-asn: #14BC8C;
+    --c-gen: #14BC8C;  --c-env: #9d9b94;
+    --c-T: #C07DB6;    --c-T-wash: rgba(192,125,182,0.15);
+    --c-common: #3D9BE0; --c-rare: #F0B23A;
+    --c-r1: #6FC2F0; --c-r2: #3D9BE0; --c-r5: #F0B23A; --c-r10: #F07A22;
+    --highlight: #3a3417;  --highlight-edge: #6b5f24;  --crit: #e06b5c;
+    --caution-wash: rgba(240,178,58,0.12); --caution-edge: rgba(240,178,58,0.5);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface-1: #1a1a19;  --surface-2: #232322;  --page: #0d0d0d;
+  --text-primary: #ffffff;  --text-secondary: #c3c2b7;  --text-muted: #918f88;
+  --grid: #2c2c2a;  --axis: #4a4a46;  --border: rgba(255,255,255,0.11);
+  --c-disc: #F07A22; --c-targ: #3D9BE0; --c-asn: #14BC8C;
+  --c-gen: #14BC8C;  --c-env: #9d9b94;
+  --c-T: #C07DB6;    --c-T-wash: rgba(192,125,182,0.15);
+  --c-common: #3D9BE0; --c-rare: #F0B23A;
+  --c-r1: #6FC2F0; --c-r2: #3D9BE0; --c-r5: #F0B23A; --c-r10: #F07A22;
+  --highlight: #3a3417;  --highlight-edge: #6b5f24;  --crit: #e06b5c;
+  --caution-wash: rgba(240,178,58,0.12); --caution-edge: rgba(240,178,58,0.5);
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--text-primary);
+       font-family: var(--sans); font-size: 16px; line-height: 1.62; }
+main { max-width: 1180px; margin: 0 auto; padding: 0 20px 80px; }
+
+h1 { font-size: clamp(1.55rem, 1.1rem + 2.1vw, 2.4rem); line-height: 1.17; letter-spacing: -0.022em;
+     margin: 0 auto; font-weight: 680; max-width: 30ch; text-wrap: balance; }
+h2 { font-size: clamp(1.08rem, 1rem + 0.45vw, 1.28rem); letter-spacing: -0.01em; margin: 0; font-weight: 620; }
+h3 { font-size: 0.9rem; margin: 0 0 9px; font-weight: 600; }
+h4 { font-size: 0.82rem; margin: 0 0 6px; font-weight: 620; color: var(--text-secondary); }
+p  { margin: 0 0 13px; }
+
+.lede { color: var(--text-secondary); }
+.muted { color: var(--text-muted); }
+.small { font-size: 0.84rem; line-height: 1.5; }
+
+.masthead { padding: 46px 0 26px; border-bottom: 1px solid var(--border); margin-bottom: 28px; }
+.masthead-top { text-align: center; margin-bottom: 26px; }
+.eyebrow { font-size: 0.7rem; font-weight: 650; letter-spacing: 0.12em; text-transform: uppercase;
+           color: var(--c-T); margin: 0 0 13px; }
+.title-rule { width: 84px; height: 3px; margin: 20px auto 0; border-radius: 2px;
+              background: linear-gradient(90deg, var(--c-disc), var(--c-targ)); }
+.byline { font-size: 0.86rem; color: var(--text-secondary); margin: 18px 0 0; text-align: center; }
+.byline a { color: var(--c-targ); }
+/* Display maths can be wider than a narrow screen, so it scrolls rather than
+   overflowing the card. scrollbar-width keeps the track from drawing a bar
+   beside equations that already fit. */
+.eq-block { overflow-x: auto; overflow-y: hidden; padding: 4px 0 0; scrollbar-width: thin; }
+.eq-block::-webkit-scrollbar { height: 6px; }
+.eq-block::-webkit-scrollbar-thumb { background: var(--grid); border-radius: 3px; }
+.eq-block::-webkit-scrollbar-track { background: transparent; }
+.formula-note { font-size: 0.78rem; color: var(--text-muted); text-align: center; margin: 2px 0 0; }
+
+section { margin: 0 0 42px; scroll-margin-top: 14px; }
+.section-head { display: flex; align-items: baseline; gap: 11px; flex-wrap: wrap; margin-bottom: 5px; }
+.section-num { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.section-sub { color: var(--text-secondary); margin: 0 0 16px; font-size: 0.93rem; }
+
+.card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 18px; }
+
+.sec-grid { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 960px) { .sec-grid { grid-template-columns: minmax(0, 1fr); } }
+
+.panel { position: sticky; top: 14px; background: var(--surface-1); border: 1px solid var(--border);
+         border-radius: 10px; padding: 15px; }
+@media (max-width: 960px) { .panel { position: static; } }
+
+.panel-out { text-align: center; padding: 9px 10px; border-radius: 8px; margin-bottom: 13px;
+             background: var(--highlight); box-shadow: inset 0 0 0 1px var(--highlight-edge); }
+.panel-out .l { font-size: 0.68rem; font-weight: 650; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-secondary); }
+.panel-out .v { font-size: 1.55rem; font-weight: 640; line-height: 1.15; letter-spacing: -0.02em; margin-top: 1px; font-variant-numeric: tabular-nums; }
+.panel-out .s { font-size: 0.75rem; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+
+.pop-head { display: flex; align-items: center; gap: 7px; font-size: 0.75rem; font-weight: 650;
+            letter-spacing: 0.04em; text-transform: uppercase; margin: 14px 0 8px; color: var(--text-secondary); }
+.pop-head:first-child { margin-top: 0; }
+.pop-head .bar { width: 3px; height: 13px; border-radius: 2px; flex: none; }
+
+.row { display: grid; grid-template-columns: 58px minmax(0,1fr) 56px; align-items: center; gap: 7px; margin-bottom: 7px; }
+.row .sym { display: flex; align-items: center; gap: 5px; font-size: 0.84rem; }
+.dot { width: 9px; height: 9px; border-radius: 2.5px; flex: none; }
+.row-def { grid-column: 1 / -1; font-size: 0.745rem; color: var(--text-muted); line-height: 1.4; margin: -3px 0 9px; }
+
+input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 20px; background: transparent; cursor: pointer; margin: 0; }
+input[type=range]::-webkit-slider-runnable-track { height: 3px; border-radius: 2px; background: var(--grid); }
+input[type=range]::-moz-range-track { height: 3px; border-radius: 2px; background: var(--grid); }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 14px; height: 14px; margin-top: -5.5px;
+  border-radius: 50%; background: var(--knob, var(--c-T)); border: 2px solid var(--surface-1); box-shadow: 0 0 0 1px var(--border); }
+input[type=range]::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%;
+  background: var(--knob, var(--c-T)); border: 2px solid var(--surface-1); box-shadow: 0 0 0 1px var(--border); }
+input[type=range]:focus-visible { outline: 2px solid var(--knob, var(--c-T)); outline-offset: 3px; border-radius: 4px; }
+input[type=number] { width: 100%; padding: 3px 4px; font: inherit; font-size: 0.78rem; font-variant-numeric: tabular-nums;
+  text-align: right; border: 1px solid var(--axis); border-radius: 5px; background: var(--surface-1); color: var(--text-primary); }
+input[type=number]:focus-visible { outline: 2px solid var(--c-targ); outline-offset: 1px; }
+select { font: inherit; font-size: 0.78rem; padding: 3px 6px; border: 1px solid var(--axis); border-radius: 5px;
+  background: var(--surface-1); color: var(--text-primary); max-width: 100%; }
+select:focus-visible { outline: 2px solid var(--c-targ); outline-offset: 1px; }
+label.fld { display: block; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 9px; }
+label.fld > span { display: block; margin-bottom: 3px; }
+
+button { font: inherit; font-size: 0.76rem; font-weight: 550; cursor: pointer; padding: 4px 10px; border-radius: 999px;
+  border: 1px solid var(--axis); background: var(--surface-1); color: var(--text-primary); transition: background-color .13s, border-color .13s; }
+button:hover:not(:disabled) { background: var(--surface-2); border-color: var(--text-muted); }
+button:focus-visible { outline: 2px solid var(--c-targ); outline-offset: 2px; }
+button:disabled { opacity: 0.42; cursor: not-allowed; }
+button.primary { background: var(--c-T); border-color: var(--c-T); color: #fff; }
+button.primary:hover:not(:disabled) { filter: brightness(1.1); background: var(--c-T); }
+button.on { background: var(--c-T); border-color: var(--c-T); color: #fff; }
+.btn-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.btn-row.tight { gap: 4px; }
+.seg { display: inline-flex; border: 1px solid var(--axis); border-radius: 999px; overflow: hidden; }
+/* label.fld > span forces its children to block, which would stretch the control
+   and leave a ragged empty tail. Inside a label the segments share the width
+   evenly instead, which reads as deliberate at any label length. */
+label.fld > span.seg { display: flex; }
+.seg button { border: 0; border-radius: 0; padding: 3px 11px; flex: 1 1 auto;
+              text-align: center; white-space: nowrap; }
+.seg button + button { border-left: 1px solid var(--axis); }
+
+.legend { display: flex; flex-wrap: wrap; gap: 5px 16px; font-size: 0.78rem; color: var(--text-secondary); margin: 0 0 11px; }
+.legend-item { display: flex; align-items: center; gap: 6px; }
+.legend-key { width: 14px; height: 3px; border-radius: 2px; flex: none; }
+.legend-box { width: 13px; height: 11px; border-radius: 2px; flex: none; }
+.legend-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+
+.fig-cap { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; margin: 8px 0 0; }
+.fig-cap b { color: var(--text-secondary); font-weight: 600; }
+.calc { font-size: 0.82rem; line-height: 1.9; margin-top: 10px; padding: 9px 12px;
+        background: var(--surface-2); border-radius: 8px; font-variant-numeric: tabular-nums; }
+.calc .r { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.calc .tot { border-top: 1px solid var(--border); margin-top: 5px; padding-top: 5px; }
+.calc b { font-weight: 650; }
+.readout { font-size: 0.82rem; color: var(--text-secondary); font-variant-numeric: tabular-nums; margin: 10px 0 0; }
+.readout b { color: var(--text-primary); font-weight: 600; }
+
+.split { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 16px; }
+@media (max-width: 720px) { .split { grid-template-columns: minmax(0,1fr); } }
+.spark-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.spark { background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px; padding: 10px 10px 4px; }
+.spark-title { font-size: 0.77rem; font-weight: 600; }
+.spark-now { font-size: 0.72rem; color: var(--text-secondary); font-variant-numeric: tabular-nums; margin: 1px 0 4px; min-height: 1.15em; }
+svg { display: block; width: 100%; height: auto; overflow: visible; }
+
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(172px, 1fr)); gap: 12px; }
+.tile { background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px; padding: 12px 13px;
+        border-top: 3px solid var(--tile-c, var(--border)); }
+.tile-label { font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); }
+.tile-value { font-size: 1.42rem; font-weight: 640; line-height: 1.18; letter-spacing: -0.015em; font-variant-numeric: tabular-nums; }
+.tile-note { font-size: 0.735rem; color: var(--text-muted); line-height: 1.42; margin-top: 3px; }
+
+.eq-hero { text-align: center; margin: 18px 0 2px; }
+.eq-hero .katex-display { font-size: 1.4em; margin: 0.2em 0; }
+.eq-sub { text-align: center; margin: 14px 0 2px; }
+.eq-sub .katex-display { font-size: 1.1em; margin: 0.2em 0; }
+
+.hm-canvas { display: block; width: 100%; height: auto; cursor: crosshair; border-radius: 5px; }
+.cbar { display: flex; align-items: center; gap: 8px; font-size: 0.74rem; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.cbar canvas { height: 10px; width: 168px; border-radius: 3px; border: 1px solid var(--border); display: block; }
+.pill { display: inline-flex; align-items: center; gap: 5px; font-size: 0.72rem; font-weight: 600; padding: 2px 9px; border-radius: 999px;
+  background: var(--surface-2); border: 1px solid var(--border); color: var(--text-secondary); }
+.pill.hot { background: var(--c-T-wash); border-color: var(--c-T); color: var(--c-T); }
+
+.tooltip { position: fixed; z-index: 40; pointer-events: none; opacity: 0; transition: opacity .1s;
+  background: var(--surface-1); color: var(--text-primary); border: 1px solid var(--axis); border-radius: 7px;
+  padding: 6px 9px; font-size: 0.76rem; line-height: 1.5; box-shadow: 0 6px 18px rgba(0,0,0,0.16);
+  font-variant-numeric: tabular-nums; max-width: 260px; }
+.tooltip[data-show="1"] { opacity: 1; }
+
+details.tableview { margin-top: 11px; }
+details.tableview > summary { cursor: pointer; font-size: 0.77rem; color: var(--text-muted); padding: 4px 0; }
+.tbl-scroll { overflow-x: auto; margin-top: 7px; }
+table.data { border-collapse: collapse; font-size: 0.77rem; width: 100%; font-variant-numeric: tabular-nums; }
+table.data th, table.data td { padding: 4px 9px; text-align: right; border-bottom: 1px solid var(--grid); white-space: nowrap; }
+table.data th:first-child, table.data td:first-child { text-align: left; }
+table.data thead th { color: var(--text-secondary); font-weight: 600; border-bottom: 1px solid var(--axis); }
+
+.katex { font-size: 1em !important; line-height: 1.2; }
+
+.howto { display: grid; gap: 7px; margin: 0; padding: 0; list-style: none; font-size: 0.88rem; }
+.howto li { padding-left: 20px; position: relative; color: var(--text-secondary); }
+.howto li::before { content: "\2192"; position: absolute; left: 0; color: var(--c-T); font-weight: 700; }
+.howto b { color: var(--text-primary); }
+
+.toc { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin: 0; }
+.toc-card { display: block; text-decoration: none; color: var(--text-primary); border: 1px solid var(--border);
+  border-left: 4px solid var(--tone); border-radius: 9px; padding: 11px 13px; background: var(--tone-wash);
+  transition: transform .13s ease, box-shadow .13s ease; }
+.toc-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.07); }
+.toc-card:focus-visible { outline: 2px solid var(--tone); outline-offset: 2px; }
+.toc-num { display: block; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.toc-title { display: block; font-weight: 620; font-size: 0.87rem; line-height: 1.3; margin: 2px 0 4px; letter-spacing: -0.005em; }
+.toc-desc { display: block; font-size: 0.755rem; color: var(--text-secondary); line-height: 1.42; }
+
+/* The contents cards and the section rules use a Morandi set that is UI chrome
+   only. It is deliberately outside the data palette so it can never be mistaken
+   for a quantity. */
+[data-tone="1"] { --tone: #8f9a8b; --tone-wash: rgba(143,154,139,0.11); }
+[data-tone="2"] { --tone: #b08d86; --tone-wash: rgba(176,141,134,0.11); }
+[data-tone="3"] { --tone: #8c9bab; --tone-wash: rgba(140,155,171,0.11); }
+[data-tone="4"] { --tone: #b0a58c; --tone-wash: rgba(176,165,140,0.11); }
+[data-tone="5"] { --tone: #9a8fa3; --tone-wash: rgba(154,143,163,0.11); }
+[data-tone="6"] { --tone: #93a29c; --tone-wash: rgba(147,162,156,0.11); }
+[data-tone="7"] { --tone: #b39c8f; --tone-wash: rgba(179,156,143,0.11); }
+[data-tone="8"] { --tone: #93949f; --tone-wash: rgba(147,148,159,0.11); }
+[data-tone="9"] { --tone: #a3a08c; --tone-wash: rgba(163,160,140,0.11); }
+[data-tone="10"] { --tone: #a08f95; --tone-wash: rgba(160,143,149,0.11); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) [data-tone] { --tone-wash: rgba(255,255,255,0.045); }
+  :root:not([data-theme="light"]) [data-tone="1"] { --tone: #a3ae9e; }
+  :root:not([data-theme="light"]) [data-tone="2"] { --tone: #c4a29a; }
+  :root:not([data-theme="light"]) [data-tone="3"] { --tone: #a0aebd; }
+  :root:not([data-theme="light"]) [data-tone="4"] { --tone: #c4b89e; }
+  :root:not([data-theme="light"]) [data-tone="5"] { --tone: #aea2b7; }
+  :root:not([data-theme="light"]) [data-tone="6"] { --tone: #a6b5af; }
+  :root:not([data-theme="light"]) [data-tone="7"] { --tone: #c6afa2; }
+  :root:not([data-theme="light"]) [data-tone="8"] { --tone: #a6a7b2; }
+  :root:not([data-theme="light"]) [data-tone="9"] { --tone: #b6b39e; }
+  :root:not([data-theme="light"]) [data-tone="10"] { --tone: #b3a2a8; }
+}
+:root[data-theme="dark"] [data-tone] { --tone-wash: rgba(255,255,255,0.045); }
+:root[data-theme="dark"] [data-tone="1"] { --tone: #a3ae9e; }
+:root[data-theme="dark"] [data-tone="2"] { --tone: #c4a29a; }
+:root[data-theme="dark"] [data-tone="3"] { --tone: #a0aebd; }
+:root[data-theme="dark"] [data-tone="4"] { --tone: #c4b89e; }
+:root[data-theme="dark"] [data-tone="5"] { --tone: #aea2b7; }
+:root[data-theme="dark"] [data-tone="6"] { --tone: #a6b5af; }
+:root[data-theme="dark"] [data-tone="7"] { --tone: #c6afa2; }
+:root[data-theme="dark"] [data-tone="8"] { --tone: #a6a7b2; }
+:root[data-theme="dark"] [data-tone="9"] { --tone: #b6b39e; }
+:root[data-theme="dark"] [data-tone="10"] { --tone: #b3a2a8; }
+
+.insight { margin-top: 16px; padding: 12px 14px; border-left: 3px solid var(--tone, var(--c-T));
+  background: var(--tone-wash, var(--c-T-wash)); border-radius: 0 8px 8px 0;
+  font-size: 0.87rem; line-height: 1.58; }
+.insight .k { display: block; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.11em;
+  text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
+.insight p { margin: 0; }
+.insight p + p { margin-top: 9px; }
+
+.caution { margin-top: 14px; padding: 11px 13px; border-radius: 8px; font-size: 0.83rem; line-height: 1.55;
+  background: var(--caution-wash); border: 1px solid var(--caution-edge); }
+.caution .k { display: block; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.11em;
+  text-transform: uppercase; color: var(--text-secondary); margin-bottom: 4px; }
+.caution p { margin: 0; }
+.caution p + p { margin-top: 8px; }
+
+.ledger { display: grid; gap: 10px; }
+.ledger details { border: 1px solid var(--border); border-radius: 9px; background: var(--surface-1); }
+.ledger summary { cursor: pointer; padding: 11px 14px; font-weight: 600; font-size: 0.89rem; list-style: none;
+  display: flex; align-items: baseline; gap: 9px; }
+.ledger summary::-webkit-details-marker { display: none; }
+.ledger summary::before { content: "+"; color: var(--c-T); font-weight: 700; font-size: 1rem; line-height: 1; }
+.ledger details[open] summary::before { content: "\2212"; }
+.ledger summary:focus-visible { outline: 2px solid var(--c-targ); outline-offset: -2px; border-radius: 9px; }
+.ledger .body { padding: 0 14px 13px 32px; font-size: 0.86rem; color: var(--text-secondary); line-height: 1.6; }
+.ledger .body p { margin: 0 0 9px; }
+.ledger .body p:last-child { margin: 0; }
+.ledger .tagline { font-size: 0.74rem; font-weight: 600; color: var(--text-muted); margin-left: auto; white-space: nowrap; }
+@media (max-width: 620px) { .ledger .tagline { display: none; } }
+
+.footer { border-top: 1px solid var(--border); padding-top: 18px; margin-top: 40px; font-size: 0.82rem; color: var(--text-secondary); }
+.footer a { color: var(--c-targ); }
+.theme-toggle { position: fixed; top: 12px; right: 12px; z-index: 30; }
+.skip { position: absolute; left: -9999px; }
+.skip:focus { left: 8px; top: 8px; z-index: 50; background: var(--surface-1); padding: 7px 12px; border-radius: 7px; border: 1px solid var(--axis); }
+@media (prefers-reduced-motion: reduce) { * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; } }
+</style>
+</head>
+<body>
+<a class="skip" href="#s1">Skip to the first section</a>
+<button class="theme-toggle" id="theme-toggle" type="button"
+        aria-label="Switch between the light and dark colour scheme">Dark</button>
+
+<main>
+  <header class="masthead">
+    <div class="masthead-top">
+      <p class="eyebrow">Interactive companion</p>
+      <h1>Population-genetic and environmental determinants of polygenic score transferability</h1>
+      <div class="title-rule"></div>
+      <p class="byline">Kaiqian Zhang, John D. Storey, Joshua M. Akey &middot;
+        Lewis-Sigler Institute for Integrative Genomics, Princeton University<br>
+        Code and simulations: <a href="https://github.com/AkeyLab/pgsbridge">github.com/AkeyLab/pgsbridge</a></p>
+    </div>
+
+    <p class="lede">Polygenic scores lose accuracy when they are carried across populations. The
+      question this study asks is which part of that loss is <b>unavoidable</b> and which part is
+      <b>recoverable</b> through better data and better methods. It answers the question by removing
+      every practical difficulty at once. Suppose every causal variant and every effect size were
+      known exactly, were the same in both populations, and there were no linkage disequilibrium.
+      What transferability would remain?</p>
+
+    <p class="lede">The answer is that a population has a ceiling on how well any genotype-based
+      predictor can do, and that ceiling is a property of the population rather than of the
+      predictor. Transferability is the ratio of two such ceilings.</p>
+
+    <p class="lede">Both of those statements can be made exact, and the two expressions below are
+      the whole of the theory. The first says that a population's ceiling is fixed by just three
+      quantities: the additive genetic variance <span data-tex="\sigma^2"></span>, meaning how much
+      of the trait is heritable; the average self-kinship <span data-tex="\overline{\Phi}"></span>,
+      which summarises relatedness and structure within the sample; and the non-genetic variance
+      <span data-tex="\tau^2"></span>, which is everything about the trait that no genotype can
+      reach. The second says that transferability from a discovery population A into a target
+      population B is the target's ceiling divided by the discovery population's. Section 1 takes
+      the first expression apart and section 2 the second, so nothing here has to be absorbed at
+      once.</p>
+
+    <div class="eq-hero eq-block" id="hero-eq"></div>
+    <p class="formula-note">Written PA for prediction accuracy and T for transferability. Under
+      Hardy&ndash;Weinberg equilibrium the average self-kinship is exactly one half, and the first
+      expression reduces to the familiar narrow-sense heritability.</p>
+  </header>
+
+  <section id="s-howto" style="margin-bottom:28px">
+    <div class="section-head"><span class="section-num">&#9656;</span><h2>How to use this page</h2></div>
+    <div class="card">
+      <ul class="howto">
+        <li>Sections <b>1 to 4</b> are the theory. They compute the closed form directly in your
+          browser, so every number you see is exact rather than simulated. Move a slider and
+          everything downstream of it moves.</li>
+        <li>Sections <b>5 to 8</b> are the simulations. Their numbers are the stored results from
+          the paper, aggregated exactly as the manuscript figures aggregate them.</li>
+        <li>Sections <b>9 and 10</b> are the framing: what the idealized model leaves out, and how
+          to read an observed transferability against the ceiling this work defines.</li>
+        <li>Every figure has an <b>as a table</b> control underneath it if you would rather read the
+          numbers than the picture.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="s-contents" style="margin-bottom:34px">
+    <div class="section-head"><span class="section-num">&#9656;</span><h2>Contents</h2></div>
+    <nav class="toc" aria-label="Sections">
+      <a class="toc-card" href="#s1" data-tone="1"><span class="toc-num">01</span>
+        <span class="toc-title">The ceiling in one population</span>
+        <span class="toc-desc">Three quantities set how well any predictor can possibly do.</span></a>
+      <a class="toc-card" href="#s2" data-tone="2"><span class="toc-num">02</span>
+        <span class="toc-title">Transferability is a ratio of two ceilings</span>
+        <span class="toc-desc">Which is why it is not constrained to be at most one.</span></a>
+      <a class="toc-card" href="#s3" data-tone="3"><span class="toc-num">03</span>
+        <span class="toc-title">One determinant at a time</span>
+        <span class="toc-desc">The sign of every effect, and why discovery and target oppose.</span></a>
+      <a class="toc-card" href="#s4" data-tone="4"><span class="toc-num">04</span>
+        <span class="toc-title">Where transferability exceeds one</span>
+        <span class="toc-desc">How much of the parameter space, measured rather than asserted.</span></a>
+      <a class="toc-card" href="#s5" data-tone="5"><span class="toc-num">05</span>
+        <span class="toc-title">Theory against simulation</span>
+        <span class="toc-desc">382 simulated population pairs, with the constraints exposed.</span></a>
+      <a class="toc-card" href="#s6" data-tone="6"><span class="toc-num">06</span>
+        <span class="toc-title">Out of Africa, and a reversed direction</span>
+        <span class="toc-desc">The result that runs opposite to the empirical literature.</span></a>
+      <a class="toc-card" href="#s7" data-tone="7"><span class="toc-num">07</span>
+        <span class="toc-title">Rare variants amplify the asymmetry</span>
+        <span class="toc-desc">One widget covering Figure 3 and three supplementary figures.</span></a>
+      <a class="toc-card" href="#s8" data-tone="8"><span class="toc-num">08</span>
+        <span class="toc-title">Where the heritability goes</span>
+        <span class="toc-desc">The mechanism underneath section 7, variant class by variant class.</span></a>
+      <a class="toc-card" href="#s9" data-tone="9"><span class="toc-num">09</span>
+        <span class="toc-title">What the model deliberately removes</span>
+        <span class="toc-desc">Five assumptions, why each was made, what it costs.</span></a>
+      <a class="toc-card" href="#s10" data-tone="10"><span class="toc-num">10</span>
+        <span class="toc-title">Unavoidable against recoverable</span>
+        <span class="toc-desc">Reading a published transferability against the ceiling.</span></a>
+    </nav>
+  </section>
+
+  <!-- ══ 01 ══════════════════════════════════════════════════════════════ -->
+  <section id="s1" data-tone="1">
+    <div class="section-head"><span class="section-num">01</span><h2>The ceiling in one population</h2></div>
+    <p class="section-sub">Give a predictor perfect knowledge: every causal variant, every effect
+      size, no estimation error at all. It still cannot predict the part of the trait that is not
+      genetic. What is left is a ceiling, and it belongs to the population.</p>
+    <div class="sec-grid">
+      <div class="panel" id="panel-1"></div>
+      <div>
+        <div class="card">
+          <h3>The phenotypic variance of one individual, split in two</h3>
+          <p class="legend">
+            <span class="legend-item"><span class="legend-box" style="background:var(--c-gen)"></span>genetic, <span id="l-gen-sym"></span></span>
+            <span class="legend-item"><span class="legend-box" style="background:var(--c-env)"></span>non-genetic, <span id="l-env-sym"></span></span>
+          </p>
+          <svg id="s1-bar" viewBox="0 0 720 194" role="img" aria-labelledby="s1-bar-t">
+            <title id="s1-bar-t">The total phenotypic variance divided into a genetic and a non-genetic part, with the prediction accuracy read off as the genetic share</title>
+          </svg>
+          <p class="fig-cap">Prediction accuracy is the genetic share of the bar. It is the fraction
+            of phenotypic variance a perfect genotype-based predictor removes, and nothing can remove
+            more.</p>
+          <div class="calc" id="s1-calc"></div>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <h3>The special case that makes the rest of the paper simple</h3>
+          <p class="small" style="color:var(--text-secondary)">Self-kinship is the probability that
+            the two alleles an individual carries at a site are identical by descent. Under
+            Hardy&ndash;Weinberg equilibrium every individual has self-kinship exactly one half, so the
+            average is one half too, and the ceiling collapses to the narrow-sense heritability.</p>
+          <div class="eq-sub eq-block" id="s1-hwe-eq"></div>
+          <div class="btn-row" style="margin-top:12px">
+            <button type="button" id="s1-hwe-btn">Set self-kinship to 1/2</button>
+            <span class="pill" id="s1-hwe-pill"></span>
+          </div>
+        </div>
+        <div class="insight">
+          <span class="k">Why this matters</span>
+          <p>Nothing in this expression mentions a prediction algorithm. Two populations can differ
+            in how predictable a trait is even when the trait has exactly the same genetic
+            architecture in both, because they differ in allele frequencies, in relatedness
+            structure, and in environmental variation. That is the whole engine of what follows.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 02 ══════════════════════════════════════════════════════════════ -->
+  <section id="s2" data-tone="2">
+    <div class="section-head"><span class="section-num">02</span><h2>Transferability is a ratio of two ceilings</h2>
+      <span class="pill" id="s2-pill"></span></div>
+    <p class="section-sub">Build the optimal predictor in discovery population A and apply it in
+      target population B. Because the predictor is already perfect, the only thing that changes is
+      which population you are measuring in. Transferability is therefore the target's ceiling
+      divided by the discovery population's ceiling, and there is no reason for that ratio to be at
+      most one.</p>
+    <div class="sec-grid">
+      <div class="panel" id="panel-2"></div>
+      <div>
+        <div class="card">
+          <div class="btn-row" style="margin-bottom:12px">
+            <span class="small muted" style="margin-right:4px">Jump to:</span>
+            <button type="button" data-preset="equal">identical populations</button>
+            <button type="button" data-preset="gt">target more predictable</button>
+            <button type="button" data-preset="lt">target less predictable</button>
+            <button type="button" data-preset="paper">the paper's baseline</button>
+          </div>
+          <svg id="s2-bars" viewBox="0 0 720 180" role="img" aria-labelledby="s2-bars-t">
+            <title id="s2-bars-t">The variance split and resulting ceiling for the discovery and target populations side by side</title>
+          </svg>
+          <p class="fig-cap" style="margin-top:2px">Both bars are drawn on one scale, so their lengths
+            are comparable. The solid block is the genetic part, and each population's ceiling is that
+            block's share of its own bar.</p>
+          <svg id="s2-gauge" viewBox="0 0 720 104" role="img" aria-labelledby="s2-gauge-t" style="margin-top:6px">
+            <title id="s2-gauge-t">Transferability on a logarithmic axis with one marked at the centre</title>
+          </svg>
+          <div class="calc" id="s2-calc"></div>
+        </div>
+        <div class="insight">
+          <span class="k">The rule behind the gauge</span>
+          <p id="s2-rule"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 03 ══════════════════════════════════════════════════════════════ -->
+  <section id="s3" data-tone="3">
+    <div class="section-head"><span class="section-num">03</span><h2>One determinant at a time</h2></div>
+    <p class="section-sub">Each panel varies one quantity and holds the other five fixed. The solid
+      curve varies it in the <span style="color:var(--c-targ);font-weight:620">target</span>
+      population; the dashed curve varies it in the
+      <span style="color:var(--c-disc);font-weight:620">discovery</span> population. The two always
+      move in opposite directions, because the discovery population sits in the denominator. This is
+      Figure 1b to 1d of the manuscript, except that you can move the point the curves are drawn
+      around.</p>
+    <div class="sec-grid">
+      <div class="panel" id="panel-3"></div>
+      <div>
+        <div class="card">
+          <p class="legend">
+            <span class="legend-item"><span class="legend-key" style="background:var(--c-targ)"></span>varied in the target, B</span>
+            <span class="legend-item"><span class="legend-key" style="background:var(--c-disc)"></span>varied in the discovery population, A</span>
+            <span class="legend-item"><span class="legend-key" style="background:var(--axis)"></span>transferability of one</span>
+          </p>
+          <div class="spark-grid" id="s3-sparks"></div>
+          <details class="tableview"><summary>as a table</summary>
+            <div class="tbl-scroll"><table class="data" id="s3-table"></table></div></details>
+        </div>
+        <div class="insight">
+          <span class="k">Reading the signs</span>
+          <p>Raising the additive genetic variance or the average self-kinship in the target
+            population raises transferability, because both raise how much of the target's trait
+            variance is genetic. Raising the non-genetic variance in the target lowers it. Doing any
+            of the three in the discovery population does the opposite, and the curves cross at
+            exactly one wherever the two populations agree.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 04 ══════════════════════════════════════════════════════════════ -->
+  <section id="s4" data-tone="4">
+    <div class="section-head"><span class="section-num">04</span><h2>Where transferability exceeds one</h2>
+      <span class="pill hot" id="s4-pill"></span></div>
+    <p class="section-sub">The claim that transferability above one is common rather than exotic
+      deserves a measurement, not an assertion. Pick any two of the six quantities for the two axes
+      and the map below reports what fraction of the displayed rectangle lies above one.</p>
+    <div class="sec-grid">
+      <div class="panel" id="panel-4"></div>
+      <div>
+        <div class="card">
+          <div class="btn-row" style="margin-bottom:11px">
+            <label class="fld" style="margin:0"><span>horizontal axis</span>
+              <select id="hm-x"></select></label>
+            <label class="fld" style="margin:0"><span>vertical axis</span>
+              <select id="hm-y"></select></label>
+            <div class="cbar" style="margin-left:auto">
+              <span id="cbar-lo"></span>
+              <canvas id="cbar" width="336" height="20" aria-hidden="true"></canvas>
+              <span id="cbar-hi"></span>
+            </div>
+          </div>
+          <canvas class="hm-canvas" id="hm" width="1000" height="820"
+                  role="img" aria-label="Transferability across a grid of two chosen determinants"></canvas>
+          <p class="fig-cap"><b>The colour is on a logarithmic scale.</b> Transferability from A to
+            B is the reciprocal of transferability from B to A, so equal factors above and below one
+            are equal distances from the neutral centre. The solid contour is where transferability
+            is exactly one, and the ring marks your current setting.</p>
+          <div class="calc" id="hm-calc"></div>
+          <details class="tableview"><summary>as a table</summary>
+            <div class="tbl-scroll"><table class="data" id="hm-table"></table></div></details>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 05 ══════════════════════════════════════════════════════════════ -->
+  <section id="s5" data-tone="5">
+    <div class="section-head"><span class="section-num">05</span><h2>Theory against simulation</h2>
+      <span class="pill" id="s5-pill"></span></div>
+    <p class="section-sub">The closed form is algebra. This is the check that it describes simulated
+      data. Each point is one pair of populations simulated independently in every determinant:
+      allele frequencies drawn separately, within-population structure drawn separately, non-genetic
+      variance drawn separately. The horizontal position is the closed form evaluated at the
+      realized parameters, and the vertical position is the ratio of accuracies measured in the
+      simulation.</p>
+    <div class="sec-grid">
+      <div class="panel" id="panel-5"></div>
+      <div>
+        <div class="card">
+          <svg id="s5-scatter" viewBox="0 0 620 560" role="img" aria-labelledby="s5-t">
+            <title id="s5-t">Empirical transferability against theoretical transferability across simulated population pairs</title>
+          </svg>
+          <p class="fig-cap">Hover or focus a point for that pair's realized values. The dashed line
+            is the identity, not a fit.</p>
+        </div>
+        <div class="caution">
+          <span class="k">What the filters can and cannot do</span>
+          <p>The simulation drew 400 population pairs and kept the
+            <span id="s5-kept-count">382</span> that satisfied three constraints on realized
+            heritability, chosen so the pairs stay in a range reported for real complex traits. The
+            stored results are therefore <b>already filtered</b>. Moving a slider below the paper's
+            setting cannot recover the discarded pairs, so the sliders only tighten, never loosen.</p>
+          <p>Two further simulation settings are not per-pair filters and cannot be moved here. The
+            differentiation coefficient controlling population structure was sampled uniformly over
+            <b id="s5-fst"></b>, spanning the range reported among continental human populations, and
+            the within-population inbreeding coefficient over <b id="s5-inb"></b>, representative of
+            samples left after close relatives are removed. Each pair used
+            <b id="s5-nm"></b>, averaged over <b id="s5-R"></b>.</p>
+        </div>
+        <div class="insight">
+          <span class="k">Why the baseline is the true mean and not the sample mean</span>
+          <p>These simulated individuals are related to one another, so the sample mean of the trait
+            carries a term in the average off-diagonal kinship that the closed form, which concerns a
+            single individual's variance, does not. Comparing against the true population mean removes
+            that mismatch, and averaging the numerator and denominator losses over 50 redraws before
+            dividing removes the variance a ratio of two noisy estimates would otherwise carry. In the
+            coalescent simulations of sections 6 to 8 the individuals are unrelated, the off-diagonal
+            term is zero, and the ordinary sample estimator is used unchanged.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 06 ══════════════════════════════════════════════════════════════ -->
+  <section id="s6" data-tone="6">
+    <div class="section-head"><span class="section-num">06</span><h2>Out of Africa, and a reversed direction</h2></div>
+    <p class="section-sub">Now let demographic history set the allele frequencies rather than
+      specifying them. African, European and East Asian samples were simulated under an
+      Out-of-Africa coalescent model. The individuals within each sample are unrelated, so every
+      population has average self-kinship one half, and transferability is exactly the ratio of
+      heritabilities. Every difference below therefore comes from demography alone.</p>
+    <div class="sec-grid">
+      <div class="panel" id="panel-6"></div>
+      <div>
+        <div class="card">
+          <h3>Intrinsic transferability, all six ordered pairs</h3>
+          <p class="legend">
+            <span class="legend-item"><span class="legend-dot" style="background:var(--c-disc)"></span>target is African</span>
+            <span class="legend-item"><span class="legend-dot" style="background:var(--c-targ)"></span>target is European</span>
+            <span class="legend-item"><span class="legend-dot" style="background:var(--c-asn)"></span>target is East Asian</span>
+          </p>
+          <svg id="s6-dots" viewBox="0 0 700 300" role="img" aria-labelledby="s6-t">
+            <title id="s6-t">Mean intrinsic transferability with confidence intervals for the six ordered population pairs</title>
+          </svg>
+          <p class="fig-cap">Points are means over 1,000 simulation replicates with 95% confidence
+            intervals, after the same single interquartile trim the manuscript figures apply.
+            Bars are ordered by transferability, so the pattern is the ordering itself.</p>
+          <details class="tableview"><summary>as a table</summary>
+            <div class="tbl-scroll"><table class="data" id="s6-table"></table></div></details>
+        </div>
+
+        <div class="card" style="margin-top:16px">
+          <h3>The mechanism, in four steps</h3>
+          <div class="tiles" id="s6-mech"></div>
+          <p class="fig-cap" id="s6-mech-note"></p>
+        </div>
+
+        <div class="card" style="margin-top:16px">
+          <h3>Against the empirical literature</h3>
+          <div class="split">
+            <div>
+              <h4>What this idealized model predicts</h4>
+              <p class="small" style="color:var(--text-secondary)" id="s6-ours"></p>
+            </div>
+            <div>
+              <h4>What empirical studies report</h4>
+              <p class="small" style="color:var(--text-secondary)">Polygenic scores trained in
+                African-ancestry cohorts transfer comparatively well into non-African populations,
+                and scores trained in European cohorts lose accuracy when applied to African-ancestry
+                individuals. The direction is the opposite of the one above.</p>
+            </div>
+          </div>
+          <div class="insight" style="--tone:var(--c-T);--tone-wash:var(--c-T-wash)">
+            <span class="k">The two are not in conflict</span>
+            <p>They answer different questions. An empirical transferability is shaped at once by
+              linkage disequilibrium, incomplete ascertainment of causal variants, finite training
+              samples, estimation error and possible effect-size heterogeneity. This model removes
+              all of them by construction. So the reversal is informative rather than contradictory:
+              allele-frequency differences on their own favour transfer <i>into</i> African
+              populations, which means the factors left out of the model must not only dominate the
+              empirical pattern but be strong enough to turn it around.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 07 ══════════════════════════════════════════════════════════════ -->
+  <section id="s7" data-tone="7">
+    <div class="section-head"><span class="section-num">07</span><h2>Rare variants amplify the asymmetry</h2></div>
+    <p class="section-sub">If allele-frequency differences drive the pattern, then loading more of
+      the trait onto rare variants should widen it, because the Out-of-Africa bottleneck fell hardest
+      on low-frequency alleles. Each trait carries 1,000 causal variants; the controls set what
+      fraction of them are rare and how much larger a rare variant's effect is than a common one's.
+      The two panels are the two directions of the same pair, which is what makes the asymmetry
+      legible.</p>
+    <div class="sec-grid">
+      <div class="panel" id="panel-7"></div>
+      <div>
+        <div class="card">
+          <p class="legend" id="s7-legend"></p>
+          <div class="split" id="s7-panels">
+            <div>
+              <h4 id="s7-title-a"></h4>
+              <svg id="s7-a" viewBox="0 0 380 300" role="img" aria-labelledby="s7-a-t">
+                <title id="s7-a-t">Transferability against the rare-variant fraction, first direction</title>
+              </svg>
+            </div>
+            <div>
+              <h4 id="s7-title-b"></h4>
+              <svg id="s7-b" viewBox="0 0 380 300" role="img" aria-labelledby="s7-b-t">
+                <title id="s7-b-t">Transferability against the rare-variant fraction, second direction</title>
+              </svg>
+            </div>
+          </div>
+          <p class="fig-cap">Both panels share a vertical scale so they can be read against each
+            other. Shaded bands are 95% confidence intervals over 200 replicates per point. The
+            vertical rule marks the rare-variant fraction selected in the panel.</p>
+          <details class="tableview"><summary>as a table</summary>
+            <div class="tbl-scroll"><table class="data" id="s7-table"></table></div></details>
+        </div>
+        <div class="insight">
+          <span class="k">Why the model produces this without any tagging argument</span>
+          <p>Rare variants are usually said to hurt portability because linkage disequilibrium tags
+            them poorly and because selection can make their effects population-specific. Neither
+            mechanism exists here: every causal variant is known and every effect size is shared. The
+            widening comes from one thing only. A variant that is rare in Europeans is often absent
+            outright from the European sample and still segregating in the African one, so it
+            contributes additive genetic variance in one population and none in the other.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 08 ══════════════════════════════════════════════════════════════ -->
+  <section id="s8" data-tone="8">
+    <div class="section-head"><span class="section-num">08</span><h2>Where the heritability goes</h2></div>
+    <p class="section-sub">Section 7 shows the consequence. This is the cause. Heritability is split
+      into the part carried by variants that are common in the European sample and the part carried
+      by variants that are rare there. That classification is fixed across all three populations, so
+      a variant labelled rare is rare <i>in Europeans</i> and need not be rare anywhere else. This
+      panel is driven by the same controls as section 7.</p>
+    <div class="sec-grid">
+      <div class="panel" id="panel-8"></div>
+      <div>
+        <div class="card">
+          <p class="legend">
+            <span class="legend-item"><span class="legend-box" style="background:var(--c-common)"></span>carried by European-common variants</span>
+            <span class="legend-item"><span class="legend-box" style="background:var(--c-rare)"></span>carried by European-rare variants</span>
+          </p>
+          <svg id="s8-bars" viewBox="0 0 700 300" role="img" aria-labelledby="s8-t">
+            <title id="s8-t">Heritability in each population divided into the parts carried by common and rare variants</title>
+          </svg>
+          <p class="fig-cap" id="s8-cap"></p>
+          <div id="s8-unavailable" hidden class="caution">
+            <span class="k">Not simulated at this combination</span>
+            <p id="s8-unavailable-text"></p>
+          </div>
+          <details class="tableview"><summary>as a table</summary>
+            <div class="tbl-scroll"><table class="data" id="s8-table"></table></div></details>
+        </div>
+
+        <div class="card" style="margin-top:16px">
+          <h3>The allele frequencies underneath all of it</h3>
+          <div class="tiles" id="s8-af"></div>
+          <p class="fig-cap" id="s8-af-note"></p>
+          <div class="caution" style="margin-top:14px">
+            <span class="k">One definition of "common" matters a great deal</span>
+            <p id="s8-af-caution"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 09 ══════════════════════════════════════════════════════════════ -->
+  <section id="s9" data-tone="9">
+    <div class="section-head"><span class="section-num">09</span><h2>What the model deliberately removes</h2></div>
+    <p class="section-sub">Every assumption here was made on purpose, and each one costs something.
+      The point of the idealization is not that it is realistic. It is that removing a difficulty is
+      the only way to find out how much of the outcome that difficulty was responsible for.</p>
+    <div class="ledger">
+      <details>
+        <summary>Linkage disequilibrium is absent <span class="tagline">removes imperfect tagging</span></summary>
+        <div class="body">
+          <p>Causal variants are assumed uncorrelated with one another, and the predictor is built
+            on the causal variants themselves rather than on markers that tag them.</p>
+          <p><b>Why remove it.</b> In a real polygenic score, a marker that tags a causal variant
+            well in the discovery population may tag it poorly elsewhere, and that alone reduces
+            portability. Leaving linkage disequilibrium in makes it impossible to say whether an
+            observed loss came from population genetics or from tagging.</p>
+          <p><b>What it costs.</b> The framework cannot speak to how much of a real portability gap
+            is a tagging problem. It can only say that whatever remains after tagging is fixed is
+            bounded by the ceiling computed here.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Effect sizes are identical across populations <span class="tagline">removes heterogeneity</span></summary>
+        <div class="body">
+          <p>The same causal variants carry the same effects in every population. Only allele
+            frequencies, relatedness structure and non-genetic variance differ.</p>
+          <p><b>Why remove it.</b> This is the assumption that isolates population genetics. If
+            effects were allowed to differ, any difference in prediction accuracy could be attributed
+            to the effects rather than to the populations, and the question being asked would
+            disappear.</p>
+          <p><b>What it costs.</b> Real effects may genuinely differ through gene-by-environment
+            interaction or local adaptation. The manuscript names extending the framework to
+            population-specific effects as the most important next step.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Every causal variant is known, and none is missed <span class="tagline">removes ascertainment</span></summary>
+        <div class="body">
+          <p>The predictor is the true genetic value, not an estimate of it. There is no discovery
+            step, no significance threshold and no variant selection.</p>
+          <p><b>Why remove it.</b> Incomplete ascertainment is itself population-dependent: a
+            variant common enough to be discovered in one population may be too rare to be discovered
+            in another. That interacts with allele frequency in exactly the place this study wants to
+            look.</p>
+          <p><b>What it costs.</b> Real scores are built from an ascertained subset, so the ceiling
+            here is not attainable in practice. That is the intended reading: it is a bound, and the
+            distance to it is the quantity of interest.</p>
+        </div>
+      </details>
+      <details>
+        <summary>The discovery sample is effectively infinite <span class="tagline">removes estimation error</span></summary>
+        <div class="body">
+          <p>Because the predictor is specified rather than fitted, it carries no sampling
+            variability, no shrinkage, no hyperparameter tuning and no winner's curse.</p>
+          <p><b>Why remove it.</b> Finite discovery samples are the single largest practical driver
+            of poor portability, and they are also the one most likely to improve. Separating them
+            out is what makes the intrinsic and recoverable split in section 10 meaningful.</p>
+          <p><b>What it costs.</b> None of the results here describe how quickly a real score
+            approaches the ceiling as sample size grows. They describe only where the ceiling is.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Only additive effects exist <span class="tagline">removes interaction</span></summary>
+        <div class="body">
+          <p>The trait follows Fisher's polygenic model with additive genetic effects, an
+            uncorrelated non-genetic component of constant variance, and no interaction of any kind.</p>
+          <p><b>Why remove it.</b> Additivity is what makes the optimal predictor the conditional
+            expectation and gives the ceiling a closed form in three quantities.</p>
+          <p><b>What it costs.</b> Gene-by-gene and gene-by-environment interaction are excluded, and
+            the manuscript lists both as directions for a more complete account of the limits of
+            polygenic prediction.</p>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ══ 10 ══════════════════════════════════════════════════════════════ -->
+  <section id="s10" data-tone="10">
+    <div class="section-head"><span class="section-num">10</span><h2>Unavoidable against recoverable</h2></div>
+    <p class="section-sub">This last panel is not a result of the paper. It is the Discussion's
+      closing proposal made arithmetic, so that the idea can be handled rather than only read.</p>
+    <div class="caution" style="margin-bottom:18px">
+      <span class="k">Read this before the numbers</span>
+      <p>The manuscript proposes that a cross-population prediction gap separates into an intrinsic
+        component, arising from population differences in genetic predictability, and a recoverable
+        component, arising from imperfect data and methods. It proposes the split; it does not derive
+        or validate a formula for it. The arithmetic below is the natural way to carry out that split
+        given that transferability is a ratio, and it is offered as an illustration of the proposal,
+        not as a validated estimator. Treat every number it produces as a way of organising a
+        comparison rather than as a measurement.</p>
+    </div>
+    <div class="sec-grid">
+      <div class="panel" id="panel-10"></div>
+      <div>
+        <div class="card">
+          <div class="eq-sub eq-block" id="s10-eq"></div>
+          <p class="fig-cap" style="text-align:center;margin-bottom:14px">Transferability is a ratio,
+            so the split is multiplicative, and additive on the logarithmic scale.</p>
+          <div class="tiles" id="s10-tiles"></div>
+          <svg id="s10-bar" viewBox="0 0 700 190" role="img" aria-labelledby="s10-t" style="margin-top:16px">
+            <title id="s10-t">The observed transferability gap divided into an intrinsic and a recoverable part on a logarithmic scale</title>
+          </svg>
+          <div class="calc" id="s10-calc"></div>
+        </div>
+        <div class="insight">
+          <span class="k">How to read the result</span>
+          <p id="s10-read"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p>An interactive companion to the manuscript. Every simulated number on this page is read from
+      the stored results of the study and aggregated with the same rule the manuscript figures use:
+      within each group the replicates are trimmed once by the interquartile rule, and the mean is
+      reported with a t-based 95% confidence interval. The theory sections evaluate the closed form
+      directly and involve no simulation at all.</p>
+    <p>Code, simulations and figure scripts:
+      <a href="https://github.com/AkeyLab/pgsbridge">github.com/AkeyLab/pgsbridge</a>.</p>
+  </footer>
+</main>
+
+<div class="tooltip" id="tooltip" role="status" aria-live="polite"></div>
+
+<script type="application/json" id="prs-data">{"theory":{"T_theo":[1.1205,1.2265,1.0006,0.7822,1.2372,1.2868,0.862,0.9442,0.6955,1.2591,1.4325,0.908,1.3178,1.0696,0.7545,0.8735,0.9427,1.1652,0.7027,0.8251,0.9694,0.9081,1.5148,0.6557,1.0124,1.7008,0.7754,1.5041,0.6707,0.9821,1.1544,1.3576,0.9666,0.9937,0.7502,0.799,1.7644,0.8348,1.2403,1.4541,0.8352,0.9796,0.6125,1.0139,0.9001,0.8277,0.9966,0.6327,1.3656,1.5532,0.9324,1.1149,0.6322,0.7888,1.0447,1.0986,1.4609,0.637,1.0318,1.1778,0.9631,0.6537,0.8289,1.0014,0.5695,1.4395,1.5026,1.2573,1.1589,1.3194,0.5286,0.9432,1.0237,0.7262,1.4136,0.5778,0.8831,0.734,1.2581,0.8693,0.9332,0.6931,0.7278,1.6252,0.7277,1.1731,1.3025,0.7649,0.8864,1.2007,1.0692,1.7487,0.8118,0.9802,1.3929,1.1142,0.9991,0.7022,1.9338,0.993,1.3622,1.4885,0.8828,1.0994,0.6985,0.6351,0.9603,0.9666,0.7711,0.9636,1.2852,0.7314,0.9575,0.9936,1.3097,1.3677,0.7438,0.904,1.0052,1.3246,1.6708,0.7804,1.2019,1.0739,0.8251,0.9747,1.6198,0.7738,1.1732,0.6163,1.0542,0.6978,1.2324,1.6234,0.7019,0.7312,1.3616,1.6732,0.7027,1.1332,1.3404,1.5107,0.9946,0.9711,0.869,0.8661,1.3749,0.8416,0.9976,0.5905,0.7973,0.8706,1.0816,1.0846,0.8528,0.9573,0.8861,1.4008,0.6488,0.8877,1.1221,1.185,1.2827,0.7586,0.9772,0.6299,1.4157,0.8225,0.8858,1.2741,0.7807,0.7607,0.8984,0.9275,1.6275,0.787,1.0243,1.0585,1.4416,1.4744,0.8877,0.6665,1.1566,1.5218,0.9146,0.984,0.7022,1.3166,0.7793,0.747,1.2894,0.5581,0.8752,1.0249,0.8157,1.3745,1.5636,1.0261,0.7634,1.1403,1.7942,0.7875,1.1252,1.5081,0.8432,1.0315,1.095,1.2339,0.891,1.1548,0.6749,0.7002,0.9158,1.2275,0.6964,1.4159,0.9533,1.2128,1.1299,0.8221,1.6249,0.9667,1.2183,0.7951,1.459,0.799,1.0256,1.4827,0.9173,0.944,0.5962,0.8098,1.643,0.6675,1.1524,1.3499,0.8983,0.9506,1.2488,1.3356,0.7363,0.7889,1.3281,0.6545,0.8959,1.31,1.0254,0.7872,0.8701,0.7589,1.4403,0.6315,1.1884,1.117,0.7644,0.5815,1.0397,1.1379,0.6306,1.615,0.678,1.1067,1.3267,0.7871,0.9537,0.977,0.9017,0.5338,0.9786,0.6462,1.2843,1.4835,0.8095,1.0139,0.766,0.9725,1.0054,1.3784,1.2185,0.9293,1.1025,1.1737,0.831,1.6122,0.947,0.6845,1.2767,0.7544,1.2269,1.3254,0.9429,1.8922,1.02,1.3666,0.7744,1.0344,1.0372,0.7224,1.741,0.895,0.808,1.4653,0.9257,1.0264,1.424,0.7632,1.0309,1.1125,1.1522,0.8572,0.8461,0.9877,0.5683,1.4275,0.9202,1.0202,0.6596,0.8073,0.943,0.9386,0.8123,1.2568,1.3759,0.8508,1.0209,1.0938,1.1146,0.9695,0.6693,1.0969,1.193,1.5517,0.6909,1.2107,0.7027,1.2969,1.8145,1.1186,1.0776,0.6536,0.8135,1.0048,0.594,1.4371,1.6132,1.0141,1.364,1.4331,0.7777,0.8906,1.3548,0.5991,0.923,1.0657,1.1353,1.4576,0.8603,0.9455,1.4002,1.3157,0.8167,1.0227,0.6172,0.7631,0.9122,0.8748,1.3358,1.3914,0.9185,1.4888,0.6963,1.3085,0.9396,0.8519,0.9979,0.8602,0.589,0.9884,1.2401,0.7477,0.8661,1.0239],"T_emp":[1.1213,1.2319,0.9953,0.7804,1.2442,1.2861,0.8607,0.9367,0.6957,1.2601,1.433,0.8973,1.3094,1.0531,0.7542,0.8666,0.9387,1.1723,0.6933,0.8198,0.9725,0.9225,1.5384,0.655,1.0214,1.6991,0.7782,1.5415,0.6706,0.9768,1.1349,1.3461,0.9366,0.9999,0.7474,0.8039,1.7927,0.8356,1.2355,1.4264,0.8391,0.985,0.6155,1.0121,0.9014,0.8191,0.9956,0.6359,1.3446,1.5441,0.9445,1.1177,0.6148,0.787,1.039,1.099,1.4961,0.6349,1.0562,1.1884,0.995,0.6641,0.8245,1.0002,0.5883,1.4298,1.4741,1.2527,1.1552,1.3255,0.5424,0.9509,1.0313,0.7215,1.415,0.5765,0.8639,0.7289,1.2622,0.876,0.9299,0.7038,0.7322,1.628,0.7208,1.1803,1.3001,0.7576,0.8884,1.2038,1.0644,1.7509,0.8086,0.9649,1.3982,1.0708,1.0025,0.7029,1.9833,0.9991,1.3798,1.487,0.8792,1.1042,0.6985,0.6386,0.9762,0.963,0.7621,0.9797,1.3028,0.7321,0.9619,0.9955,1.3842,1.3499,0.7417,0.8978,1.0002,1.3338,1.6871,0.7824,1.202,1.0649,0.8287,0.9741,1.6435,0.7658,1.1844,0.6074,1.0475,0.7073,1.2466,1.6245,0.7235,0.73,1.3539,1.6479,0.6959,1.1535,1.337,1.4863,0.9901,0.9842,0.8596,0.8701,1.3514,0.8467,1.0064,0.5756,0.7951,0.8577,1.0847,1.0879,0.8535,0.9877,0.875,1.3978,0.6482,0.8781,1.1315,1.1728,1.2641,0.757,0.9646,0.6388,1.442,0.8187,0.8853,1.2765,0.7773,0.7585,0.8987,0.9275,1.6318,0.7929,1.0182,1.061,1.3886,1.4625,0.9192,0.6699,1.1708,1.4798,0.9529,0.9858,0.7008,1.3125,0.7698,0.7448,1.2872,0.5573,0.8911,1.0256,0.82,1.4146,1.5211,1.0317,0.7756,1.1288,1.7818,0.8008,1.1103,1.5255,0.8533,1.0422,1.0937,1.2493,0.8888,1.1577,0.6813,0.7076,0.9107,1.2329,0.6896,1.3812,0.9588,1.2294,1.1311,0.8315,1.6502,0.9702,1.2326,0.7947,1.5036,0.8093,1.0213,1.4973,0.9203,0.94,0.6081,0.7978,1.624,0.6652,1.1602,1.3427,0.8358,0.9487,1.2498,1.2992,0.7315,0.7922,1.317,0.6423,0.8867,1.3032,1.0196,0.7893,0.8854,0.7602,1.4459,0.6353,1.1724,1.1121,0.7653,0.5692,1.0426,1.1406,0.6278,1.5948,0.672,1.1139,1.3305,0.7862,0.9486,0.9725,0.8961,0.5367,0.9726,0.6466,1.2611,1.4986,0.8239,1.0091,0.7671,0.98,1.0039,1.4544,1.2038,0.9161,1.0981,1.1754,0.8354,1.6329,0.9494,0.6844,1.2419,0.7576,1.2334,1.326,0.9466,1.9256,1.0074,1.3706,0.7881,1.0446,1.0525,0.7098,1.7656,0.8807,0.8034,1.4779,0.9036,1.0432,1.4338,0.767,1.0251,1.1132,1.1161,0.8589,0.8603,0.9954,0.5658,1.4246,0.9237,1.0237,0.6623,0.8073,0.9473,0.9339,0.8068,1.2729,1.3756,0.8479,1.0272,1.0725,1.1315,0.9658,0.6811,1.1126,1.195,1.5865,0.692,1.2265,0.7052,1.3061,1.825,1.1055,1.0763,0.6495,0.8224,1.0074,0.5901,1.398,1.6444,1.0135,1.3665,1.4546,0.7876,0.9013,1.3563,0.5852,0.9407,1.0634,1.1456,1.4657,0.8517,0.948,1.3876,1.2921,0.8174,1.0137,0.618,0.7666,0.9076,0.8952,1.3427,1.4015,0.912,1.4696,0.6886,1.3357,0.9389,0.8534,0.9973,0.8561,0.591,0.9837,1.2446,0.7334,0.8621,1.0276],"h2_A":[0.3496,0.447,0.886,0.5633,0.5931,0.6667,0.7266,0.8451,0.8357,0.3607,0.5978,0.6306,0.63,0.3492,0.488,0.8137,0.7008,0.5981,0.7875,0.8983,0.8842,0.4197,0.5736,0.6311,0.7091,0.4143,0.8043,0.3475,0.5443,0.4275,0.4082,0.4962,0.3282,0.77,0.8379,0.8878,0.3514,0.4521,0.4478,0.5258,0.8292,0.6486,0.7388,0.8386,0.7916,0.8171,0.8932,0.7276,0.4081,0.5033,0.4615,0.6111,0.6679,0.7256,0.783,0.812,0.4387,0.5403,0.5332,0.6712,0.3389,0.5063,0.6169,0.8517,0.6912,0.3192,0.4533,0.4029,0.6871,0.6188,0.6195,0.6863,0.8111,0.8083,0.3248,0.5753,0.4148,0.8167,0.6789,0.4851,0.7918,0.8403,0.6716,0.3398,0.4309,0.421,0.5409,0.6271,0.6623,0.7252,0.5241,0.3534,0.5001,0.4889,0.5128,0.3139,0.6164,0.7304,0.3204,0.42,0.4071,0.5547,0.7927,0.6587,0.7263,0.7334,0.5413,0.8458,0.5341,0.6856,0.6529,0.77,0.8331,0.8767,0.3261,0.4452,0.4193,0.5382,0.7788,0.3499,0.4111,0.7137,0.5183,0.8283,0.8756,0.7504,0.4393,0.8477,0.5689,0.6062,0.616,0.857,0.3468,0.3525,0.4666,0.8726,0.3051,0.3586,0.7124,0.4886,0.5938,0.3627,0.8261,0.5176,0.4088,0.8256,0.5553,0.5906,0.6153,0.6968,0.83,0.5109,0.798,0.4689,0.8927,0.3667,0.6406,0.4581,0.7658,0.7925,0.6728,0.3262,0.4275,0.5546,0.6771,0.7379,0.5038,0.5681,0.8696,0.705,0.8128,0.8642,0.7207,0.479,0.4452,0.7471,0.7868,0.8367,0.3108,0.44,0.3887,0.8491,0.4987,0.376,0.4425,0.8658,0.6605,0.3959,0.4377,0.8973,0.5262,0.6614,0.6515,0.7413,0.8668,0.3448,0.3136,0.804,0.8393,0.5116,0.3469,0.6661,0.6908,0.5324,0.8015,0.6702,0.4531,0.6078,0.6726,0.761,0.778,0.5626,0.6908,0.6714,0.7818,0.4089,0.8963,0.5272,0.7844,0.6212,0.3097,0.792,0.6682,0.8974,0.3598,0.4129,0.8592,0.5083,0.5567,0.8536,0.6444,0.771,0.4125,0.8812,0.5211,0.6125,0.4274,0.7497,0.3583,0.3769,0.4417,0.898,0.4174,0.6406,0.5285,0.5853,0.6923,0.6398,0.4137,0.8605,0.4917,0.6092,0.4,0.7124,0.7775,0.5595,0.6102,0.7399,0.7819,0.3939,0.6807,0.5068,0.5877,0.858,0.706,0.4583,0.856,0.5642,0.642,0.8297,0.4419,0.5213,0.5079,0.653,0.7656,0.8169,0.8838,0.3266,0.6297,0.6026,0.6765,0.339,0.8031,0.4374,0.8935,0.6997,0.3804,0.4978,0.5478,0.6708,0.8051,0.3318,0.5773,0.416,0.4963,0.4167,0.7251,0.7884,0.3575,0.6485,0.8555,0.4183,0.4551,0.4917,0.5576,0.8459,0.6512,0.7567,0.3813,0.8789,0.6478,0.7887,0.5838,0.6114,0.6572,0.7203,0.7527,0.8776,0.8834,0.8099,0.4739,0.463,0.6269,0.8286,0.675,0.3147,0.3936,0.8351,0.5473,0.3385,0.3687,0.4628,0.5683,0.6731,0.805,0.4803,0.3028,0.3608,0.6689,0.5174,0.7864,0.8388,0.7208,0.3147,0.335,0.8583,0.315,0.3336,0.4338,0.4676,0.5233,0.6449,0.6205,0.7207,0.5301,0.4021,0.4424,0.7715,0.5901,0.6153,0.6684,0.5358,0.7716,0.8775,0.8666,0.5526,0.5722,0.6365,0.6845,0.4306,0.7997,0.3398,0.8461,0.4758,0.3302,0.7578,0.5689,0.6648,0.511,0.7434,0.8635,0.8572],"h2_B":[0.3917,0.5482,0.8866,0.4407,0.7337,0.8579,0.6263,0.7979,0.5813,0.4541,0.8564,0.5726,0.8302,0.3735,0.3682,0.7107,0.6607,0.6969,0.5534,0.7412,0.8571,0.3811,0.8689,0.4138,0.7179,0.7046,0.6237,0.5226,0.3651,0.4199,0.4712,0.6736,0.3172,0.7651,0.6286,0.7093,0.62,0.3774,0.5554,0.7645,0.6926,0.6353,0.4525,0.8502,0.7126,0.6763,0.8901,0.4604,0.5573,0.7817,0.4303,0.6813,0.4222,0.5724,0.818,0.8921,0.6409,0.3442,0.5502,0.7905,0.3264,0.331,0.5113,0.8529,0.3936,0.4595,0.6811,0.5066,0.7964,0.8164,0.3275,0.6473,0.8303,0.587,0.4592,0.3324,0.3663,0.5994,0.8542,0.4217,0.7389,0.5824,0.4888,0.5523,0.3136,0.4938,0.7045,0.4797,0.5871,0.8708,0.5604,0.618,0.406,0.4792,0.7143,0.3498,0.6159,0.5129,0.6196,0.417,0.5545,0.8256,0.6998,0.7241,0.5073,0.4658,0.5198,0.8175,0.4118,0.6606,0.8391,0.5632,0.7977,0.8711,0.4271,0.6089,0.3119,0.4865,0.7829,0.4635,0.6869,0.5569,0.623,0.8895,0.7224,0.7314,0.7116,0.6559,0.6674,0.3736,0.6494,0.598,0.4274,0.5722,0.3275,0.638,0.4154,0.5999,0.5006,0.5536,0.796,0.5479,0.8217,0.5027,0.3552,0.7151,0.7634,0.4971,0.6139,0.4115,0.6618,0.4447,0.8631,0.5086,0.7613,0.351,0.5676,0.6417,0.4968,0.7035,0.755,0.3865,0.5484,0.4207,0.6617,0.4648,0.7133,0.4672,0.7702,0.8982,0.6345,0.6574,0.6475,0.4443,0.7246,0.588,0.8059,0.8856,0.4481,0.6487,0.345,0.5659,0.5768,0.5722,0.4047,0.8519,0.4638,0.5212,0.3411,0.6703,0.6785,0.3691,0.5702,0.7597,0.707,0.4739,0.4903,0.825,0.6407,0.5833,0.6224,0.5245,0.7773,0.8029,0.6759,0.6914,0.4962,0.7499,0.5993,0.8788,0.5251,0.394,0.6327,0.8241,0.5444,0.5789,0.8544,0.6394,0.8863,0.5107,0.5032,0.7656,0.814,0.7135,0.5249,0.3299,0.8812,0.7536,0.5107,0.8058,0.3842,0.6244,0.6777,0.5882,0.6005,0.8269,0.384,0.7127,0.4475,0.5034,0.3252,0.7084,0.5543,0.4193,0.4735,0.7667,0.7099,0.5036,0.36,0.653,0.7082,0.3847,0.4754,0.7957,0.5943,0.3253,0.6345,0.8419,0.4931,0.6361,0.4615,0.5609,0.7797,0.6754,0.6733,0.4478,0.7718,0.3011,0.6282,0.5362,0.5675,0.7733,0.4111,0.6621,0.5864,0.7944,0.8886,0.4501,0.7672,0.56,0.7458,0.3979,0.6674,0.7051,0.8462,0.4789,0.4856,0.3755,0.6721,0.8891,0.7591,0.6278,0.5888,0.5685,0.3844,0.431,0.7521,0.5696,0.6223,0.5804,0.6913,0.6129,0.4213,0.5047,0.794,0.6455,0.6713,0.8418,0.4394,0.7534,0.5481,0.779,0.3318,0.8728,0.6048,0.7348,0.4965,0.7085,0.833,0.7602,0.385,0.5819,0.8625,0.7049,0.6891,0.3442,0.4387,0.8096,0.3663,0.3714,0.4399,0.7182,0.3927,0.8149,0.5657,0.623,0.5494,0.4036,0.7207,0.3382,0.6397,0.8428,0.4282,0.4523,0.5404,0.8704,0.4296,0.478,0.3373,0.4165,0.709,0.3863,0.5727,0.7681,0.6019,0.5861,0.3806,0.7294,0.8262,0.8096,0.5458,0.5479,0.4762,0.6697,0.7905,0.4834,0.7644,0.8856,0.6287,0.6411,0.5568,0.4446,0.7949,0.4053,0.3295,0.6519,0.3351,0.6571,0.6337,0.5559,0.7479,0.8777],"r_squared":0.997474002730707,"n_kept":382,"n_simulated":400,"settings":{"n":600,"m":400,"redraws":50,"fst_range":[0.01,0.18],"inbreeding_range":[0.01,0.1],"accuracy_gap":0.3}},"common":{"20|0.1|AFR-ASN":[0.8437,0.0299,939],"20|0.1|AFR-EUR":[0.9289,0.0325,955],"20|0.1|ASN-AFR":[1.3432,0.0453,929],"20|0.1|ASN-EUR":[1.1153,0.0394,939],"20|0.1|EUR-AFR":[1.2772,0.0447,947],"20|0.1|EUR-ASN":[1.0241,0.0361,939],"20|0.4|AFR-ASN":[0.864,0.0128,976],"20|0.4|AFR-EUR":[0.9002,0.0123,963],"20|0.4|ASN-AFR":[1.1882,0.0185,982],"20|0.4|ASN-EUR":[1.04,0.0145,967],"20|0.4|EUR-AFR":[1.1137,0.0151,975],"20|0.4|EUR-ASN":[0.9564,0.0138,977],"20|0.8|AFR-ASN":[0.9541,0.004,980],"20|0.8|AFR-EUR":[0.9707,0.0035,987],"20|0.8|ASN-AFR":[1.051,0.0044,988],"20|0.8|ASN-EUR":[1.0212,0.004,982],"20|0.8|EUR-AFR":[1.0329,0.0036,986],"20|0.8|EUR-ASN":[0.9824,0.004,985],"50|0.1|AFR-ASN":[0.829,0.0278,943],"50|0.1|AFR-EUR":[0.8929,0.0282,934],"50|0.1|ASN-AFR":[1.3641,0.048,938],"50|0.1|ASN-EUR":[1.1323,0.0391,924],"50|0.1|EUR-AFR":[1.2236,0.0389,942],"50|0.1|EUR-ASN":[1.0114,0.035,952],"50|0.4|AFR-ASN":[0.8622,0.0108,982],"50|0.4|AFR-EUR":[0.9099,0.0112,983],"50|0.4|ASN-AFR":[1.1637,0.0146,977],"50|0.4|ASN-EUR":[1.0564,0.0138,972],"50|0.4|EUR-AFR":[1.1157,0.0144,989],"50|0.4|EUR-ASN":[0.9678,0.013,985],"50|0.8|AFR-ASN":[0.9515,0.0032,989],"50|0.8|AFR-EUR":[0.968,0.0031,986],"50|0.8|ASN-AFR":[1.0492,0.0035,980],"50|0.8|ASN-EUR":[1.0157,0.0033,977],"50|0.8|EUR-AFR":[1.0326,0.0031,983],"50|0.8|EUR-ASN":[0.983,0.0034,980],"100|0.1|AFR-ASN":[0.8469,0.0275,943],"100|0.1|AFR-EUR":[0.9121,0.029,954],"100|0.1|ASN-AFR":[1.3392,0.0453,926],"100|0.1|ASN-EUR":[1.1554,0.0402,938],"100|0.1|EUR-AFR":[1.2397,0.0423,933],"100|0.1|EUR-ASN":[1.007,0.0357,948],"100|0.4|AFR-ASN":[0.8623,0.0105,984],"100|0.4|AFR-EUR":[0.9168,0.011,985],"100|0.4|ASN-AFR":[1.1638,0.0143,979],"100|0.4|ASN-EUR":[1.066,0.0135,981],"100|0.4|EUR-AFR":[1.1046,0.0135,981],"100|0.4|EUR-ASN":[0.9509,0.0124,982],"100|0.8|AFR-ASN":[0.955,0.0029,990],"100|0.8|AFR-EUR":[0.9716,0.0028,995],"100|0.8|ASN-AFR":[1.047,0.0033,989],"100|0.8|ASN-EUR":[1.0173,0.0033,986],"100|0.8|EUR-AFR":[1.033,0.0031,989],"100|0.8|EUR-ASN":[0.9868,0.0032,993],"1000|0.1|AFR-ASN":[0.8826,0.0292,950],"1000|0.1|AFR-EUR":[0.9228,0.0296,947],"1000|0.1|ASN-AFR":[1.2923,0.0412,933],"1000|0.1|ASN-EUR":[1.1284,0.0376,941],"1000|0.1|EUR-AFR":[1.2308,0.0403,944],"1000|0.1|EUR-ASN":[0.9885,0.0337,943],"1000|0.4|AFR-ASN":[0.886,0.0105,988],"1000|0.4|AFR-EUR":[0.9105,0.0103,979],"1000|0.4|ASN-AFR":[1.1606,0.0139,981],"1000|0.4|ASN-EUR":[1.0459,0.0125,983],"1000|0.4|EUR-AFR":[1.1109,0.0132,980],"1000|0.4|EUR-ASN":[0.9599,0.012,981],"1000|0.8|AFR-ASN":[0.9545,0.0027,992],"1000|0.8|AFR-EUR":[0.9692,0.0025,984],"1000|0.8|ASN-AFR":[1.0478,0.0031,991],"1000|0.8|ASN-EUR":[1.0131,0.0031,983],"1000|0.8|EUR-AFR":[1.0313,0.0028,986],"1000|0.8|EUR-ASN":[0.9836,0.003,990]},"normal":{"1000|0.1|AFR-ASN":[0.8933,0.0306,953],"1000|0.1|AFR-EUR":[0.9246,0.0294,939],"1000|0.1|ASN-AFR":[1.2694,0.0425,927],"1000|0.1|ASN-EUR":[1.1526,0.04,943],"1000|0.1|EUR-AFR":[1.1788,0.0369,933],"1000|0.1|EUR-ASN":[1.0148,0.0354,951],"1000|0.4|AFR-ASN":[0.8736,0.0103,980],"1000|0.4|AFR-EUR":[0.9148,0.0104,977],"1000|0.4|ASN-AFR":[1.1631,0.0137,982],"1000|0.4|ASN-EUR":[1.0544,0.013,976],"1000|0.4|EUR-AFR":[1.108,0.0125,982],"1000|0.4|EUR-ASN":[0.9667,0.0119,985],"1000|0.8|AFR-ASN":[0.9569,0.0028,991],"1000|0.8|AFR-EUR":[0.9694,0.0026,984],"1000|0.8|ASN-AFR":[1.0465,0.0031,991],"1000|0.8|ASN-EUR":[1.0141,0.003,984],"1000|0.8|EUR-AFR":[1.0325,0.0028,988],"1000|0.8|EUR-ASN":[0.9872,0.0029,988]},"rare":{"0.1|1|0.1|AFR-ASN":[0.8818,0.0635,190],"0.1|1|0.1|AFR-EUR":[1.0043,0.0767,193],"0.1|1|0.1|ASN-AFR":[1.3193,0.1023,191],"0.1|1|0.1|ASN-EUR":[1.1493,0.0877,188],"0.1|1|0.1|EUR-AFR":[1.269,0.0951,189],"0.1|1|0.1|EUR-ASN":[0.9019,0.0646,183],"0.1|1|0.2|AFR-ASN":[0.9243,0.0706,192],"0.1|1|0.2|AFR-EUR":[0.9281,0.0601,192],"0.1|1|0.2|ASN-AFR":[1.2392,0.0919,190],"0.1|1|0.2|ASN-EUR":[1.0909,0.0784,186],"0.1|1|0.2|EUR-AFR":[1.3183,0.0939,196],"0.1|1|0.2|EUR-ASN":[1.0463,0.0858,187],"0.1|1|0.3|AFR-ASN":[0.8514,0.064,192],"0.1|1|0.3|AFR-EUR":[1.0319,0.0808,193],"0.1|1|0.3|ASN-AFR":[1.2701,0.0855,188],"0.1|1|0.3|ASN-EUR":[1.1682,0.0833,188],"0.1|1|0.3|EUR-AFR":[1.2293,0.092,189],"0.1|1|0.3|EUR-ASN":[0.9921,0.0715,183],"0.1|1|0.4|AFR-ASN":[0.9287,0.0756,191],"0.1|1|0.4|AFR-EUR":[0.9049,0.0615,189],"0.1|1|0.4|ASN-AFR":[1.3377,0.1034,186],"0.1|1|0.4|ASN-EUR":[1.063,0.0841,191],"0.1|1|0.4|EUR-AFR":[1.2292,0.0879,189],"0.1|1|0.4|EUR-ASN":[0.9567,0.0674,185],"0.1|1|0.5|AFR-ASN":[0.9019,0.0674,187],"0.1|1|0.5|AFR-EUR":[0.8694,0.0636,188],"0.1|1|0.5|ASN-AFR":[1.2509,0.0966,182],"0.1|1|0.5|ASN-EUR":[1.0859,0.0768,192],"0.1|1|0.5|EUR-AFR":[1.2012,0.0824,185],"0.1|1|0.5|EUR-ASN":[1.004,0.0844,189],"0.1|1|0.6|AFR-ASN":[0.7897,0.0684,187],"0.1|1|0.6|AFR-EUR":[0.9436,0.0731,192],"0.1|1|0.6|ASN-AFR":[1.4412,0.1059,195],"0.1|1|0.6|ASN-EUR":[1.0428,0.0766,184],"0.1|1|0.6|EUR-AFR":[1.1816,0.0889,186],"0.1|1|0.6|EUR-ASN":[1.0224,0.0806,187],"0.1|1|0.7|AFR-ASN":[0.8064,0.0603,194],"0.1|1|0.7|AFR-EUR":[0.94,0.0767,190],"0.1|1|0.7|ASN-AFR":[1.3219,0.0929,191],"0.1|1|0.7|ASN-EUR":[1.225,0.1051,194],"0.1|1|0.7|EUR-AFR":[1.2782,0.0884,190],"0.1|1|0.7|EUR-ASN":[0.9712,0.071,186],"0.1|1|0.8|AFR-ASN":[0.8458,0.0686,189],"0.1|1|0.8|AFR-EUR":[0.9208,0.0658,191],"0.1|1|0.8|ASN-AFR":[1.1989,0.0854,187],"0.1|1|0.8|ASN-EUR":[1.0459,0.084,185],"0.1|1|0.8|EUR-AFR":[1.2948,0.0914,194],"0.1|1|0.8|EUR-ASN":[1.0653,0.0837,190],"0.1|1|0.9|AFR-ASN":[0.815,0.0592,187],"0.1|1|0.9|AFR-EUR":[0.8006,0.0568,184],"0.1|1|0.9|ASN-AFR":[1.423,0.0983,185],"0.1|1|0.9|ASN-EUR":[1.1785,0.1015,191],"0.1|1|0.9|EUR-AFR":[1.3412,0.0945,190],"0.1|1|0.9|EUR-ASN":[1.0023,0.0746,189],"0.1|2|0.1|AFR-ASN":[0.8808,0.0618,193],"0.1|2|0.1|AFR-EUR":[0.9153,0.0622,187],"0.1|2|0.1|ASN-AFR":[1.2388,0.0847,191],"0.1|2|0.1|ASN-EUR":[1.1813,0.0977,187],"0.1|2|0.1|EUR-AFR":[1.1408,0.0813,185],"0.1|2|0.1|EUR-ASN":[0.9756,0.0715,186],"0.1|2|0.2|AFR-ASN":[0.8132,0.0531,190],"0.1|2|0.2|AFR-EUR":[0.9274,0.0677,189],"0.1|2|0.2|ASN-AFR":[1.4481,0.1072,192],"0.1|2|0.2|ASN-EUR":[1.0744,0.0867,184],"0.1|2|0.2|EUR-AFR":[1.2151,0.0939,186],"0.1|2|0.2|EUR-ASN":[0.9838,0.0672,179],"0.1|2|0.3|AFR-ASN":[0.8784,0.0679,195],"0.1|2|0.3|AFR-EUR":[0.8847,0.0674,193],"0.1|2|0.3|ASN-AFR":[1.2622,0.0841,182],"0.1|2|0.3|ASN-EUR":[1.1263,0.0864,185],"0.1|2|0.3|EUR-AFR":[1.2347,0.0918,190],"0.1|2|0.3|EUR-ASN":[0.9574,0.0688,186],"0.1|2|0.4|AFR-ASN":[0.7791,0.0538,184],"0.1|2|0.4|AFR-EUR":[0.8568,0.0595,186],"0.1|2|0.4|ASN-AFR":[1.3274,0.1084,183],"0.1|2|0.4|ASN-EUR":[1.2757,0.0984,189],"0.1|2|0.4|EUR-AFR":[1.2398,0.0936,190],"0.1|2|0.4|EUR-ASN":[0.9786,0.0758,190],"0.1|2|0.5|AFR-ASN":[0.8319,0.0592,190],"0.1|2|0.5|AFR-EUR":[0.9555,0.0698,192],"0.1|2|0.5|ASN-AFR":[1.2596,0.0885,184],"0.1|2|0.5|ASN-EUR":[1.0372,0.0775,189],"0.1|2|0.5|EUR-AFR":[1.2244,0.0898,188],"0.1|2|0.5|EUR-ASN":[0.9996,0.0713,190],"0.1|2|0.6|AFR-ASN":[0.8226,0.0631,193],"0.1|2|0.6|AFR-EUR":[0.9089,0.0656,190],"0.1|2|0.6|ASN-AFR":[1.422,0.1012,193],"0.1|2|0.6|ASN-EUR":[1.1278,0.0804,187],"0.1|2|0.6|EUR-AFR":[1.3223,0.0971,193],"0.1|2|0.6|EUR-ASN":[1.0394,0.0775,190],"0.1|2|0.7|AFR-ASN":[0.8122,0.0586,189],"0.1|2|0.7|AFR-EUR":[0.9002,0.0676,191],"0.1|2|0.7|ASN-AFR":[1.3756,0.1085,189],"0.1|2|0.7|ASN-EUR":[1.1673,0.0944,190],"0.1|2|0.7|EUR-AFR":[1.2139,0.0789,186],"0.1|2|0.7|EUR-ASN":[0.9969,0.0701,189],"0.1|2|0.8|AFR-ASN":[0.727,0.0488,184],"0.1|2|0.8|AFR-EUR":[0.8513,0.0596,192],"0.1|2|0.8|ASN-AFR":[1.5912,0.1238,191],"0.1|2|0.8|ASN-EUR":[1.2148,0.098,189],"0.1|2|0.8|EUR-AFR":[1.3645,0.1008,185],"0.1|2|0.8|EUR-ASN":[1.0439,0.0848,191],"0.1|2|0.9|AFR-ASN":[0.7481,0.0539,189],"0.1|2|0.9|AFR-EUR":[0.7903,0.0541,192],"0.1|2|0.9|ASN-AFR":[1.4351,0.1074,182],"0.1|2|0.9|ASN-EUR":[1.1355,0.0885,191],"0.1|2|0.9|EUR-AFR":[1.3334,0.0896,186],"0.1|2|0.9|EUR-ASN":[0.9797,0.0873,189],"0.1|5|0.1|AFR-ASN":[0.8121,0.0594,193],"0.1|5|0.1|AFR-EUR":[0.8584,0.0563,187],"0.1|5|0.1|ASN-AFR":[1.5017,0.1067,190],"0.1|5|0.1|ASN-EUR":[1.1389,0.088,190],"0.1|5|0.1|EUR-AFR":[1.2538,0.0932,187],"0.1|5|0.1|EUR-ASN":[1.0761,0.0811,189],"0.1|5|0.2|AFR-ASN":[0.8511,0.0668,186],"0.1|5|0.2|AFR-EUR":[0.9498,0.0676,194],"0.1|5|0.2|ASN-AFR":[1.2529,0.0924,184],"0.1|5|0.2|ASN-EUR":[1.0675,0.0796,184],"0.1|5|0.2|EUR-AFR":[1.1465,0.0787,184],"0.1|5|0.2|EUR-ASN":[0.9804,0.071,186],"0.1|5|0.3|AFR-ASN":[0.9134,0.0717,196],"0.1|5|0.3|AFR-EUR":[0.8375,0.0614,192],"0.1|5|0.3|ASN-AFR":[1.4998,0.125,189],"0.1|5|0.3|ASN-EUR":[1.1199,0.082,190],"0.1|5|0.3|EUR-AFR":[1.2697,0.087,188],"0.1|5|0.3|EUR-ASN":[0.984,0.0737,190],"0.1|5|0.4|AFR-ASN":[0.7601,0.055,191],"0.1|5|0.4|AFR-EUR":[0.8355,0.0597,190],"0.1|5|0.4|ASN-AFR":[1.4091,0.1022,187],"0.1|5|0.4|ASN-EUR":[1.208,0.0895,192],"0.1|5|0.4|EUR-AFR":[1.4167,0.1052,188],"0.1|5|0.4|EUR-ASN":[1.0484,0.0896,188],"0.1|5|0.5|AFR-ASN":[0.7856,0.0589,189],"0.1|5|0.5|AFR-EUR":[0.7783,0.0532,184],"0.1|5|0.5|ASN-AFR":[1.5014,0.1034,188],"0.1|5|0.5|ASN-EUR":[1.2459,0.0995,191],"0.1|5|0.5|EUR-AFR":[1.3858,0.0924,182],"0.1|5|0.5|EUR-ASN":[0.99,0.0781,194],"0.1|5|0.6|AFR-ASN":[0.7625,0.0534,185],"0.1|5|0.6|AFR-EUR":[0.7988,0.0589,196],"0.1|5|0.6|ASN-AFR":[1.4865,0.1058,185],"0.1|5|0.6|ASN-EUR":[1.1754,0.0876,191],"0.1|5|0.6|EUR-AFR":[1.4765,0.1092,191],"0.1|5|0.6|EUR-ASN":[0.9984,0.0767,187],"0.1|5|0.7|AFR-ASN":[0.6931,0.0491,192],"0.1|5|0.7|AFR-EUR":[0.7306,0.0542,189],"0.1|5|0.7|ASN-AFR":[1.715,0.1294,190],"0.1|5|0.7|ASN-EUR":[1.1433,0.0872,189],"0.1|5|0.7|EUR-AFR":[1.4617,0.1072,185],"0.1|5|0.7|EUR-ASN":[0.9275,0.0673,187],"0.1|5|0.8|AFR-ASN":[0.5825,0.0392,186],"0.1|5|0.8|AFR-EUR":[0.749,0.0548,192],"0.1|5|0.8|ASN-AFR":[1.6821,0.1333,183],"0.1|5|0.8|ASN-EUR":[1.2914,0.0999,192],"0.1|5|0.8|EUR-AFR":[1.5297,0.1067,193],"0.1|5|0.8|EUR-ASN":[1.011,0.0753,194],"0.1|5|0.9|AFR-ASN":[0.5737,0.0394,193],"0.1|5|0.9|AFR-EUR":[0.6126,0.0411,187],"0.1|5|0.9|ASN-AFR":[1.9572,0.1204,180],"0.1|5|0.9|ASN-EUR":[1.1954,0.0958,187],"0.1|5|0.9|EUR-AFR":[1.7067,0.1127,189],"0.1|5|0.9|EUR-ASN":[0.9798,0.0758,189],"0.1|10|0.1|AFR-ASN":[0.8286,0.0612,188],"0.1|10|0.1|AFR-EUR":[0.8979,0.0639,194],"0.1|10|0.1|ASN-AFR":[1.3453,0.097,186],"0.1|10|0.1|ASN-EUR":[1.1431,0.0875,184],"0.1|10|0.1|EUR-AFR":[1.3732,0.1049,193],"0.1|10|0.1|EUR-ASN":[1.0885,0.0869,193],"0.1|10|0.2|AFR-ASN":[0.729,0.0531,193],"0.1|10|0.2|AFR-EUR":[0.8076,0.0606,192],"0.1|10|0.2|ASN-AFR":[1.4804,0.1057,192],"0.1|10|0.2|ASN-EUR":[1.2512,0.0874,185],"0.1|10|0.2|EUR-AFR":[1.3663,0.0805,187],"0.1|10|0.2|EUR-ASN":[0.9395,0.0668,184],"0.1|10|0.3|AFR-ASN":[0.7259,0.0592,189],"0.1|10|0.3|AFR-EUR":[0.7578,0.0496,185],"0.1|10|0.3|ASN-AFR":[1.5443,0.0964,183],"0.1|10|0.3|ASN-EUR":[1.0709,0.0761,183],"0.1|10|0.3|EUR-AFR":[1.4334,0.1014,182],"0.1|10|0.3|EUR-ASN":[0.9602,0.0748,190],"0.1|10|0.4|AFR-ASN":[0.6583,0.043,192],"0.1|10|0.4|AFR-EUR":[0.6435,0.0422,189],"0.1|10|0.4|ASN-AFR":[1.7759,0.1341,187],"0.1|10|0.4|ASN-EUR":[1.2056,0.0987,189],"0.1|10|0.4|EUR-AFR":[1.5896,0.1095,190],"0.1|10|0.4|EUR-ASN":[0.9194,0.0781,189],"0.1|10|0.5|AFR-ASN":[0.653,0.0473,192],"0.1|10|0.5|AFR-EUR":[0.689,0.0482,192],"0.1|10|0.5|ASN-AFR":[1.6538,0.1166,187],"0.1|10|0.5|ASN-EUR":[1.1621,0.0841,187],"0.1|10|0.5|EUR-AFR":[1.4983,0.0897,186],"0.1|10|0.5|EUR-ASN":[0.9553,0.0693,193],"0.1|10|0.6|AFR-ASN":[0.5426,0.036,187],"0.1|10|0.6|AFR-EUR":[0.633,0.0389,193],"0.1|10|0.6|ASN-AFR":[1.9185,0.1493,184],"0.1|10|0.6|ASN-EUR":[1.1725,0.0893,185],"0.1|10|0.6|EUR-AFR":[1.6731,0.1089,184],"0.1|10|0.6|EUR-ASN":[0.876,0.0683,187],"0.1|10|0.7|AFR-ASN":[0.5299,0.0363,190],"0.1|10|0.7|AFR-EUR":[0.6522,0.0456,195],"0.1|10|0.7|ASN-AFR":[2.1632,0.1712,190],"0.1|10|0.7|ASN-EUR":[1.2392,0.1082,189],"0.1|10|0.7|EUR-AFR":[1.8023,0.1261,187],"0.1|10|0.7|EUR-ASN":[1.0559,0.0856,194],"0.1|10|0.8|AFR-ASN":[0.5073,0.0408,192],"0.1|10|0.8|AFR-EUR":[0.5805,0.0381,193],"0.1|10|0.8|ASN-AFR":[2.0792,0.1368,187],"0.1|10|0.8|ASN-EUR":[1.2335,0.1023,183],"0.1|10|0.8|EUR-AFR":[1.7439,0.1162,185],"0.1|10|0.8|EUR-ASN":[0.8888,0.0716,186],"0.1|10|0.9|AFR-ASN":[0.4959,0.0376,193],"0.1|10|0.9|AFR-EUR":[0.5284,0.0363,191],"0.1|10|0.9|ASN-AFR":[2.3131,0.1659,186],"0.1|10|0.9|ASN-EUR":[1.3013,0.1129,184],"0.1|10|0.9|EUR-AFR":[1.9586,0.1375,183],"0.1|10|0.9|EUR-ASN":[0.9098,0.0699,191],"0.4|1|0.1|AFR-ASN":[0.8756,0.0238,199],"0.4|1|0.1|AFR-EUR":[0.9336,0.0245,196],"0.4|1|0.1|ASN-AFR":[1.1694,0.03,194],"0.4|1|0.1|ASN-EUR":[1.063,0.0281,199],"0.4|1|0.1|EUR-AFR":[1.1115,0.0281,200],"0.4|1|0.1|EUR-ASN":[0.9745,0.0299,198],"0.4|1|0.2|AFR-ASN":[0.8482,0.0236,198],"0.4|1|0.2|AFR-EUR":[0.9102,0.0241,197],"0.4|1|0.2|ASN-AFR":[1.1487,0.0304,197],"0.4|1|0.2|ASN-EUR":[1.0531,0.0292,198],"0.4|1|0.2|EUR-AFR":[1.1074,0.0277,194],"0.4|1|0.2|EUR-ASN":[0.9748,0.0266,197],"0.4|1|0.3|AFR-ASN":[0.8781,0.0223,196],"0.4|1|0.3|AFR-EUR":[0.9098,0.0241,196],"0.4|1|0.3|ASN-AFR":[1.1366,0.0315,198],"0.4|1|0.3|ASN-EUR":[1.036,0.0275,195],"0.4|1|0.3|EUR-AFR":[1.1056,0.0279,196],"0.4|1|0.3|EUR-ASN":[0.9632,0.0258,195],"0.4|1|0.4|AFR-ASN":[0.8643,0.0216,197],"0.4|1|0.4|AFR-EUR":[0.9223,0.023,199],"0.4|1|0.4|ASN-AFR":[1.1431,0.0253,196],"0.4|1|0.4|ASN-EUR":[1.0451,0.0287,194],"0.4|1|0.4|EUR-AFR":[1.0883,0.0293,198],"0.4|1|0.4|EUR-ASN":[0.9709,0.0267,199],"0.4|1|0.5|AFR-ASN":[0.8687,0.0238,194],"0.4|1|0.5|AFR-EUR":[0.89,0.0244,197],"0.4|1|0.5|ASN-AFR":[1.1392,0.0307,196],"0.4|1|0.5|ASN-EUR":[1.0359,0.0273,197],"0.4|1|0.5|EUR-AFR":[1.1433,0.0314,195],"0.4|1|0.5|EUR-ASN":[0.9691,0.0302,198],"0.4|1|0.6|AFR-ASN":[0.8969,0.0255,197],"0.4|1|0.6|AFR-EUR":[0.901,0.0205,193],"0.4|1|0.6|ASN-AFR":[1.1483,0.0299,196],"0.4|1|0.6|ASN-EUR":[1.0404,0.0264,197],"0.4|1|0.6|EUR-AFR":[1.1334,0.0312,195],"0.4|1|0.6|EUR-ASN":[0.9778,0.0267,197],"0.4|1|0.7|AFR-ASN":[0.8754,0.0241,198],"0.4|1|0.7|AFR-EUR":[0.9135,0.0227,196],"0.4|1|0.7|ASN-AFR":[1.1782,0.0311,196],"0.4|1|0.7|ASN-EUR":[1.0581,0.0286,198],"0.4|1|0.7|EUR-AFR":[1.118,0.0288,197],"0.4|1|0.7|EUR-ASN":[0.9569,0.0271,195],"0.4|1|0.8|AFR-ASN":[0.8714,0.0233,196],"0.4|1|0.8|AFR-EUR":[0.8887,0.0193,188],"0.4|1|0.8|ASN-AFR":[1.1803,0.0304,195],"0.4|1|0.8|ASN-EUR":[1.0423,0.0299,195],"0.4|1|0.8|EUR-AFR":[1.1405,0.0312,196],"0.4|1|0.8|EUR-ASN":[0.9594,0.0294,197],"0.4|1|0.9|AFR-ASN":[0.8571,0.0247,198],"0.4|1|0.9|AFR-EUR":[0.8874,0.0253,200],"0.4|1|0.9|ASN-AFR":[1.226,0.0354,197],"0.4|1|0.9|ASN-EUR":[1.0524,0.0276,193],"0.4|1|0.9|EUR-AFR":[1.1656,0.0317,196],"0.4|1|0.9|EUR-ASN":[0.9383,0.027,200],"0.4|2|0.1|AFR-ASN":[0.8904,0.0226,197],"0.4|2|0.1|AFR-EUR":[0.9069,0.0231,196],"0.4|2|0.1|ASN-AFR":[1.1468,0.0315,198],"0.4|2|0.1|ASN-EUR":[1.0638,0.0293,197],"0.4|2|0.1|EUR-AFR":[1.104,0.0286,197],"0.4|2|0.1|EUR-ASN":[0.9595,0.0276,195],"0.4|2|0.2|AFR-ASN":[0.8644,0.022,199],"0.4|2|0.2|AFR-EUR":[0.923,0.0253,196],"0.4|2|0.2|ASN-AFR":[1.163,0.0308,198],"0.4|2|0.2|ASN-EUR":[1.0725,0.0315,193],"0.4|2|0.2|EUR-AFR":[1.0829,0.027,194],"0.4|2|0.2|EUR-ASN":[0.9438,0.0244,198],"0.4|2|0.3|AFR-ASN":[0.863,0.0192,190],"0.4|2|0.3|AFR-EUR":[0.8954,0.0206,195],"0.4|2|0.3|ASN-AFR":[1.2217,0.0341,197],"0.4|2|0.3|ASN-EUR":[1.0507,0.0276,194],"0.4|2|0.3|EUR-AFR":[1.1131,0.0277,193],"0.4|2|0.3|EUR-ASN":[0.9385,0.0266,196],"0.4|2|0.4|AFR-ASN":[0.8596,0.0227,193],"0.4|2|0.4|AFR-EUR":[0.9294,0.0238,198],"0.4|2|0.4|ASN-AFR":[1.1719,0.0326,199],"0.4|2|0.4|ASN-EUR":[1.0829,0.0294,195],"0.4|2|0.4|EUR-AFR":[1.0974,0.0258,194],"0.4|2|0.4|EUR-ASN":[0.9609,0.0287,195],"0.4|2|0.5|AFR-ASN":[0.8954,0.0257,200],"0.4|2|0.5|AFR-EUR":[0.9139,0.024,197],"0.4|2|0.5|ASN-AFR":[1.1698,0.0316,196],"0.4|2|0.5|ASN-EUR":[1.0609,0.0284,194],"0.4|2|0.5|EUR-AFR":[1.1234,0.0294,198],"0.4|2|0.5|EUR-ASN":[0.9438,0.0275,193],"0.4|2|0.6|AFR-ASN":[0.8398,0.0201,197],"0.4|2|0.6|AFR-EUR":[0.8769,0.0216,198],"0.4|2|0.6|ASN-AFR":[1.207,0.0323,194],"0.4|2|0.6|ASN-EUR":[1.05,0.0284,197],"0.4|2|0.6|EUR-AFR":[1.1185,0.0264,195],"0.4|2|0.6|EUR-ASN":[0.9607,0.0272,199],"0.4|2|0.7|AFR-ASN":[0.8549,0.0236,198],"0.4|2|0.7|AFR-EUR":[0.8902,0.0223,196],"0.4|2|0.7|ASN-AFR":[1.1992,0.0323,199],"0.4|2|0.7|ASN-EUR":[1.0509,0.0269,197],"0.4|2|0.7|EUR-AFR":[1.1143,0.0273,192],"0.4|2|0.7|EUR-ASN":[0.9745,0.0307,198],"0.4|2|0.8|AFR-ASN":[0.8472,0.0241,198],"0.4|2|0.8|AFR-EUR":[0.8757,0.0232,198],"0.4|2|0.8|ASN-AFR":[1.232,0.0319,193],"0.4|2|0.8|ASN-EUR":[1.0735,0.0297,197],"0.4|2|0.8|EUR-AFR":[1.1588,0.0283,192],"0.4|2|0.8|EUR-ASN":[0.9461,0.0268,196],"0.4|2|0.9|AFR-ASN":[0.7993,0.0227,200],"0.4|2|0.9|AFR-EUR":[0.8556,0.0217,199],"0.4|2|0.9|ASN-AFR":[1.267,0.0303,191],"0.4|2|0.9|ASN-EUR":[1.0876,0.0284,191],"0.4|2|0.9|EUR-AFR":[1.1793,0.0282,195],"0.4|2|0.9|EUR-ASN":[0.9427,0.0273,197],"0.4|5|0.1|AFR-ASN":[0.8914,0.0251,200],"0.4|5|0.1|AFR-EUR":[0.9007,0.0228,198],"0.4|5|0.1|ASN-AFR":[1.1778,0.0316,196],"0.4|5|0.1|ASN-EUR":[1.0714,0.03,197],"0.4|5|0.1|EUR-AFR":[1.1481,0.0284,197],"0.4|5|0.1|EUR-ASN":[0.9477,0.0272,197],"0.4|5|0.2|AFR-ASN":[0.8544,0.0241,198],"0.4|5|0.2|AFR-EUR":[0.8978,0.0198,197],"0.4|5|0.2|ASN-AFR":[1.2017,0.0321,198],"0.4|5|0.2|ASN-EUR":[1.0599,0.0297,197],"0.4|5|0.2|EUR-AFR":[1.1074,0.0243,192],"0.4|5|0.2|EUR-ASN":[0.9713,0.0276,197],"0.4|5|0.3|AFR-ASN":[0.8267,0.0212,193],"0.4|5|0.3|AFR-EUR":[0.8863,0.0214,198],"0.4|5|0.3|ASN-AFR":[1.2082,0.0306,195],"0.4|5|0.3|ASN-EUR":[1.0528,0.0307,196],"0.4|5|0.3|EUR-AFR":[1.1341,0.0263,191],"0.4|5|0.3|EUR-ASN":[0.954,0.026,199],"0.4|5|0.4|AFR-ASN":[0.8282,0.022,199],"0.4|5|0.4|AFR-EUR":[0.8741,0.0223,197],"0.4|5|0.4|ASN-AFR":[1.2395,0.031,195],"0.4|5|0.4|ASN-EUR":[1.0658,0.0308,198],"0.4|5|0.4|EUR-AFR":[1.1695,0.0263,198],"0.4|5|0.4|EUR-ASN":[0.944,0.0243,197],"0.4|5|0.5|AFR-ASN":[0.8333,0.0213,197],"0.4|5|0.5|AFR-EUR":[0.8698,0.0211,200],"0.4|5|0.5|ASN-AFR":[1.225,0.0321,195],"0.4|5|0.5|ASN-EUR":[1.0534,0.031,198],"0.4|5|0.5|EUR-AFR":[1.1924,0.0299,197],"0.4|5|0.5|EUR-ASN":[0.9801,0.03,196],"0.4|5|0.6|AFR-ASN":[0.7824,0.0205,197],"0.4|5|0.6|AFR-EUR":[0.8391,0.0212,199],"0.4|5|0.6|ASN-AFR":[1.3178,0.0361,198],"0.4|5|0.6|ASN-EUR":[1.0698,0.0288,193],"0.4|5|0.6|EUR-AFR":[1.2023,0.0339,192],"0.4|5|0.6|EUR-ASN":[0.9341,0.0238,196],"0.4|5|0.7|AFR-ASN":[0.7664,0.0195,196],"0.4|5|0.7|AFR-EUR":[0.8073,0.0199,196],"0.4|5|0.7|ASN-AFR":[1.3455,0.0346,192],"0.4|5|0.7|ASN-EUR":[1.0781,0.0305,199],"0.4|5|0.7|EUR-AFR":[1.2157,0.0298,197],"0.4|5|0.7|EUR-ASN":[0.9638,0.0278,200],"0.4|5|0.8|AFR-ASN":[0.7149,0.0189,197],"0.4|5|0.8|AFR-EUR":[0.7719,0.0196,197],"0.4|5|0.8|ASN-AFR":[1.4234,0.0331,193],"0.4|5|0.8|ASN-EUR":[1.1076,0.0304,198],"0.4|5|0.8|EUR-AFR":[1.2959,0.0304,194],"0.4|5|0.8|EUR-ASN":[0.9297,0.0226,196],"0.4|5|0.9|AFR-ASN":[0.6592,0.0183,200],"0.4|5|0.9|AFR-EUR":[0.7272,0.0177,198],"0.4|5|0.9|ASN-AFR":[1.5441,0.0452,196],"0.4|5|0.9|ASN-EUR":[1.1084,0.0333,197],"0.4|5|0.9|EUR-AFR":[1.3667,0.0314,196],"0.4|5|0.9|EUR-ASN":[0.9329,0.0296,197],"0.4|10|0.1|AFR-ASN":[0.8633,0.0231,200],"0.4|10|0.1|AFR-EUR":[0.8934,0.0235,197],"0.4|10|0.1|ASN-AFR":[1.1679,0.0315,196],"0.4|10|0.1|ASN-EUR":[1.0587,0.0287,196],"0.4|10|0.1|EUR-AFR":[1.1708,0.0299,197],"0.4|10|0.1|EUR-ASN":[0.9717,0.0278,197],"0.4|10|0.2|AFR-ASN":[0.8204,0.0233,199],"0.4|10|0.2|AFR-EUR":[0.8545,0.0219,197],"0.4|10|0.2|ASN-AFR":[1.2328,0.0338,190],"0.4|10|0.2|ASN-EUR":[1.0614,0.0352,198],"0.4|10|0.2|EUR-AFR":[1.2257,0.0322,196],"0.4|10|0.2|EUR-ASN":[0.9792,0.0309,197],"0.4|10|0.3|AFR-ASN":[0.7892,0.0202,196],"0.4|10|0.3|AFR-EUR":[0.8183,0.0193,198],"0.4|10|0.3|ASN-AFR":[1.3297,0.0376,199],"0.4|10|0.3|ASN-EUR":[1.074,0.0288,193],"0.4|10|0.3|EUR-AFR":[1.2143,0.0319,191],"0.4|10|0.3|EUR-ASN":[0.9457,0.0262,196],"0.4|10|0.4|AFR-ASN":[0.7479,0.0187,194],"0.4|10|0.4|AFR-EUR":[0.796,0.0206,199],"0.4|10|0.4|ASN-AFR":[1.37,0.0391,198],"0.4|10|0.4|ASN-EUR":[1.0739,0.0327,197],"0.4|10|0.4|EUR-AFR":[1.2725,0.0348,194],"0.4|10|0.4|EUR-ASN":[0.9773,0.0274,199],"0.4|10|0.5|AFR-ASN":[0.7087,0.0202,199],"0.4|10|0.5|AFR-EUR":[0.7749,0.0182,197],"0.4|10|0.5|ASN-AFR":[1.4353,0.0384,194],"0.4|10|0.5|ASN-EUR":[1.0986,0.0368,195],"0.4|10|0.5|EUR-AFR":[1.2962,0.0301,193],"0.4|10|0.5|EUR-ASN":[0.9391,0.0291,199],"0.4|10|0.6|AFR-ASN":[0.6927,0.02,200],"0.4|10|0.6|AFR-EUR":[0.7498,0.0183,196],"0.4|10|0.6|ASN-AFR":[1.4722,0.0411,195],"0.4|10|0.6|ASN-EUR":[1.1171,0.0336,196],"0.4|10|0.6|EUR-AFR":[1.3529,0.0322,196],"0.4|10|0.6|EUR-ASN":[0.9168,0.028,192],"0.4|10|0.7|AFR-ASN":[0.667,0.0176,195],"0.4|10|0.7|AFR-EUR":[0.7456,0.0202,199],"0.4|10|0.7|ASN-AFR":[1.5135,0.0421,193],"0.4|10|0.7|ASN-EUR":[1.1462,0.036,198],"0.4|10|0.7|EUR-AFR":[1.3783,0.035,194],"0.4|10|0.7|EUR-ASN":[0.936,0.0303,195],"0.4|10|0.8|AFR-ASN":[0.6535,0.0178,197],"0.4|10|0.8|AFR-EUR":[0.7186,0.0162,195],"0.4|10|0.8|ASN-AFR":[1.6085,0.0438,193],"0.4|10|0.8|ASN-EUR":[1.1311,0.0364,195],"0.4|10|0.8|EUR-AFR":[1.3871,0.0341,195],"0.4|10|0.8|EUR-ASN":[0.9047,0.0289,196],"0.4|10|0.9|AFR-ASN":[0.6235,0.0172,197],"0.4|10|0.9|AFR-EUR":[0.7118,0.0178,197],"0.4|10|0.9|ASN-AFR":[1.5914,0.0457,194],"0.4|10|0.9|ASN-EUR":[1.1335,0.0325,194],"0.4|10|0.9|EUR-AFR":[1.4801,0.0361,197],"0.4|10|0.9|EUR-ASN":[0.8982,0.029,198],"0.8|1|0.1|AFR-ASN":[0.9577,0.0063,199],"0.8|1|0.1|AFR-EUR":[0.9725,0.0059,198],"0.8|1|0.1|ASN-AFR":[1.0446,0.0067,196],"0.8|1|0.1|ASN-EUR":[1.0197,0.0071,199],"0.8|1|0.1|EUR-AFR":[1.0305,0.0065,195],"0.8|1|0.1|EUR-ASN":[0.9893,0.0069,197],"0.8|1|0.2|AFR-ASN":[0.9595,0.0057,198],"0.8|1|0.2|AFR-EUR":[0.9737,0.0058,199],"0.8|1|0.2|ASN-AFR":[1.0418,0.0063,198],"0.8|1|0.2|ASN-EUR":[1.0089,0.0066,198],"0.8|1|0.2|EUR-AFR":[1.027,0.0058,192],"0.8|1|0.2|EUR-ASN":[0.991,0.0063,198],"0.8|1|0.3|AFR-ASN":[0.959,0.0064,199],"0.8|1|0.3|AFR-EUR":[0.9709,0.0059,198],"0.8|1|0.3|ASN-AFR":[1.048,0.0068,197],"0.8|1|0.3|ASN-EUR":[1.0125,0.0066,197],"0.8|1|0.3|EUR-AFR":[1.0298,0.0068,200],"0.8|1|0.3|EUR-ASN":[0.9843,0.0067,197],"0.8|1|0.4|AFR-ASN":[0.9542,0.0068,199],"0.8|1|0.4|AFR-EUR":[0.9687,0.0056,199],"0.8|1|0.4|ASN-AFR":[1.0455,0.0063,199],"0.8|1|0.4|ASN-EUR":[1.0159,0.007,198],"0.8|1|0.4|EUR-AFR":[1.0377,0.006,198],"0.8|1|0.4|EUR-ASN":[0.9872,0.0062,194],"0.8|1|0.5|AFR-ASN":[0.9605,0.0064,199],"0.8|1|0.5|AFR-EUR":[0.971,0.0054,197],"0.8|1|0.5|ASN-AFR":[1.0504,0.0062,199],"0.8|1|0.5|ASN-EUR":[1.0186,0.0065,198],"0.8|1|0.5|EUR-AFR":[1.0367,0.0065,199],"0.8|1|0.5|EUR-ASN":[0.9839,0.0067,198],"0.8|1|0.6|AFR-ASN":[0.9508,0.0059,200],"0.8|1|0.6|AFR-EUR":[0.9698,0.006,198],"0.8|1|0.6|ASN-AFR":[1.0485,0.0069,197],"0.8|1|0.6|ASN-EUR":[1.007,0.0075,200],"0.8|1|0.6|EUR-AFR":[1.032,0.0061,199],"0.8|1|0.6|EUR-ASN":[0.988,0.0067,196],"0.8|1|0.7|AFR-ASN":[0.9527,0.0055,198],"0.8|1|0.7|AFR-EUR":[0.97,0.006,197],"0.8|1|0.7|ASN-AFR":[1.0443,0.0062,196],"0.8|1|0.7|ASN-EUR":[1.0158,0.0071,199],"0.8|1|0.7|EUR-AFR":[1.0359,0.0066,200],"0.8|1|0.7|EUR-ASN":[0.9855,0.0071,199],"0.8|1|0.8|AFR-ASN":[0.9523,0.0063,197],"0.8|1|0.8|AFR-EUR":[0.9683,0.0061,199],"0.8|1|0.8|ASN-AFR":[1.0578,0.0063,194],"0.8|1|0.8|ASN-EUR":[1.0186,0.0061,197],"0.8|1|0.8|EUR-AFR":[1.0338,0.007,200],"0.8|1|0.8|EUR-ASN":[0.984,0.0068,200],"0.8|1|0.9|AFR-ASN":[0.9373,0.0065,200],"0.8|1|0.9|AFR-EUR":[0.9554,0.0062,199],"0.8|1|0.9|ASN-AFR":[1.0587,0.0068,196],"0.8|1|0.9|ASN-EUR":[1.0213,0.0074,198],"0.8|1|0.9|EUR-AFR":[1.0411,0.0065,200],"0.8|1|0.9|EUR-ASN":[0.9759,0.0073,199],"0.8|2|0.1|AFR-ASN":[0.9534,0.0063,198],"0.8|2|0.1|AFR-EUR":[0.9704,0.006,200],"0.8|2|0.1|ASN-AFR":[1.0499,0.0064,200],"0.8|2|0.1|ASN-EUR":[1.0189,0.0061,197],"0.8|2|0.1|EUR-AFR":[1.0336,0.0062,199],"0.8|2|0.1|EUR-ASN":[0.9849,0.0067,199],"0.8|2|0.2|AFR-ASN":[0.9572,0.0063,197],"0.8|2|0.2|AFR-EUR":[0.9761,0.0057,197],"0.8|2|0.2|ASN-AFR":[1.052,0.0065,199],"0.8|2|0.2|ASN-EUR":[1.0174,0.0071,199],"0.8|2|0.2|EUR-AFR":[1.0293,0.0061,197],"0.8|2|0.2|EUR-ASN":[0.9882,0.0069,196],"0.8|2|0.3|AFR-ASN":[0.9599,0.0062,200],"0.8|2|0.3|AFR-EUR":[0.9708,0.0056,197],"0.8|2|0.3|ASN-AFR":[1.0505,0.0061,195],"0.8|2|0.3|ASN-EUR":[1.0143,0.0065,196],"0.8|2|0.3|EUR-AFR":[1.0347,0.0059,200],"0.8|2|0.3|EUR-ASN":[0.9891,0.0065,197],"0.8|2|0.4|AFR-ASN":[0.9553,0.0063,199],"0.8|2|0.4|AFR-EUR":[0.9709,0.006,198],"0.8|2|0.4|ASN-AFR":[1.0474,0.0064,199],"0.8|2|0.4|ASN-EUR":[1.0183,0.0071,198],"0.8|2|0.4|EUR-AFR":[1.0343,0.0063,198],"0.8|2|0.4|EUR-ASN":[0.9847,0.0069,198],"0.8|2|0.5|AFR-ASN":[0.9474,0.006,200],"0.8|2|0.5|AFR-EUR":[0.9667,0.0056,195],"0.8|2|0.5|ASN-AFR":[1.0553,0.0065,197],"0.8|2|0.5|ASN-EUR":[1.0218,0.0076,198],"0.8|2|0.5|EUR-AFR":[1.0345,0.0059,193],"0.8|2|0.5|EUR-ASN":[0.9811,0.0067,196],"0.8|2|0.6|AFR-ASN":[0.9552,0.006,200],"0.8|2|0.6|AFR-EUR":[0.9607,0.0058,198],"0.8|2|0.6|ASN-AFR":[1.0573,0.0067,200],"0.8|2|0.6|ASN-EUR":[1.0127,0.0061,195],"0.8|2|0.6|EUR-AFR":[1.039,0.0063,198],"0.8|2|0.6|EUR-ASN":[0.9869,0.0073,199],"0.8|2|0.7|AFR-ASN":[0.9514,0.0062,197],"0.8|2|0.7|AFR-EUR":[0.9634,0.0055,200],"0.8|2|0.7|ASN-AFR":[1.0575,0.007,199],"0.8|2|0.7|ASN-EUR":[1.0187,0.0062,194],"0.8|2|0.7|EUR-AFR":[1.0372,0.006,199],"0.8|2|0.7|EUR-ASN":[0.987,0.0067,196],"0.8|2|0.8|AFR-ASN":[0.938,0.006,199],"0.8|2|0.8|AFR-EUR":[0.955,0.0056,198],"0.8|2|0.8|ASN-AFR":[1.0648,0.0063,198],"0.8|2|0.8|ASN-EUR":[1.023,0.0071,199],"0.8|2|0.8|EUR-AFR":[1.0465,0.006,198],"0.8|2|0.8|EUR-ASN":[0.984,0.0065,199],"0.8|2|0.9|AFR-ASN":[0.9267,0.0058,193],"0.8|2|0.9|AFR-EUR":[0.9434,0.0059,199],"0.8|2|0.9|ASN-AFR":[1.0786,0.0076,199],"0.8|2|0.9|ASN-EUR":[1.0184,0.0081,197],"0.8|2|0.9|EUR-AFR":[1.057,0.0064,197],"0.8|2|0.9|EUR-ASN":[0.977,0.0072,199],"0.8|5|0.1|AFR-ASN":[0.9494,0.0063,199],"0.8|5|0.1|AFR-EUR":[0.9654,0.0057,198],"0.8|5|0.1|ASN-AFR":[1.0519,0.0066,198],"0.8|5|0.1|ASN-EUR":[1.0195,0.0068,199],"0.8|5|0.1|EUR-AFR":[1.0326,0.0058,197],"0.8|5|0.1|EUR-ASN":[0.9874,0.0063,196],"0.8|5|0.2|AFR-ASN":[0.9551,0.0054,190],"0.8|5|0.2|AFR-EUR":[0.968,0.0058,197],"0.8|5|0.2|ASN-AFR":[1.0518,0.0071,198],"0.8|5|0.2|ASN-EUR":[1.0209,0.0066,198],"0.8|5|0.2|EUR-AFR":[1.0383,0.0059,197],"0.8|5|0.2|EUR-ASN":[0.9859,0.0062,198],"0.8|5|0.3|AFR-ASN":[0.9431,0.006,199],"0.8|5|0.3|AFR-EUR":[0.9582,0.0054,199],"0.8|5|0.3|ASN-AFR":[1.0644,0.0065,200],"0.8|5|0.3|ASN-EUR":[1.0149,0.0061,190],"0.8|5|0.3|EUR-AFR":[1.0466,0.0061,197],"0.8|5|0.3|EUR-ASN":[0.9843,0.0065,196],"0.8|5|0.4|AFR-ASN":[0.9422,0.0061,198],"0.8|5|0.4|AFR-EUR":[0.9563,0.0052,200],"0.8|5|0.4|ASN-AFR":[1.0584,0.0065,196],"0.8|5|0.4|ASN-EUR":[1.017,0.0071,199],"0.8|5|0.4|EUR-AFR":[1.0478,0.0065,200],"0.8|5|0.4|EUR-ASN":[0.9892,0.0063,198],"0.8|5|0.5|AFR-ASN":[0.9352,0.0056,199],"0.8|5|0.5|AFR-EUR":[0.9474,0.0059,200],"0.8|5|0.5|ASN-AFR":[1.0767,0.0066,200],"0.8|5|0.5|ASN-EUR":[1.0208,0.0064,197],"0.8|5|0.5|EUR-AFR":[1.0573,0.0062,195],"0.8|5|0.5|EUR-ASN":[0.9819,0.0061,195],"0.8|5|0.6|AFR-ASN":[0.9234,0.0059,199],"0.8|5|0.6|AFR-EUR":[0.948,0.0062,199],"0.8|5|0.6|ASN-AFR":[1.0762,0.0065,193],"0.8|5|0.6|ASN-EUR":[1.0227,0.0067,197],"0.8|5|0.6|EUR-AFR":[1.0587,0.0059,199],"0.8|5|0.6|EUR-ASN":[0.9778,0.0063,198],"0.8|5|0.7|AFR-ASN":[0.9168,0.0062,198],"0.8|5|0.7|AFR-EUR":[0.9352,0.0051,195],"0.8|5|0.7|ASN-AFR":[1.0977,0.0067,199],"0.8|5|0.7|ASN-EUR":[1.0224,0.0071,197],"0.8|5|0.7|EUR-AFR":[1.0659,0.0062,199],"0.8|5|0.7|EUR-ASN":[0.9817,0.0073,199],"0.8|5|0.8|AFR-ASN":[0.8961,0.006,199],"0.8|5|0.8|AFR-EUR":[0.9268,0.0055,197],"0.8|5|0.8|ASN-AFR":[1.1134,0.0073,198],"0.8|5|0.8|ASN-EUR":[1.0243,0.0071,194],"0.8|5|0.8|EUR-AFR":[1.08,0.0059,199],"0.8|5|0.8|EUR-ASN":[0.9735,0.0071,200],"0.8|5|0.9|AFR-ASN":[0.8861,0.006,199],"0.8|5|0.9|AFR-EUR":[0.9112,0.0054,195],"0.8|5|0.9|ASN-AFR":[1.1301,0.0074,198],"0.8|5|0.9|ASN-EUR":[1.0254,0.0073,190],"0.8|5|0.9|EUR-AFR":[1.0995,0.0066,198],"0.8|5|0.9|EUR-ASN":[0.9752,0.0079,198],"0.8|10|0.1|AFR-ASN":[0.952,0.0053,197],"0.8|10|0.1|AFR-EUR":[0.9628,0.0056,199],"0.8|10|0.1|ASN-AFR":[1.0578,0.0067,200],"0.8|10|0.1|ASN-EUR":[1.0148,0.0062,197],"0.8|10|0.1|EUR-AFR":[1.0411,0.0062,195],"0.8|10|0.1|EUR-ASN":[0.9791,0.0064,198],"0.8|10|0.2|AFR-ASN":[0.9359,0.0064,197],"0.8|10|0.2|AFR-EUR":[0.9516,0.0055,195],"0.8|10|0.2|ASN-AFR":[1.0665,0.006,191],"0.8|10|0.2|ASN-EUR":[1.0177,0.0069,198],"0.8|10|0.2|EUR-AFR":[1.0485,0.0062,199],"0.8|10|0.2|EUR-ASN":[0.98,0.0072,199],"0.8|10|0.3|AFR-ASN":[0.925,0.0059,200],"0.8|10|0.3|AFR-EUR":[0.9436,0.0056,196],"0.8|10|0.3|ASN-AFR":[1.0817,0.0064,199],"0.8|10|0.3|ASN-EUR":[1.0252,0.0072,196],"0.8|10|0.3|EUR-AFR":[1.0629,0.0067,198],"0.8|10|0.3|EUR-ASN":[0.986,0.0064,192],"0.8|10|0.4|AFR-ASN":[0.9132,0.0059,198],"0.8|10|0.4|AFR-EUR":[0.9259,0.0054,197],"0.8|10|0.4|ASN-AFR":[1.0933,0.0067,195],"0.8|10|0.4|ASN-EUR":[1.0226,0.0066,193],"0.8|10|0.4|EUR-AFR":[1.0731,0.0063,198],"0.8|10|0.4|EUR-ASN":[0.983,0.0076,199],"0.8|10|0.5|AFR-ASN":[0.9055,0.0059,198],"0.8|10|0.5|AFR-EUR":[0.9305,0.0051,198],"0.8|10|0.5|ASN-AFR":[1.106,0.0073,198],"0.8|10|0.5|ASN-EUR":[1.0288,0.0081,195],"0.8|10|0.5|EUR-AFR":[1.0786,0.0066,198],"0.8|10|0.5|EUR-ASN":[0.9696,0.0073,196],"0.8|10|0.6|AFR-ASN":[0.8961,0.0053,195],"0.8|10|0.6|AFR-EUR":[0.9155,0.0051,199],"0.8|10|0.6|ASN-AFR":[1.1187,0.0077,200],"0.8|10|0.6|ASN-EUR":[1.02,0.0074,194],"0.8|10|0.6|EUR-AFR":[1.0949,0.0062,197],"0.8|10|0.6|EUR-ASN":[0.9701,0.0077,199],"0.8|10|0.7|AFR-ASN":[0.8861,0.0063,195],"0.8|10|0.7|AFR-EUR":[0.9109,0.0054,199],"0.8|10|0.7|ASN-AFR":[1.127,0.0078,194],"0.8|10|0.7|ASN-EUR":[1.0226,0.008,197],"0.8|10|0.7|EUR-AFR":[1.0963,0.006,199],"0.8|10|0.7|EUR-ASN":[0.9746,0.0085,198],"0.8|10|0.8|AFR-ASN":[0.8703,0.0064,198],"0.8|10|0.8|AFR-EUR":[0.9085,0.0056,198],"0.8|10|0.8|ASN-AFR":[1.1489,0.0081,195],"0.8|10|0.8|ASN-EUR":[1.0315,0.0078,197],"0.8|10|0.8|EUR-AFR":[1.1068,0.0067,199],"0.8|10|0.8|EUR-ASN":[0.962,0.0084,197],"0.8|10|0.9|AFR-ASN":[0.8664,0.0063,199],"0.8|10|0.9|AFR-EUR":[0.9011,0.0048,198],"0.8|10|0.9|ASN-AFR":[1.1655,0.0092,194],"0.8|10|0.9|ASN-EUR":[1.0478,0.0096,196],"0.8|10|0.9|EUR-AFR":[1.1137,0.0068,199],"0.8|10|0.9|EUR-ASN":[0.9629,0.009,196]},"decomp":{"0.1|2|0.1|EUR|common":0.0993,"0.1|2|0.1|EUR|rare":0.0003,"0.1|2|0.1|AFR|common":0.1156,"0.1|2|0.1|AFR|rare":0.0007,"0.1|2|0.1|ASN|common":0.0931,"0.1|2|0.1|ASN|rare":0.0003,"0.1|2|0.2|EUR|common":0.0993,"0.1|2|0.2|EUR|rare":0.0007,"0.1|2|0.2|AFR|common":0.1157,"0.1|2|0.2|AFR|rare":0.0016,"0.1|2|0.2|ASN|common":0.0926,"0.1|2|0.2|ASN|rare":0.0006,"0.1|2|0.3|EUR|common":0.0994,"0.1|2|0.3|EUR|rare":0.0013,"0.1|2|0.3|AFR|common":0.1145,"0.1|2|0.3|AFR|rare":0.0026,"0.1|2|0.3|ASN|common":0.0929,"0.1|2|0.3|ASN|rare":0.001,"0.1|2|0.4|EUR|common":0.0985,"0.1|2|0.4|EUR|rare":0.0019,"0.1|2|0.4|AFR|common":0.1138,"0.1|2|0.4|AFR|rare":0.0041,"0.1|2|0.4|ASN|common":0.0907,"0.1|2|0.4|ASN|rare":0.0016,"0.1|2|0.5|EUR|common":0.0977,"0.1|2|0.5|EUR|rare":0.0029,"0.1|2|0.5|AFR|common":0.1123,"0.1|2|0.5|AFR|rare":0.006,"0.1|2|0.5|ASN|common":0.0916,"0.1|2|0.5|ASN|rare":0.0023,"0.1|2|0.6|EUR|common":0.0957,"0.1|2|0.6|EUR|rare":0.0042,"0.1|2|0.6|AFR|common":0.1111,"0.1|2|0.6|AFR|rare":0.0091,"0.1|2|0.6|ASN|common":0.0892,"0.1|2|0.6|ASN|rare":0.0035,"0.1|2|0.7|EUR|common":0.0942,"0.1|2|0.7|EUR|rare":0.0064,"0.1|2|0.7|AFR|common":0.1087,"0.1|2|0.7|AFR|rare":0.0136,"0.1|2|0.7|ASN|common":0.0875,"0.1|2|0.7|ASN|rare":0.0053,"0.1|2|0.8|EUR|common":0.0895,"0.1|2|0.8|EUR|rare":0.0106,"0.1|2|0.8|AFR|common":0.1031,"0.1|2|0.8|AFR|rare":0.0225,"0.1|2|0.8|ASN|common":0.0836,"0.1|2|0.8|ASN|rare":0.0087,"0.1|2|0.9|EUR|common":0.0795,"0.1|2|0.9|EUR|rare":0.0207,"0.1|2|0.9|AFR|common":0.0905,"0.1|2|0.9|AFR|rare":0.044,"0.1|2|0.9|ASN|common":0.0743,"0.1|2|0.9|ASN|rare":0.0173,"0.1|5|0.1|EUR|common":0.0982,"0.1|5|0.1|EUR|rare":0.002,"0.1|5|0.1|AFR|common":0.1131,"0.1|5|0.1|AFR|rare":0.0042,"0.1|5|0.1|ASN|common":0.0915,"0.1|5|0.1|ASN|rare":0.0017,"0.1|5|0.2|EUR|common":0.0966,"0.1|5|0.2|EUR|rare":0.0043,"0.1|5|0.2|AFR|common":0.1112,"0.1|5|0.2|AFR|rare":0.0093,"0.1|5|0.2|ASN|common":0.0897,"0.1|5|0.2|ASN|rare":0.0035,"0.1|5|0.3|EUR|common":0.0928,"0.1|5|0.3|EUR|rare":0.0073,"0.1|5|0.3|AFR|common":0.1087,"0.1|5|0.3|AFR|rare":0.0153,"0.1|5|0.3|ASN|common":0.0877,"0.1|5|0.3|ASN|rare":0.0061,"0.1|5|0.4|EUR|common":0.0891,"0.1|5|0.4|EUR|rare":0.0107,"0.1|5|0.4|AFR|common":0.1031,"0.1|5|0.4|AFR|rare":0.0234,"0.1|5|0.4|ASN|common":0.0835,"0.1|5|0.4|ASN|rare":0.009,"0.1|5|0.5|EUR|common":0.0841,"0.1|5|0.5|EUR|rare":0.0157,"0.1|5|0.5|AFR|common":0.0974,"0.1|5|0.5|AFR|rare":0.0331,"0.1|5|0.5|ASN|common":0.0793,"0.1|5|0.5|ASN|rare":0.013,"0.1|5|0.6|EUR|common":0.0792,"0.1|5|0.6|EUR|rare":0.0216,"0.1|5|0.6|AFR|common":0.0894,"0.1|5|0.6|AFR|rare":0.0448,"0.1|5|0.6|ASN|common":0.0735,"0.1|5|0.6|ASN|rare":0.0177,"0.1|5|0.7|EUR|common":0.0708,"0.1|5|0.7|EUR|rare":0.0293,"0.1|5|0.7|AFR|common":0.0802,"0.1|5|0.7|AFR|rare":0.062,"0.1|5|0.7|ASN|common":0.0662,"0.1|5|0.7|ASN|rare":0.0249,"0.1|5|0.8|EUR|common":0.0584,"0.1|5|0.8|EUR|rare":0.0414,"0.1|5|0.8|AFR|common":0.0655,"0.1|5|0.8|AFR|rare":0.0874,"0.1|5|0.8|ASN|common":0.055,"0.1|5|0.8|ASN|rare":0.0354,"0.1|5|0.9|EUR|common":0.0386,"0.1|5|0.9|EUR|rare":0.0617,"0.1|5|0.9|AFR|common":0.0417,"0.1|5|0.9|AFR|rare":0.1268,"0.1|5|0.9|ASN|common":0.0366,"0.1|5|0.9|ASN|rare":0.0521,"0.1|10|0.1|EUR|common":0.0927,"0.1|10|0.1|EUR|rare":0.0071,"0.1|10|0.1|AFR|common":0.1068,"0.1|10|0.1|AFR|rare":0.0165,"0.1|10|0.1|ASN|common":0.0875,"0.1|10|0.1|ASN|rare":0.0061,"0.1|10|0.2|EUR|common":0.0854,"0.1|10|0.2|EUR|rare":0.015,"0.1|10|0.2|AFR|common":0.0974,"0.1|10|0.2|AFR|rare":0.0327,"0.1|10|0.2|ASN|common":0.0798,"0.1|10|0.2|ASN|rare":0.0125,"0.1|10|0.3|EUR|common":0.0775,"0.1|10|0.3|EUR|rare":0.0232,"0.1|10|0.3|AFR|common":0.0872,"0.1|10|0.3|AFR|rare":0.0506,"0.1|10|0.3|ASN|common":0.0721,"0.1|10|0.3|ASN|rare":0.0196,"0.1|10|0.4|EUR|common":0.0671,"0.1|10|0.4|EUR|rare":0.0333,"0.1|10|0.4|AFR|common":0.0759,"0.1|10|0.4|AFR|rare":0.068,"0.1|10|0.4|ASN|common":0.0631,"0.1|10|0.4|ASN|rare":0.0278,"0.1|10|0.5|EUR|common":0.0587,"0.1|10|0.5|EUR|rare":0.0414,"0.1|10|0.5|AFR|common":0.0655,"0.1|10|0.5|AFR|rare":0.0876,"0.1|10|0.5|ASN|common":0.0549,"0.1|10|0.5|ASN|rare":0.0356,"0.1|10|0.6|EUR|common":0.0474,"0.1|10|0.6|EUR|rare":0.0521,"0.1|10|0.6|AFR|common":0.0526,"0.1|10|0.6|AFR|rare":0.1065,"0.1|10|0.6|ASN|common":0.0447,"0.1|10|0.6|ASN|rare":0.0436,"0.1|10|0.7|EUR|common":0.0374,"0.1|10|0.7|EUR|rare":0.0629,"0.1|10|0.7|AFR|common":0.0408,"0.1|10|0.7|AFR|rare":0.1315,"0.1|10|0.7|ASN|common":0.0352,"0.1|10|0.7|ASN|rare":0.053,"0.1|10|0.8|EUR|common":0.0259,"0.1|10|0.8|EUR|rare":0.0745,"0.1|10|0.8|AFR|common":0.028,"0.1|10|0.8|AFR|rare":0.1484,"0.1|10|0.8|ASN|common":0.0243,"0.1|10|0.8|ASN|rare":0.0621,"0.1|10|0.9|EUR|common":0.0137,"0.1|10|0.9|EUR|rare":0.0863,"0.1|10|0.9|AFR|common":0.0145,"0.1|10|0.9|AFR|rare":0.1737,"0.1|10|0.9|ASN|common":0.013,"0.1|10|0.9|ASN|rare":0.0735,"0.8|2|0.1|EUR|common":0.7967,"0.8|2|0.1|EUR|rare":0.0025,"0.8|2|0.1|AFR|common":0.8198,"0.8|2|0.1|AFR|rare":0.0048,"0.8|2|0.1|ASN|common":0.785,"0.8|2|0.1|ASN|rare":0.0023,"0.8|2|0.2|EUR|common":0.7947,"0.8|2|0.2|EUR|rare":0.0058,"0.8|2|0.2|AFR|common":0.8163,"0.8|2|0.2|AFR|rare":0.0113,"0.8|2|0.2|ASN|common":0.7807,"0.8|2|0.2|ASN|rare":0.0049,"0.8|2|0.3|EUR|common":0.7897,"0.8|2|0.3|EUR|rare":0.0097,"0.8|2|0.3|AFR|common":0.8061,"0.8|2|0.3|AFR|rare":0.0185,"0.8|2|0.3|ASN|common":0.7783,"0.8|2|0.3|ASN|rare":0.0084,"0.8|2|0.4|EUR|common":0.786,"0.8|2|0.4|EUR|rare":0.0149,"0.8|2|0.4|AFR|common":0.8003,"0.8|2|0.4|AFR|rare":0.0282,"0.8|2|0.4|ASN|common":0.7749,"0.8|2|0.4|ASN|rare":0.0133,"0.8|2|0.5|EUR|common":0.779,"0.8|2|0.5|EUR|rare":0.0224,"0.8|2|0.5|AFR|common":0.7858,"0.8|2|0.5|AFR|rare":0.0422,"0.8|2|0.5|ASN|common":0.767,"0.8|2|0.5|ASN|rare":0.0198,"0.8|2|0.6|EUR|common":0.7673,"0.8|2|0.6|EUR|rare":0.0338,"0.8|2|0.6|AFR|common":0.7725,"0.8|2|0.6|AFR|rare":0.0631,"0.8|2|0.6|ASN|common":0.7566,"0.8|2|0.6|ASN|rare":0.0296,"0.8|2|0.7|EUR|common":0.7487,"0.8|2|0.7|EUR|rare":0.0509,"0.8|2|0.7|AFR|common":0.7372,"0.8|2|0.7|AFR|rare":0.0937,"0.8|2|0.7|ASN|common":0.7437,"0.8|2|0.7|ASN|rare":0.0447,"0.8|2|0.8|EUR|common":0.7145,"0.8|2|0.8|EUR|rare":0.0834,"0.8|2|0.8|AFR|common":0.6903,"0.8|2|0.8|AFR|rare":0.1483,"0.8|2|0.8|ASN|common":0.7139,"0.8|2|0.8|ASN|rare":0.0738,"0.8|2|0.9|EUR|common":0.6394,"0.8|2|0.9|EUR|rare":0.1623,"0.8|2|0.9|AFR|common":0.5708,"0.8|2|0.9|AFR|rare":0.2777,"0.8|2|0.9|ASN|common":0.6383,"0.8|2|0.9|ASN|rare":0.147,"0.8|5|0.1|EUR|common":0.785,"0.8|5|0.1|EUR|rare":0.0166,"0.8|5|0.1|AFR|common":0.7972,"0.8|5|0.1|AFR|rare":0.0289,"0.8|5|0.1|ASN|common":0.7702,"0.8|5|0.1|ASN|rare":0.0136,"0.8|5|0.2|EUR|common":0.7638,"0.8|5|0.2|EUR|rare":0.0345,"0.8|5|0.2|AFR|common":0.7663,"0.8|5|0.2|AFR|rare":0.0629,"0.8|5|0.2|ASN|common":0.758,"0.8|5|0.2|ASN|rare":0.0305,"0.8|5|0.3|EUR|common":0.7445,"0.8|5|0.3|EUR|rare":0.0583,"0.8|5|0.3|AFR|common":0.7325,"0.8|5|0.3|AFR|rare":0.104,"0.8|5|0.3|ASN|common":0.7346,"0.8|5|0.3|ASN|rare":0.0503,"0.8|5|0.4|EUR|common":0.717,"0.8|5|0.4|EUR|rare":0.0851,"0.8|5|0.4|AFR|common":0.6832,"0.8|5|0.4|AFR|rare":0.1552,"0.8|5|0.4|ASN|common":0.7109,"0.8|5|0.4|ASN|rare":0.0769,"0.8|5|0.5|EUR|common":0.6767,"0.8|5|0.5|EUR|rare":0.1218,"0.8|5|0.5|AFR|common":0.6349,"0.8|5|0.5|AFR|rare":0.2133,"0.8|5|0.5|ASN|common":0.6797,"0.8|5|0.5|ASN|rare":0.1066,"0.8|5|0.6|EUR|common":0.6297,"0.8|5|0.6|EUR|rare":0.173,"0.8|5|0.6|AFR|common":0.5668,"0.8|5|0.6|AFR|rare":0.282,"0.8|5|0.6|ASN|common":0.6352,"0.8|5|0.6|ASN|rare":0.152,"0.8|5|0.7|EUR|common":0.5635,"0.8|5|0.7|EUR|rare":0.2389,"0.8|5|0.7|AFR|common":0.4845,"0.8|5|0.7|AFR|rare":0.3764,"0.8|5|0.7|ASN|common":0.5688,"0.8|5|0.7|ASN|rare":0.2149,"0.8|5|0.8|EUR|common":0.4672,"0.8|5|0.8|EUR|rare":0.3325,"0.8|5|0.8|AFR|common":0.3753,"0.8|5|0.8|AFR|rare":0.4917,"0.8|5|0.8|ASN|common":0.4766,"0.8|5|0.8|ASN|rare":0.3012,"0.8|5|0.9|EUR|common":0.3069,"0.8|5|0.9|EUR|rare":0.4946,"0.8|5|0.9|AFR|common":0.2199,"0.8|5|0.9|AFR|rare":0.6593,"0.8|5|0.9|ASN|common":0.3197,"0.8|5|0.9|ASN|rare":0.4572,"0.8|10|0.1|EUR|common":0.7369,"0.8|10|0.1|EUR|rare":0.0611,"0.8|10|0.1|AFR|common":0.7258,"0.8|10|0.1|AFR|rare":0.1059,"0.8|10|0.1|ASN|common":0.7331,"0.8|10|0.1|ASN|rare":0.0537,"0.8|10|0.2|EUR|common":0.6743,"0.8|10|0.2|EUR|rare":0.1212,"0.8|10|0.2|AFR|common":0.6304,"0.8|10|0.2|AFR|rare":0.2155,"0.8|10|0.2|ASN|common":0.6766,"0.8|10|0.2|ASN|rare":0.1076,"0.8|10|0.3|EUR|common":0.613,"0.8|10|0.3|EUR|rare":0.1878,"0.8|10|0.3|AFR|common":0.5416,"0.8|10|0.3|AFR|rare":0.3088,"0.8|10|0.3|ASN|common":0.6193,"0.8|10|0.3|ASN|rare":0.167,"0.8|10|0.4|EUR|common":0.5384,"0.8|10|0.4|EUR|rare":0.2618,"0.8|10|0.4|AFR|common":0.449,"0.8|10|0.4|AFR|rare":0.406,"0.8|10|0.4|ASN|common":0.548,"0.8|10|0.4|ASN|rare":0.2304,"0.8|10|0.5|EUR|common":0.4683,"0.8|10|0.5|EUR|rare":0.3339,"0.8|10|0.5|AFR|common":0.3727,"0.8|10|0.5|AFR|rare":0.4932,"0.8|10|0.5|ASN|common":0.4736,"0.8|10|0.5|ASN|rare":0.3064,"0.8|10|0.6|EUR|common":0.3876,"0.8|10|0.6|EUR|rare":0.4143,"0.8|10|0.6|AFR|common":0.2953,"0.8|10|0.6|AFR|rare":0.5809,"0.8|10|0.6|ASN|common":0.4026,"0.8|10|0.6|ASN|rare":0.3732,"0.8|10|0.7|EUR|common":0.3,"0.8|10|0.7|EUR|rare":0.5005,"0.8|10|0.7|AFR|common":0.2144,"0.8|10|0.7|AFR|rare":0.6677,"0.8|10|0.7|ASN|common":0.3129,"0.8|10|0.7|ASN|rare":0.4623,"0.8|10|0.8|EUR|common":0.2064,"0.8|10|0.8|EUR|rare":0.5952,"0.8|10|0.8|AFR|common":0.1394,"0.8|10|0.8|AFR|rare":0.745,"0.8|10|0.8|ASN|common":0.2173,"0.8|10|0.8|ASN|rare":0.5505,"0.8|10|0.9|EUR|common":0.1087,"0.8|10|0.9|EUR|rare":0.692,"0.8|10|0.9|AFR|common":0.0678,"0.8|10|0.9|AFR|rare":0.8213,"0.8|10|0.9|ASN|common":0.1135,"0.8|10|0.9|ASN|rare":0.6593},"af":{"pooled":{"mean_maf":[0.1244,0.1101,0.1034],"mean_het":[0.0918,0.0777,0.072],"n_variants":383345},"everywhere":{"mean_maf":[0.2152,0.2398,0.2334],"mean_het":[0.1479,0.1621,0.158],"n_variants":144234},"common_class":{"maf":{"AFR":0.1244,"EUR":0.1101,"ASN":0.1034},"het":{"AFR":0.0918,"EUR":0.0777,"ASN":0.072},"n":383345},"rare_class":{"maf":{"AFR":0.0012,"EUR":0.0006,"ASN":0.0005},"het":{"AFR":0.0012,"EUR":0.0006,"ASN":0.0005},"n":2817430},"lost":{"EUR":{"common":20.02,"rare":41.4},"ASN":{"common":29.15,"rare":42.02}}},"pairs":["AFR-ASN","AFR-EUR","ASN-AFR","ASN-EUR","EUR-AFR","EUR-ASN"],"populations":["AFR","EUR","ASN"],"h2_levels":["0.1","0.4","0.8"],"ratios":[1,2,5,10],"fractions":[0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]}</script>
+<script>
+"use strict";
+/* ═══════════════════════════════════════════════════════════════════════════
+   The whole page is driven by one closed form and one bundle of stored
+   simulation results. Nothing is fetched at run time.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+const DATA = JSON.parse(document.getElementById('prs-data').textContent);
+const $ = id => document.getElementById(id);
+
+/* ── CORE:BEGIN ─────────────────────────────────────────────────────────────
+   The paper's closed form. verify.py extracts exactly this block and runs it
+   against an independent Python implementation, so nothing below may depend on
+   anything defined outside it.
+
+     PA = 2 sigma^2 Phibar / (2 sigma^2 Phibar + tau^2)          Eq (5) of Methods
+     T_{A->B} = PA_B / PA_A                                      Eq (1) of Results
+
+   Under Hardy-Weinberg equilibrium Phibar is 1/2, so PA reduces to the
+   narrow-sense heritability sigma^2 / (sigma^2 + tau^2) and T reduces to the
+   ratio of heritabilities.
+*/
+function predictionAccuracy(sigma2, phibar, tau2) {
+  if (!(sigma2 > 0) || !(phibar > 0) || !(tau2 > 0)) return NaN;
+  const genetic = 2 * sigma2 * phibar;
+  return genetic / (genetic + tau2);
+}
+function transferability(sA, pA, tA, sB, pB, tB) {
+  const paA = predictionAccuracy(sA, pA, tA);
+  const paB = predictionAccuracy(sB, pB, tB);
+  if (!(paA > 0)) return NaN;
+  return paB / paA;
+}
+function heritability(sigma2, tau2) {
+  if (!(sigma2 > 0) || !(tau2 > 0)) return NaN;
+  return sigma2 / (sigma2 + tau2);
+}
+/* ── CORE:END ────────────────────────────────────────────────────────────── */
+
+/* ── formatting ─────────────────────────────────────────────────────────── */
+const fmt = (v, p = 3) => (!Number.isFinite(v) ? '—' : v.toFixed(p));
+const clamp = (x, lo, hi) => Math.min(hi, Math.max(lo, x));
+const pct = v => (!Number.isFinite(v) ? '—' : (100 * v).toFixed(1) + '%');
+
+/* ── KaTeX with a graceful fallback ─────────────────────────────────────── */
+const mathCache = new Map();
+function mh(tex, display) {
+  const key = (display ? 'D:' : 'I:') + tex;
+  if (mathCache.has(key)) return mathCache.get(key);
+  let html;
+  if (typeof katex !== 'undefined') {
+    try {
+      html = katex.renderToString(tex, { displayMode: !!display, throwOnError: false });
+    } catch (e) { html = null; }
+  }
+  if (html == null) html = fallbackMath(tex);
+  mathCache.set(key, html);
+  return html;
+}
+/* Used when the stylesheet or script did not load. Deliberately covers only the
+   handful of symbols this page actually uses, so a silent wrong rendering is
+   not possible: anything unrecognised is left as written. */
+function fallbackMath(tex) {
+  const map = [
+    [/\\overline\{\\Phi\}/g, 'Φ̄'], [/\\bar\{\\Phi\}/g, 'Φ̄'],
+    [/\\sigma/g, 'σ'], [/\\tau/g, 'τ'], [/\\Phi/g, 'Φ'],
+    [/\\mathrm\{PA\}/g, 'PA'], [/\\operatorname\{PA\}/g, 'PA'],
+    [/\\to/g, '→'], [/\\cdot/g, '·'], [/\\times/g, '×'],
+    [/\\log/g, 'log'], [/\\frac\{([^{}]*)\}\{([^{}]*)\}/g, '($1)/($2)'],
+    [/\^2/g, '<sup>2</sup>'], [/\^\{2\}/g, '<sup>2</sup>'],
+    [/_A/g, '<sub>A</sub>'], [/_B/g, '<sub>B</sub>'],
+    [/_\{A\\to B\}/g, '<sub>A→B</sub>'],
+    [/[{}]/g, '']
+  ];
+  let out = tex;
+  for (const [re, rep] of map) out = out.replace(re, rep);
+  return '<span class="math-fallback">' + out + '</span>';
+}
+
+/* ── SVG helpers ────────────────────────────────────────────────────────── */
+const NS = 'http://www.w3.org/2000/svg';
+function el(tag, attrs, text) {
+  const node = document.createElementNS(NS, tag);
+  if (attrs) for (const k in attrs) if (attrs[k] != null) node.setAttribute(k, attrs[k]);
+  if (text != null) node.textContent = text;
+  return node;
+}
+function clearSvg(svg) {
+  // The <title> is the accessible name and must survive a redraw.
+  const keep = svg.querySelector('title');
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+  if (keep) svg.appendChild(keep);
+  return svg;
+}
+const cssVar = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+/* ── tooltip ────────────────────────────────────────────────────────────── */
+const tip = $('tooltip');
+function showTip(evt, html) {
+  tip.innerHTML = html;
+  tip.dataset.show = '1';
+  const box = tip.getBoundingClientRect();
+  let x = evt.clientX + 14, y = evt.clientY + 14;
+  if (x + box.width > window.innerWidth - 8) x = evt.clientX - box.width - 14;
+  if (y + box.height > window.innerHeight - 8) y = evt.clientY - box.height - 14;
+  tip.style.left = Math.max(8, x) + 'px';
+  tip.style.top = Math.max(8, y) + 'px';
+}
+const hideTip = () => { tip.dataset.show = '0'; };
+
+/* ═══ THEORY STATE ═════════════════════════════════════════════════════════
+   Sections 1 to 4 read one shared six-parameter state, so moving a slider in
+   section 1 moves the curves in section 3 and the map in section 4. The ranges
+   and the symmetric baseline are the ones the manuscript's Methods specify for
+   Figure 1b to 1d.
+   ═══════════════════════════════════════════════════════════════════════════ */
+const BASE = { sA: 0.3, pA: 0.6, tA: 1.0, sB: 0.3, pB: 0.6, tB: 1.0 };
+const theory = Object.assign({}, BASE);
+
+const VARS = {
+  sA: { pop: 'A', kind: 's', tex: '\\sigma^2_A', min: 0.1, max: 1.0, step: 0.005 },
+  pA: { pop: 'A', kind: 'p', tex: '\\overline{\\Phi}_A', min: 0.5, max: 1.0, step: 0.005 },
+  tA: { pop: 'A', kind: 't', tex: '\\tau^2_A', min: 0.3, max: 3.0, step: 0.01 },
+  sB: { pop: 'B', kind: 's', tex: '\\sigma^2_B', min: 0.1, max: 1.0, step: 0.005 },
+  pB: { pop: 'B', kind: 'p', tex: '\\overline{\\Phi}_B', min: 0.5, max: 1.0, step: 0.005 },
+  tB: { pop: 'B', kind: 't', tex: '\\tau^2_B', min: 0.3, max: 3.0, step: 0.01 }
+};
+const KIND = {
+  s: { name: 'additive genetic variance', blurb: 'How much of the trait is heritable. It is set by the causal effect sizes together with the allele frequencies, so demography enters here.' },
+  p: { name: 'average self-kinship', blurb: 'The chance an individual’s two alleles at a site are identical by descent, averaged over the sample. Exactly one half when the sample is unrelated and in Hardy–Weinberg equilibrium, and larger under inbreeding or structure.' },
+  t: { name: 'non-genetic variance', blurb: 'Everything that varies the trait and cannot be read from the genotype. No predictor built from genotype can touch it.' }
+};
+const popColour = pop => (pop === 'A' ? 'var(--c-disc)' : 'var(--c-targ)');
+const popName = pop => (pop === 'A' ? 'discovery, A' : 'target, B');
+
+const theoryListeners = [];
+const onTheory = fn => { theoryListeners.push(fn); };
+function setTheory(key, value) {
+  const v = VARS[key];
+  theory[key] = clamp(value, v.min, v.max);
+  syncTheoryInputs();
+  theoryListeners.forEach(fn => fn());
+}
+function setTheoryAll(obj) {
+  for (const k in obj) if (k in VARS) theory[k] = clamp(obj[k], VARS[k].min, VARS[k].max);
+  syncTheoryInputs();
+  theoryListeners.forEach(fn => fn());
+}
+
+const theoryInputs = [];
+/* One panel builder, reused by sections 1 to 4. `keys` chooses which of the six
+   sliders that section exposes. */
+function buildTheoryPanel(hostId, keys, opts) {
+  const host = $(hostId);
+  const o = opts || {};
+  let html = '<div class="panel-out"><div class="l">' + (o.outLabel || '') + '</div>' +
+             '<div class="v" id="' + hostId + '-out"></div>' +
+             '<div class="s" id="' + hostId + '-sub"></div></div>';
+  let lastPop = null;
+  for (const key of keys) {
+    const v = VARS[key], k = KIND[v.kind];
+    if (v.pop !== lastPop && keys.length > 3) {
+      html += '<div class="pop-head"><span class="bar" style="background:' + popColour(v.pop) + '"></span>' +
+              popName(v.pop) + '</div>';
+      lastPop = v.pop;
+    }
+    const rid = hostId + '-r-' + key, nid = hostId + '-n-' + key;
+    html += '<div class="row" style="--knob:' + popColour(v.pop) + '">' +
+      '<span class="sym"><span class="dot" style="background:' + popColour(v.pop) + '"></span>' +
+      '<span data-tex="' + v.tex + '"></span></span>' +
+      '<input type="range" id="' + rid + '" data-key="' + key + '" min="' + v.min + '" max="' + v.max +
+      '" step="' + v.step + '" value="' + theory[key] + '" aria-label="' + k.name + ' in the ' + popName(v.pop) + ' population">' +
+      '<input type="number" id="' + nid + '" data-key="' + key + '" step="' + v.step +
+      '" min="' + v.min + '" max="' + v.max + '" value="' + theory[key] + '" aria-label="' + k.name + ' in the ' + popName(v.pop) + ' population, typed">' +
+      '<span class="row-def">' + k.name + (o.defs ? '. ' + k.blurb : '') + '</span></div>';
+  }
+  if (o.reset !== false) {
+    html += '<div class="btn-row" style="margin-top:6px"><button type="button" data-reset="1">' +
+            'Reset to the paper’s baseline</button></div>';
+  }
+  host.innerHTML = html;
+
+  host.querySelectorAll('input[type=range], input[type=number]').forEach(inp => {
+    theoryInputs.push(inp);
+    inp.addEventListener('input', () => {
+      const val = parseFloat(inp.value);
+      if (Number.isFinite(val)) setTheory(inp.dataset.key, val);
+    });
+  });
+  const reset = host.querySelector('[data-reset]');
+  if (reset) reset.addEventListener('click', () => setTheoryAll(BASE));
+  host.querySelectorAll('[data-tex]').forEach(n => { n.innerHTML = mh(n.dataset.tex, false); });
+}
+function syncTheoryInputs() {
+  for (const inp of theoryInputs) {
+    const v = String(theory[inp.dataset.key]);
+    if (inp.value !== v) inp.value = v;
+  }
+}
+
+/* ═══ 01 · the ceiling in one population ══════════════════════════════════ */
+function drawSection1() {
+  const g = 2 * theory.sA * theory.pA, e = theory.tA, total = g + e;
+  const pa = predictionAccuracy(theory.sA, theory.pA, theory.tA);
+
+  $('panel-1-out').textContent = fmt(pa, 3);
+  $('panel-1-sub').innerHTML = 'of the phenotypic variance is genetically predictable';
+
+  const svg = clearSvg($('s1-bar'));
+  // y leaves room for the total-variance caption above the segment labels; the
+  // two collided when the bar sat higher.
+  const W = 720, x0 = 14, x1 = 706, y = 58, h = 46;
+  const wid = x1 - x0;
+  const gw = wid * (g / total);
+
+  svg.appendChild(el('rect', { x: x0, y, width: Math.max(gw, 0), height: h, rx: 4, fill: 'var(--c-gen)' }));
+  svg.appendChild(el('rect', { x: x0 + gw, y, width: Math.max(wid - gw, 0), height: h, rx: 4, fill: 'var(--c-env)' }));
+  svg.appendChild(el('rect', { x: x0, y, width: wid, height: h, rx: 4, fill: 'none', stroke: 'var(--border)' }));
+
+  const label = (x, anchor, top, bottom, colour) => {
+    svg.appendChild(el('text', { x, y: y - 12, 'text-anchor': anchor, fill: colour,
+      'font-size': 13, 'font-weight': 620 }, top));
+    svg.appendChild(el('text', { x, y: y + h + 19, 'text-anchor': anchor, fill: 'var(--text-secondary)',
+      'font-size': 12 }, bottom));
+  };
+  if (gw > 96) label(x0 + gw / 2, 'middle', 'genetic  ' + fmt(g, 3), pct(g / total) + ' of the variance', 'var(--c-gen)');
+  if (wid - gw > 96) label(x0 + gw + (wid - gw) / 2, 'middle', 'non-genetic  ' + fmt(e, 3), pct(e / total) + ' of the variance', 'var(--c-env)');
+
+  // The accuracy bracket beneath the genetic block.
+  const by = y + h + 40;
+  svg.appendChild(el('path', {
+    d: 'M' + x0 + ' ' + by + ' L' + x0 + ' ' + (by + 7) + ' L' + (x0 + gw) + ' ' + (by + 7) + ' L' + (x0 + gw) + ' ' + by,
+    fill: 'none', stroke: 'var(--c-T)', 'stroke-width': 1.6
+  }));
+  svg.appendChild(el('text', { x: x0 + gw / 2, y: by + 27, 'text-anchor': 'middle', fill: 'var(--c-T)',
+    'font-size': 14, 'font-weight': 650 }, 'prediction accuracy = ' + fmt(pa, 3)));
+  svg.appendChild(el('text', { x: x0, y: 20, fill: 'var(--text-muted)', 'font-size': 12 },
+    'total phenotypic variance = ' + fmt(total, 3)));
+
+  $('s1-calc').innerHTML =
+    '<div class="r">genetic part &nbsp;' + mh('2\\sigma^2_A\\overline{\\Phi}_A') + ' &nbsp;=&nbsp; 2 &times; ' +
+      fmt(theory.sA, 3) + ' &times; ' + fmt(theory.pA, 3) + ' = <b>' + fmt(g, 3) + '</b></div>' +
+    '<div class="r">non-genetic part &nbsp;' + mh('\\tau^2_A') + ' &nbsp;=&nbsp; <b>' + fmt(e, 3) + '</b></div>' +
+    '<div class="r tot">' + mh('\\mathrm{PA}_A') + ' = ' + fmt(g, 3) + ' / (' + fmt(g, 3) + ' + ' + fmt(e, 3) +
+      ') = <b>' + fmt(pa, 3) + '</b></div>';
+
+  const atHWE = Math.abs(theory.pA - 0.5) < 1e-9;
+  const h2 = heritability(theory.sA, theory.tA);
+  $('s1-hwe-pill').textContent = atHWE
+    ? 'at Hardy–Weinberg: accuracy ' + fmt(pa, 3) + ' equals heritability ' + fmt(h2, 3)
+    : 'currently ' + fmt(theory.pA, 3) + ', above one half, so accuracy ' + fmt(pa, 3) +
+      ' exceeds the heritability ' + fmt(h2, 3);
+  $('s1-hwe-btn').disabled = atHWE;
+}
+
+/* ═══ 02 · transferability as a ratio ═════════════════════════════════════ */
+function drawSection2() {
+  const paA = predictionAccuracy(theory.sA, theory.pA, theory.tA);
+  const paB = predictionAccuracy(theory.sB, theory.pB, theory.tB);
+  const T = paB / paA;
+  const gA = 2 * theory.sA * theory.pA, gB = 2 * theory.sB * theory.pB;
+  const vA = gA + theory.tA, vB = gB + theory.tB;
+
+  $('panel-2-out').textContent = fmt(T, 3);
+  $('panel-2-sub').textContent = 'transferability from A into B';
+  const pill = $('s2-pill');
+  if (Math.abs(T - 1) < 5e-4) { pill.textContent = 'transferability is one'; pill.className = 'pill'; }
+  else if (T > 1) { pill.textContent = 'above one: the target is more predictable'; pill.className = 'pill hot'; }
+  else { pill.textContent = 'below one: the target is less predictable'; pill.className = 'pill'; }
+
+  /* two variance bars, one per population, on a shared scale */
+  const svg = clearSvg($('s2-bars'));
+  const x0 = 128, x1 = 700, scale = (x1 - x0) / Math.max(vA, vB);
+  const rows = [
+    { lab: 'discovery, A', g: gA, t: theory.tA, pa: paA, c: 'var(--c-disc)', y: 34 },
+    { lab: 'target, B', g: gB, t: theory.tB, pa: paB, c: 'var(--c-targ)', y: 116 }
+  ];
+  for (const r of rows) {
+    const gw = r.g * scale, tw = r.t * scale, h = 42;
+    svg.appendChild(el('text', { x: x0 - 12, y: r.y + 20, 'text-anchor': 'end', fill: r.c,
+      'font-size': 13, 'font-weight': 640 }, r.lab));
+    svg.appendChild(el('text', { x: x0 - 12, y: r.y + 37, 'text-anchor': 'end', fill: 'var(--text-muted)',
+      'font-size': 11.5 }, 'ceiling ' + fmt(r.pa, 3)));
+    svg.appendChild(el('rect', { x: x0, y: r.y, width: Math.max(gw, 0), height: h, rx: 4, fill: r.c }));
+    svg.appendChild(el('rect', { x: x0 + gw, y: r.y, width: Math.max(tw, 0), height: h, rx: 4,
+      fill: r.c, 'fill-opacity': 0.17 }));
+    svg.appendChild(el('rect', { x: x0 + gw, y: r.y, width: Math.max(tw, 0), height: h, rx: 4,
+      fill: 'none', stroke: r.c, 'stroke-opacity': 0.5, 'stroke-dasharray': '3 3' }));
+    if (gw > 80) svg.appendChild(el('text', { x: x0 + gw / 2, y: r.y + 26, 'text-anchor': 'middle',
+      fill: '#fff', 'font-size': 12, 'font-weight': 620 }, 'genetic ' + fmt(r.g, 3)));
+    if (tw > 96) svg.appendChild(el('text', { x: x0 + gw + tw / 2, y: r.y + 26, 'text-anchor': 'middle',
+      fill: 'var(--text-secondary)', 'font-size': 12 }, 'non-genetic ' + fmt(r.t, 3)));
+  }
+  /* the gauge, on a logarithmic axis so the two directions are symmetric */
+  const gs = clearSvg($('s2-gauge'));
+  const gx0 = 40, gx1 = 680, gy = 54, LIM = Math.log(3);
+  const toX = t => gx0 + (gx1 - gx0) * (clamp(Math.log(t), -LIM, LIM) + LIM) / (2 * LIM);
+  gs.appendChild(el('line', { x1: gx0, y1: gy, x2: gx1, y2: gy, stroke: 'var(--axis)', 'stroke-width': 1.4 }));
+  for (const t of [1 / 3, 1 / 2, 2 / 3, 1, 1.5, 2, 3]) {
+    const x = toX(t), major = Math.abs(t - 1) < 1e-9;
+    gs.appendChild(el('line', { x1: x, y1: gy - (major ? 15 : 6), x2: x, y2: gy + (major ? 15 : 6),
+      stroke: major ? 'var(--text-primary)' : 'var(--axis)', 'stroke-width': major ? 1.6 : 1 }));
+    gs.appendChild(el('text', { x, y: gy + 31, 'text-anchor': 'middle',
+      fill: major ? 'var(--text-primary)' : 'var(--text-muted)', 'font-size': major ? 12.5 : 11,
+      'font-weight': major ? 650 : 400 }, t === 1 / 3 ? '0.33' : t === 2 / 3 ? '0.67' : String(t)));
+  }
+  gs.appendChild(el('text', { x: gx0, y: 18, fill: 'var(--c-disc)', 'font-size': 11.5, 'font-weight': 600 },
+    'target less predictable'));
+  gs.appendChild(el('text', { x: gx1, y: 18, 'text-anchor': 'end', fill: 'var(--c-targ)',
+    'font-size': 11.5, 'font-weight': 600 }, 'target more predictable'));
+  if (Number.isFinite(T)) {
+    const x = toX(T), off = (T < 1 / 3 || T > 3);
+    // The marker occupies gy-22 up to gy-33, so its label sits clear above it.
+    gs.appendChild(el('path', { d: 'M' + x + ' ' + (gy - 22) + ' l6 -11 l-12 0 z', fill: 'var(--c-T)' }));
+    gs.appendChild(el('text', { x, y: gy - 39, 'text-anchor': 'middle', fill: 'var(--c-T)',
+      'font-size': 13.5, 'font-weight': 660 }, fmt(T, 3) + (off ? ' (beyond the axis)' : '')));
+  }
+
+  $('s2-calc').innerHTML =
+    '<div class="r">' + mh('\\mathrm{PA}_A') + ' = ' + fmt(gA, 3) + ' / ' + fmt(vA, 3) + ' = <b>' + fmt(paA, 3) + '</b></div>' +
+    '<div class="r">' + mh('\\mathrm{PA}_B') + ' = ' + fmt(gB, 3) + ' / ' + fmt(vB, 3) + ' = <b>' + fmt(paB, 3) + '</b></div>' +
+    '<div class="r tot">' + mh('T_{A\\to B}') + ' = ' + fmt(paB, 3) + ' / ' + fmt(paA, 3) + ' = <b>' + fmt(T, 3) + '</b></div>';
+
+  const sameTau = Math.abs(theory.tA - theory.tB) < 1e-9;
+  $('s2-rule').innerHTML = sameTau
+    ? ('The two non-genetic variances are equal right now, and in that case the rule is simple: ' +
+       'transferability exceeds one exactly when the target has the larger genetically predictable ' +
+       'variance, which is the same as saying it has the larger total trait variance. Here the target ' +
+       'has ' + fmt(gB, 3) + ' against ' + fmt(gA, 3) + ' in the discovery population, so transferability ' +
+       'is ' + (gB > gA ? 'above' : gB < gA ? 'below' : 'exactly') + ' one.')
+    : ('When the non-genetic variances differ, as they do now (' + fmt(theory.tA, 3) + ' against ' +
+       fmt(theory.tB, 3) + '), the comparison of genetic variances alone no longer settles the question. ' +
+       'Environmental variation is a genuinely non-genetic route by which two populations can differ in ' +
+       'how predictable a trait is. Set the two equal to recover the clean rule.');
+}
+
+/* ═══ 03 · one determinant at a time ══════════════════════════════════════ */
+const SPARKS = [
+  { kind: 's', label: 'additive genetic variance', tex: '\\sigma^2' },
+  { kind: 'p', label: 'average self-kinship', tex: '\\overline{\\Phi}' },
+  { kind: 't', label: 'non-genetic variance', tex: '\\tau^2' }
+];
+function sparkCurve(kind, whichPop) {
+  const key = kind + whichPop, v = VARS[key], N = 121, pts = [];
+  const saved = theory[key];
+  for (let i = 0; i < N; i++) {
+    const x = v.min + (v.max - v.min) * i / (N - 1);
+    theory[key] = x;
+    pts.push([x, transferability(theory.sA, theory.pA, theory.tA, theory.sB, theory.pB, theory.tB)]);
+  }
+  theory[key] = saved;
+  return pts;
+}
+function buildSparks() {
+  $('s3-sparks').innerHTML = SPARKS.map(s =>
+    '<div class="spark"><div class="spark-title" data-tex="' + s.tex + '"></div>' +
+    '<div class="spark-now" id="s3-now-' + s.kind + '"></div>' +
+    '<svg id="s3-sp-' + s.kind + '" viewBox="0 0 300 176" role="img" aria-label="Transferability as the ' +
+    s.label + ' is varied"></svg></div>').join('');
+  $('s3-sparks').querySelectorAll('[data-tex]').forEach(n => {
+    const s = SPARKS.find(k => k.tex === n.dataset.tex);
+    n.innerHTML = mh(n.dataset.tex, false) + ' <span style="font-weight:500;color:var(--text-secondary)">' +
+      s.label + '</span>';
+  });
+}
+function drawSparks() {
+  const rows = [];
+  for (const s of SPARKS) {
+    const curveB = sparkCurve(s.kind, 'B'), curveA = sparkCurve(s.kind, 'A');
+    const svg = clearSvg($('s3-sp-' + s.kind));
+    const W = 300, H = 176, L = 38, R = 8, Tp = 12, B = 30;
+    const v = VARS[s.kind + 'B'];
+    let lo = Infinity, hi = -Infinity;
+    for (const c of [curveA, curveB]) for (const p of c) {
+      if (Number.isFinite(p[1])) { lo = Math.min(lo, p[1]); hi = Math.max(hi, p[1]); }
+    }
+    lo = Math.min(lo, 1); hi = Math.max(hi, 1);
+    const pad = (hi - lo) * 0.1 || 0.05;
+    lo -= pad; hi += pad;
+    const X = x => L + (W - L - R) * (x - v.min) / (v.max - v.min);
+    const Y = y => Tp + (H - Tp - B) * (1 - (y - lo) / (hi - lo));
+
+    svg.appendChild(el('line', { x1: L, y1: Y(1), x2: W - R, y2: Y(1),
+      stroke: 'var(--axis)', 'stroke-width': 1, 'stroke-dasharray': '4 3' }));
+    for (const [c, colour, dash] of [[curveA, 'var(--c-disc)', '5 4'], [curveB, 'var(--c-targ)', null]]) {
+      const d = c.filter(p => Number.isFinite(p[1]))
+                 .map((p, i) => (i ? 'L' : 'M') + X(p[0]).toFixed(2) + ' ' + Y(p[1]).toFixed(2)).join(' ');
+      svg.appendChild(el('path', { d, fill: 'none', stroke: colour, 'stroke-width': 2,
+        'stroke-dasharray': dash, 'stroke-linejoin': 'round' }));
+    }
+    // axes
+    svg.appendChild(el('line', { x1: L, y1: Tp, x2: L, y2: H - B, stroke: 'var(--axis)' }));
+    svg.appendChild(el('line', { x1: L, y1: H - B, x2: W - R, y2: H - B, stroke: 'var(--axis)' }));
+    for (const t of [lo + (hi - lo) * 0.02, 1, hi - (hi - lo) * 0.02]) {
+      svg.appendChild(el('text', { x: L - 5, y: Y(t) + 4, 'text-anchor': 'end',
+        fill: 'var(--text-muted)', 'font-size': 10 }, t.toFixed(2)));
+    }
+    for (const t of [v.min, (v.min + v.max) / 2, v.max]) {
+      svg.appendChild(el('text', { x: X(t), y: H - B + 15, 'text-anchor': 'middle',
+        fill: 'var(--text-muted)', 'font-size': 10 }, String(+t.toFixed(2))));
+    }
+    // current positions
+    const nowA = theory[s.kind + 'A'], nowB = theory[s.kind + 'B'];
+    const Tnow = transferability(theory.sA, theory.pA, theory.tA, theory.sB, theory.pB, theory.tB);
+    svg.appendChild(el('circle', { cx: X(nowA), cy: Y(Tnow), r: 4, fill: 'var(--c-disc)',
+      stroke: 'var(--surface-1)', 'stroke-width': 1.5 }));
+    svg.appendChild(el('circle', { cx: X(nowB), cy: Y(Tnow), r: 4, fill: 'var(--c-targ)',
+      stroke: 'var(--surface-1)', 'stroke-width': 1.5 }));
+
+    $('s3-now-' + s.kind).innerHTML = 'A = ' + fmt(nowA, 3) + ' · B = ' + fmt(nowB, 3) +
+      ' · T = ' + fmt(Tnow, 3);
+
+    rows.push({ label: s.label, curveA, curveB, v });
+  }
+  drawSparkTable(rows);
+}
+function drawSparkTable(rows) {
+  const steps = 9;
+  let html = '<thead><tr><th>quantity</th><th>value</th><th>varied in A</th><th>varied in B</th></tr></thead><tbody>';
+  for (const r of rows) {
+    for (let i = 0; i < steps; i++) {
+      const idx = Math.round(i * (r.curveA.length - 1) / (steps - 1));
+      html += '<tr><td>' + (i === 0 ? r.label : '') + '</td><td>' + fmt(r.curveA[idx][0], 3) +
+        '</td><td>' + fmt(r.curveA[idx][1], 3) + '</td><td>' + fmt(r.curveB[idx][1], 3) + '</td></tr>';
+    }
+  }
+  $('s3-table').innerHTML = html + '</tbody>';
+}
+
+/* ═══ 04 · the map ════════════════════════════════════════════════════════ */
+const HM = { N: 100, W: 1000, H: 820, L: 92, R: 18, T: 18, B: 62 };
+const hmState = { x: 'sB', y: 'tB' };
+/* Diverging ramp on log T. Vermillion is the discovery population winning,
+   blue is the target winning, and the centre is deliberately near the page
+   surface so that "no difference" reads as no colour. */
+function rampColour(u) { // u in [-1, 1]
+  const A = [213, 94, 0], B = [0, 114, 178];
+  const mid = document.documentElement.dataset.theme === 'dark' ||
+    (!document.documentElement.dataset.theme && window.matchMedia('(prefers-color-scheme: dark)').matches)
+    ? [40, 40, 38] : [248, 248, 245];
+  const end = u < 0 ? A : B, t = Math.min(1, Math.abs(u));
+  const g = Math.pow(t, 0.85);
+  return [0, 1, 2].map(i => Math.round(mid[i] + (end[i] - mid[i]) * g));
+}
+function buildHeatControls() {
+  const opts = Object.keys(VARS).map(k =>
+    '<option value="' + k + '">' + KIND[VARS[k].kind].name + ' in ' + popName(VARS[k].pop) + '</option>').join('');
+  $('hm-x').innerHTML = opts; $('hm-y').innerHTML = opts;
+  $('hm-x').value = hmState.x; $('hm-y').value = hmState.y;
+  const guard = which => () => {
+    const other = which === 'x' ? 'y' : 'x';
+    if ($('hm-' + which).value === hmState[other]) {
+      // Swap rather than refuse, so the control never dead-ends.
+      hmState[other] = hmState[which];
+      $('hm-' + other).value = hmState[other];
+    }
+    hmState[which] = $('hm-' + which).value;
+    drawHeat();
+  };
+  $('hm-x').addEventListener('change', guard('x'));
+  $('hm-y').addEventListener('change', guard('y'));
+}
+let hmField = null, hmMaxAbs = 1;
+function drawHeat() {
+  const N = HM.N, vx = VARS[hmState.x], vy = VARS[hmState.y];
+  const saved = { x: theory[hmState.x], y: theory[hmState.y] };
+  hmField = new Float64Array(N * N);
+  let above = 0, finite = 0;
+  hmMaxAbs = 0;
+  for (let j = 0; j < N; j++) {
+    theory[hmState.y] = vy.min + (vy.max - vy.min) * j / (N - 1);
+    for (let i = 0; i < N; i++) {
+      theory[hmState.x] = vx.min + (vx.max - vx.min) * i / (N - 1);
+      const T = transferability(theory.sA, theory.pA, theory.tA, theory.sB, theory.pB, theory.tB);
+      const L = Math.log(T);
+      hmField[j * N + i] = L;
+      if (Number.isFinite(L)) { finite++; if (L > 0) above++; hmMaxAbs = Math.max(hmMaxAbs, Math.abs(L)); }
+    }
+  }
+  theory[hmState.x] = saved.x; theory[hmState.y] = saved.y;
+  if (!(hmMaxAbs > 0)) hmMaxAbs = 1;
+
+  const cv = $('hm'), ctx = cv.getContext('2d');
+  ctx.clearRect(0, 0, HM.W, HM.H);
+  const pw = HM.W - HM.L - HM.R, ph = HM.H - HM.T - HM.B;
+  const img = ctx.createImageData(N, N);
+  for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+    const L = hmField[j * N + i];
+    const [r, g, b] = rampColour(Number.isFinite(L) ? L / hmMaxAbs : 0);
+    const px = ((N - 1 - j) * N + i) * 4;
+    img.data[px] = r; img.data[px + 1] = g; img.data[px + 2] = b; img.data[px + 3] = 255;
+  }
+  const off = document.createElement('canvas');
+  off.width = N; off.height = N;
+  off.getContext('2d').putImageData(img, 0, 0);
+  ctx.imageSmoothingEnabled = true;
+  ctx.drawImage(off, HM.L, HM.T, pw, ph);
+
+  /* The T = 1 contour, by marching squares on the sign of log T.
+     Each cell contributes the segment joining the two edge crossings implied by
+     its four corner signs, so the result is a continuous line rather than the
+     scatter of stubs that drawing per-edge crossings produces. The ambiguous
+     saddle cases (5 and 10) are split into two segments, which is the standard
+     resolution and is correct for either choice on a field this smooth. */
+  ctx.strokeStyle = cssVar('--text-primary') || '#000';
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  const px = i => HM.L + pw * i / (N - 1), py = j => HM.T + ph * (1 - j / (N - 1));
+  // Crossing point on an edge between two corners, linearly interpolated.
+  const cross = (i0, j0, i1, j1, v0, v1) => {
+    const f = v0 / (v0 - v1);
+    return [px(i0 + (i1 - i0) * f), py(j0 + (j1 - j0) * f)];
+  };
+  for (let j = 0; j < N - 1; j++) for (let i = 0; i < N - 1; i++) {
+    const bl = hmField[j * N + i], br = hmField[j * N + i + 1];
+    const tl = hmField[(j + 1) * N + i], tr = hmField[(j + 1) * N + i + 1];
+    if (![bl, br, tl, tr].every(Number.isFinite)) continue;
+    const code = (bl > 0 ? 1 : 0) | (br > 0 ? 2 : 0) | (tr > 0 ? 4 : 0) | (tl > 0 ? 8 : 0);
+    if (code === 0 || code === 15) continue;
+    const bottom = () => cross(i, j, i + 1, j, bl, br);
+    const right = () => cross(i + 1, j, i + 1, j + 1, br, tr);
+    const top = () => cross(i, j + 1, i + 1, j + 1, tl, tr);
+    const left = () => cross(i, j, i, j + 1, bl, tl);
+    const draw = (p, q) => { ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); };
+    switch (code) {
+      case 1: case 14: draw(left(), bottom()); break;
+      case 2: case 13: draw(bottom(), right()); break;
+      case 3: case 12: draw(left(), right()); break;
+      case 4: case 11: draw(right(), top()); break;
+      case 6: case 9: draw(bottom(), top()); break;
+      case 7: case 8: draw(left(), top()); break;
+      case 5: draw(left(), top()); draw(bottom(), right()); break;
+      case 10: draw(left(), bottom()); draw(right(), top()); break;
+    }
+  }
+  ctx.stroke();
+
+  // axes, ticks and the current position
+  ctx.strokeStyle = cssVar('--axis') || '#999'; ctx.lineWidth = 1.5;
+  ctx.strokeRect(HM.L, HM.T, pw, ph);
+  ctx.fillStyle = cssVar('--text-muted') || '#777';
+  ctx.font = '20px system-ui, sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  for (let k = 0; k <= 4; k++) {
+    const t = vx.min + (vx.max - vx.min) * k / 4;
+    ctx.fillText(String(+t.toFixed(2)), HM.L + pw * k / 4, HM.T + ph + 8);
+  }
+  ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  for (let k = 0; k <= 4; k++) {
+    const t = vy.min + (vy.max - vy.min) * k / 4;
+    ctx.fillText(String(+t.toFixed(2)), HM.L - 8, HM.T + ph * (1 - k / 4));
+  }
+  ctx.fillStyle = cssVar('--text-secondary') || '#555';
+  ctx.font = '600 21px system-ui, sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+  ctx.fillText(KIND[vx.kind].name + ' in the ' + popName(vx.pop) + ' population', HM.L + pw / 2, HM.H - 8);
+  ctx.save();
+  ctx.translate(20, HM.T + ph / 2); ctx.rotate(-Math.PI / 2);
+  ctx.fillText(KIND[vy.kind].name + ' in the ' + popName(vy.pop) + ' population', 0, 0);
+  ctx.restore();
+
+  const cx = HM.L + pw * (theory[hmState.x] - vx.min) / (vx.max - vx.min);
+  const cy = HM.T + ph * (1 - (theory[hmState.y] - vy.min) / (vy.max - vy.min));
+  ctx.strokeStyle = cssVar('--text-primary') || '#000'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.arc(cx, cy, 11, 0, 2 * Math.PI); ctx.stroke();
+  ctx.strokeStyle = cssVar('--surface-1') || '#fff'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(cx, cy, 11, 0, 2 * Math.PI); ctx.stroke();
+
+  const share = finite ? above / finite : NaN;
+  $('s4-pill').textContent = pct(share) + ' of this rectangle has transferability above one';
+  const Tnow = transferability(theory.sA, theory.pA, theory.tA, theory.sB, theory.pB, theory.tB);
+  $('hm-calc').innerHTML =
+    '<div class="r">grid: ' + N + ' &times; ' + N + ' = ' + (N * N).toLocaleString() +
+      ' exact evaluations of the closed form, recomputed on every change</div>' +
+    '<div class="r">the other four quantities are held at their panel values</div>' +
+    '<div class="r tot">at the ring: ' + KIND[vx.kind].name + ' ' + fmt(theory[hmState.x], 3) + ', ' +
+      KIND[vy.kind].name + ' ' + fmt(theory[hmState.y], 3) + ', transferability <b>' + fmt(Tnow, 3) + '</b></div>';
+
+  paintColourbar();
+  drawHeatTable();
+}
+function paintColourbar() {
+  const cv = $('cbar'), ctx = cv.getContext('2d');
+  const img = ctx.createImageData(cv.width, 1);
+  for (let i = 0; i < cv.width; i++) {
+    const [r, g, b] = rampColour(-1 + 2 * i / (cv.width - 1));
+    img.data[i * 4] = r; img.data[i * 4 + 1] = g; img.data[i * 4 + 2] = b; img.data[i * 4 + 3] = 255;
+  }
+  const off = document.createElement('canvas');
+  off.width = cv.width; off.height = 1;
+  off.getContext('2d').putImageData(img, 0, 0);
+  ctx.clearRect(0, 0, cv.width, cv.height);
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(off, 0, 0, cv.width, cv.height);
+  $('cbar-lo').textContent = 'T = ' + fmt(Math.exp(-hmMaxAbs), 2);
+  $('cbar-hi').textContent = 'T = ' + fmt(Math.exp(hmMaxAbs), 2);
+}
+function drawHeatTable() {
+  const N = HM.N, vx = VARS[hmState.x], vy = VARS[hmState.y], steps = 7;
+  let html = '<thead><tr><th>' + KIND[vy.kind].name + ' (' + popName(vy.pop) + ') \\ ' +
+    KIND[vx.kind].name + ' (' + popName(vx.pop) + ')</th>';
+  const idx = k => Math.round(k * (N - 1) / (steps - 1));
+  for (let k = 0; k < steps; k++) {
+    html += '<th>' + (vx.min + (vx.max - vx.min) * idx(k) / (N - 1)).toFixed(2) + '</th>';
+  }
+  html += '</tr></thead><tbody>';
+  for (let r = steps - 1; r >= 0; r--) {
+    const j = idx(r);
+    html += '<tr><td>' + (vy.min + (vy.max - vy.min) * j / (N - 1)).toFixed(2) + '</td>';
+    for (let k = 0; k < steps; k++) html += '<td>' + fmt(Math.exp(hmField[j * N + idx(k)]), 3) + '</td>';
+    html += '</tr>';
+  }
+  $('hm-table').innerHTML = html + '</tbody>';
+}
+function wireHeatHover() {
+  const cv = $('hm');
+  const at = evt => {
+    const box = cv.getBoundingClientRect();
+    const lx = (evt.clientX - box.left) / box.width * HM.W;
+    const ly = (evt.clientY - box.top) / box.height * HM.H;
+    const pw = HM.W - HM.L - HM.R, ph = HM.H - HM.T - HM.B;
+    if (lx < HM.L || lx > HM.L + pw || ly < HM.T || ly > HM.T + ph) return null;
+    const i = Math.round((lx - HM.L) / pw * (HM.N - 1));
+    const j = Math.round((1 - (ly - HM.T) / ph) * (HM.N - 1));
+    return { i, j };
+  };
+  cv.addEventListener('mousemove', evt => {
+    const p = at(evt);
+    if (!p || !hmField) { hideTip(); return; }
+    const vx = VARS[hmState.x], vy = VARS[hmState.y];
+    const xv = vx.min + (vx.max - vx.min) * p.i / (HM.N - 1);
+    const yv = vy.min + (vy.max - vy.min) * p.j / (HM.N - 1);
+    const T = Math.exp(hmField[p.j * HM.N + p.i]);
+    showTip(evt, '<b>T = ' + fmt(T, 3) + '</b><br>' + KIND[vx.kind].name + ' ' + fmt(xv, 3) +
+      '<br>' + KIND[vy.kind].name + ' ' + fmt(yv, 3));
+  });
+  cv.addEventListener('mouseleave', hideTip);
+  cv.addEventListener('click', evt => {
+    const p = at(evt);
+    if (!p) return;
+    const vx = VARS[hmState.x], vy = VARS[hmState.y];
+    const obj = {};
+    obj[hmState.x] = vx.min + (vx.max - vx.min) * p.i / (HM.N - 1);
+    obj[hmState.y] = vy.min + (vy.max - vy.min) * p.j / (HM.N - 1);
+    setTheoryAll(obj);
+  });
+}
+
+/* ═══ 05 · theory against simulation ══════════════════════════════════════ */
+const filt = { minA: 0.30, minB: 0.30, maxGap: 0.30 };
+function pearsonR2(x, y) {
+  const n = x.length;
+  if (n < 3) return NaN;
+  let mx = 0, my = 0;
+  for (let i = 0; i < n; i++) { mx += x[i]; my += y[i]; }
+  mx /= n; my /= n;
+  let sxy = 0, sxx = 0, syy = 0;
+  for (let i = 0; i < n; i++) {
+    const a = x[i] - mx, b = y[i] - my;
+    sxy += a * b; sxx += a * a; syy += b * b;
+  }
+  if (!(sxx > 0) || !(syy > 0)) return NaN;
+  const r = sxy / Math.sqrt(sxx * syy);
+  return r * r;
+}
+function buildPanel5() {
+  const s = DATA.theory.settings;
+  const rows = [
+    ['minA', 'smallest allowed heritability in the discovery population', 0.30, 0.85],
+    ['minB', 'smallest allowed heritability in the target population', 0.30, 0.85],
+    ['maxGap', 'largest allowed difference between the two heritabilities', 0.02, 0.30]
+  ];
+  let html = '<div class="panel-out"><div class="l">Pearson r squared</div>' +
+             '<div class="v" id="s5-r2"></div><div class="s" id="s5-n"></div></div>';
+  for (const [key, label, lo, hi] of rows) {
+    html += '<div class="row" style="--knob:var(--c-T)">' +
+      '<span class="sym" style="font-size:0.78rem">' + (key === 'maxGap' ? 'gap ≤' : '≥') + '</span>' +
+      '<input type="range" id="s5-r-' + key + '" data-k="' + key + '" min="' + lo + '" max="' + hi +
+      '" step="0.005" value="' + filt[key] + '" aria-label="' + label + '">' +
+      '<input type="number" id="s5-n-' + key + '" data-k="' + key + '" min="' + lo + '" max="' + hi +
+      '" step="0.005" value="' + filt[key] + '" aria-label="' + label + ', typed">' +
+      '<span class="row-def">' + label + '</span></div>';
+  }
+  html += '<div class="btn-row"><button type="button" id="s5-reset">Back to the paper’s setting</button></div>';
+  $('panel-5').innerHTML = html;
+  $('panel-5').querySelectorAll('input').forEach(inp => {
+    inp.addEventListener('input', () => {
+      const v = parseFloat(inp.value);
+      if (!Number.isFinite(v)) return;
+      filt[inp.dataset.k] = v;
+      $('s5-r-' + inp.dataset.k).value = v; $('s5-n-' + inp.dataset.k).value = v;
+      drawSection5();
+    });
+  });
+  $('s5-reset').addEventListener('click', () => {
+    filt.minA = 0.30; filt.minB = 0.30; filt.maxGap = 0.30;
+    for (const k of ['minA', 'minB', 'maxGap']) { $('s5-r-' + k).value = filt[k]; $('s5-n-' + k).value = filt[k]; }
+    drawSection5();
+  });
+
+  $('s5-kept-count').textContent = String(DATA.theory.n_kept);
+  $('s5-fst').textContent = s.fst_range[0] + ' to ' + s.fst_range[1];
+  $('s5-inb').textContent = s.inbreeding_range[0] + ' to ' + s.inbreeding_range[1];
+  $('s5-nm').textContent = s.n + ' individuals and ' + s.m + ' causal variants';
+  $('s5-R').textContent = s.redraws + ' independent redraws';
+}
+function drawSection5() {
+  const th = DATA.theory;
+  const keep = [];
+  for (let i = 0; i < th.T_theo.length; i++) {
+    if (th.h2_A[i] >= filt.minA && th.h2_B[i] >= filt.minB &&
+        Math.abs(th.h2_A[i] - th.h2_B[i]) <= filt.maxGap) keep.push(i);
+  }
+  const xs = keep.map(i => th.T_theo[i]), ys = keep.map(i => th.T_emp[i]);
+  const r2 = pearsonR2(xs, ys);
+
+  $('s5-r2').textContent = Number.isFinite(r2) ? r2.toFixed(4) : '—';
+  $('s5-n').textContent = keep.length + ' of ' + th.T_theo.length + ' stored pairs shown';
+  const atPaper = Math.abs(filt.minA - 0.3) < 1e-9 && Math.abs(filt.minB - 0.3) < 1e-9 &&
+                  Math.abs(filt.maxGap - 0.3) < 1e-9;
+  $('s5-pill').textContent = atPaper
+    ? 'at the manuscript’s constraints, matching the reported ' + th.r_squared.toFixed(3)
+    : 'tightened beyond the manuscript’s constraints';
+
+  const svg = clearSvg($('s5-scatter'));
+  const W = 620, H = 560, L = 62, R = 16, Tp = 16, B = 56;
+  const all = th.T_theo.concat(th.T_emp);
+  const lo = Math.min.apply(null, all) - 0.05, hi = Math.max.apply(null, all) + 0.05;
+  const X = v => L + (W - L - R) * (v - lo) / (hi - lo);
+  const Y = v => Tp + (H - Tp - B) * (1 - (v - lo) / (hi - lo));
+
+  for (let k = 0; k <= 4; k++) {
+    const t = lo + (hi - lo) * k / 4;
+    svg.appendChild(el('line', { x1: X(t), y1: Tp, x2: X(t), y2: H - B, stroke: 'var(--grid)' }));
+    svg.appendChild(el('line', { x1: L, y1: Y(t), x2: W - R, y2: Y(t), stroke: 'var(--grid)' }));
+    svg.appendChild(el('text', { x: X(t), y: H - B + 17, 'text-anchor': 'middle',
+      fill: 'var(--text-muted)', 'font-size': 11 }, t.toFixed(2)));
+    svg.appendChild(el('text', { x: L - 7, y: Y(t) + 4, 'text-anchor': 'end',
+      fill: 'var(--text-muted)', 'font-size': 11 }, t.toFixed(2)));
+  }
+  svg.appendChild(el('line', { x1: X(lo), y1: Y(lo), x2: X(hi), y2: Y(hi),
+    stroke: 'var(--text-secondary)', 'stroke-width': 1.3, 'stroke-dasharray': '5 4' }));
+
+  const kept = new Set(keep);
+  for (let i = 0; i < th.T_theo.length; i++) {
+    const inSet = kept.has(i);
+    const c = el('circle', {
+      cx: X(th.T_theo[i]).toFixed(2), cy: Y(th.T_emp[i]).toFixed(2), r: inSet ? 3.6 : 2.4,
+      fill: inSet ? 'var(--c-targ)' : 'var(--text-muted)',
+      'fill-opacity': inSet ? 0.62 : 0.14, tabindex: inSet ? 0 : null,
+      role: inSet ? 'img' : null
+    });
+    if (inSet) {
+      const label = 'theoretical ' + th.T_theo[i].toFixed(3) + ', empirical ' + th.T_emp[i].toFixed(3) +
+        ', heritability ' + th.h2_A[i].toFixed(3) + ' in A and ' + th.h2_B[i].toFixed(3) + ' in B';
+      c.setAttribute('aria-label', label);
+      const html = '<b>simulated pair ' + (i + 1) + '</b><br>theoretical T ' + th.T_theo[i].toFixed(4) +
+        '<br>empirical T ' + th.T_emp[i].toFixed(4) +
+        '<br>heritability A ' + th.h2_A[i].toFixed(3) + '<br>heritability B ' + th.h2_B[i].toFixed(3) +
+        '<br>difference ' + Math.abs(th.h2_A[i] - th.h2_B[i]).toFixed(3);
+      c.addEventListener('mouseenter', e => showTip(e, html));
+      c.addEventListener('mousemove', e => showTip(e, html));
+      c.addEventListener('mouseleave', hideTip);
+      c.addEventListener('focus', () => {
+        const b = c.getBoundingClientRect();
+        showTip({ clientX: b.left + b.width / 2, clientY: b.top }, html);
+      });
+      c.addEventListener('blur', hideTip);
+    }
+    svg.appendChild(c);
+  }
+  svg.appendChild(el('text', { x: L + (W - L - R) / 2, y: H - 12, 'text-anchor': 'middle',
+    fill: 'var(--text-secondary)', 'font-size': 12.5, 'font-weight': 600 },
+    'theoretical transferability, the closed form'));
+  const yl = el('text', { x: 16, y: Tp + (H - Tp - B) / 2, 'text-anchor': 'middle',
+    fill: 'var(--text-secondary)', 'font-size': 12.5, 'font-weight': 600,
+    transform: 'rotate(-90 16 ' + (Tp + (H - Tp - B) / 2) + ')' }, 'empirical transferability, simulated');
+  svg.appendChild(yl);
+  // Top left, because the points run along the identity and would sit under an
+  // annotation placed in the top right.
+  svg.appendChild(el('text', { x: L + 10, y: Tp + 20,
+    fill: 'var(--text-primary)', 'font-size': 14, 'font-weight': 650 },
+    'r² = ' + (Number.isFinite(r2) ? r2.toFixed(4) : '—')));
+  svg.appendChild(el('text', { x: L + 10, y: Tp + 38,
+    fill: 'var(--text-muted)', 'font-size': 11.5 }, keep.length + ' pairs'));
+}
+
+/* ═══ 06 to 08 · the simulations ══════════════════════════════════════════ */
+const POP_LONG = { AFR: 'African', EUR: 'European', ASN: 'East Asian' };
+const POP_COLOUR = { AFR: 'var(--c-disc)', EUR: 'var(--c-targ)', ASN: 'var(--c-asn)' };
+const RATIO_COLOUR = { 1: 'var(--c-r1)', 2: 'var(--c-r2)', 5: 'var(--c-r5)', 10: 'var(--c-r10)' };
+const UNORDERED = [
+  { key: 'AFR-EUR', a: 'AFR', b: 'EUR' },
+  { key: 'AFR-ASN', a: 'AFR', b: 'ASN' },
+  { key: 'EUR-ASN', a: 'EUR', b: 'ASN' }
+];
+const sim = { h2: '0.1', m: '1000', effects: 'fixed', pair: 'AFR-EUR', ratio: 5, frac: 0.5 };
+const simListeners = [];
+function fireSim() { simListeners.forEach(fn => fn()); }
+
+const commonAt = (m, h2, pair, effects) =>
+  (effects === 'normal' ? DATA.normal : DATA.common)[m + '|' + h2 + '|' + pair];
+const rareAt = (h2, ratio, frac, pair) =>
+  DATA.rare[h2 + '|' + ratio + '|' + frac.toFixed(1) + '|' + pair];
+const decompAt = (h2, ratio, frac, pop, type) =>
+  DATA.decomp[h2 + '|' + ratio + '|' + frac.toFixed(1) + '|' + pop + '|' + type];
+
+function buildPanel6() {
+  const h2opts = DATA.h2_levels.map(h =>
+    '<button type="button" data-h2="' + h + '">' + h + '</button>').join('');
+  const mopts = ['20', '50', '100', '1000'].map(m =>
+    '<button type="button" data-m="' + m + '">' + m + '</button>').join('');
+  $('panel-6').innerHTML =
+    '<div class="panel-out"><div class="l">Highest transferability</div>' +
+    '<div class="v" id="s6-best"></div><div class="s" id="s6-best-sub"></div></div>' +
+    '<label class="fld"><span>heritability fixed in the European sample</span>' +
+      '<span class="seg" id="s6-h2">' + h2opts + '</span></label>' +
+    '<label class="fld"><span>number of causal variants <span class="muted">(S1 Fig)</span></span>' +
+      '<span class="seg" id="s6-m">' + mopts + '</span></label>' +
+    // A select rather than a segmented control: these two labels are sentences,
+    // and side by side they overflow the panel at its narrowest.
+    '<label class="fld"><span>effect sizes <span class="muted">(S2 Fig)</span></span>' +
+      '<select id="s6-eff">' +
+      '<option value="fixed">equal at every locus</option>' +
+      '<option value="normal">drawn from a normal distribution</option></select></label>' +
+    '<p class="small muted" id="s6-eff-note" style="margin:0"></p>';
+
+  $('s6-h2').addEventListener('click', e => {
+    const b = e.target.closest('[data-h2]'); if (!b) return;
+    sim.h2 = b.dataset.h2; fireSim();
+  });
+  $('s6-m').addEventListener('click', e => {
+    const b = e.target.closest('[data-m]'); if (!b) return;
+    sim.m = b.dataset.m;
+    // The normal-effects experiment was run only at 1,000 causal variants.
+    if (sim.m !== '1000') sim.effects = 'fixed';
+    fireSim();
+  });
+  $('s6-eff').addEventListener('change', () => { sim.effects = $('s6-eff').value; fireSim(); });
+}
+function drawSection6() {
+  // segmented-control states
+  $('s6-h2').querySelectorAll('[data-h2]').forEach(b => b.classList.toggle('on', b.dataset.h2 === sim.h2));
+  $('s6-m').querySelectorAll('[data-m]').forEach(b => b.classList.toggle('on', b.dataset.m === sim.m));
+  $('s6-eff').value = sim.effects;
+  // The normal-effects experiment exists only at 1,000 causal variants.
+  $('s6-eff').querySelector('option[value="normal"]').disabled = (sim.m !== '1000');
+  $('s6-eff-note').textContent = sim.m === '1000'
+    ? 'Both effect-size models were run at 1,000 causal variants.'
+    : 'Normally distributed effect sizes were simulated only at 1,000 causal variants.';
+
+  const rows = DATA.pairs.map(p => {
+    const rec = commonAt(sim.m, sim.h2, p, sim.effects);
+    const [disc, targ] = p.split('-');
+    return { pair: p, disc, targ, mean: rec[0], ci: rec[1], n: rec[2] };
+  }).sort((a, b) => b.mean - a.mean);
+
+  $('s6-best').textContent = fmt(rows[0].mean, 3);
+  $('s6-best-sub').textContent = POP_LONG[rows[0].disc] + ' into ' + POP_LONG[rows[0].targ];
+
+  const svg = clearSvg($('s6-dots'));
+  const W = 700, H = 300, L = 152, R = 26, Tp = 16, B = 46;
+  let lo = Infinity, hi = -Infinity;
+  for (const r of rows) { lo = Math.min(lo, r.mean - r.ci); hi = Math.max(hi, r.mean + r.ci); }
+  lo = Math.min(lo, 1) - 0.04; hi = Math.max(hi, 1) + 0.04;
+  const X = v => L + (W - L - R) * (v - lo) / (hi - lo);
+  const rowH = (H - Tp - B) / rows.length;
+
+  svg.appendChild(el('line', { x1: X(1), y1: Tp, x2: X(1), y2: H - B,
+    stroke: 'var(--text-primary)', 'stroke-width': 1.4, 'stroke-dasharray': '4 3' }));
+  svg.appendChild(el('text', { x: X(1), y: Tp - 3, 'text-anchor': 'middle',
+    fill: 'var(--text-secondary)', 'font-size': 11 }, 'no change'));
+
+  rows.forEach((r, i) => {
+    const y = Tp + rowH * (i + 0.5), c = POP_COLOUR[r.targ];
+    svg.appendChild(el('text', { x: L - 12, y: y + 4, 'text-anchor': 'end',
+      fill: 'var(--text-primary)', 'font-size': 12.5 },
+      POP_LONG[r.disc] + ' → ' + POP_LONG[r.targ]));
+    svg.appendChild(el('line', { x1: X(r.mean - r.ci), y1: y, x2: X(r.mean + r.ci), y2: y,
+      stroke: c, 'stroke-width': 2, 'stroke-opacity': 0.55 }));
+    for (const b of [r.mean - r.ci, r.mean + r.ci]) {
+      svg.appendChild(el('line', { x1: X(b), y1: y - 4, x2: X(b), y2: y + 4, stroke: c, 'stroke-width': 2 }));
+    }
+    const dot = el('circle', { cx: X(r.mean), cy: y, r: 5.5, fill: c,
+      stroke: 'var(--surface-1)', 'stroke-width': 1.5, tabindex: 0, role: 'img',
+      'aria-label': POP_LONG[r.disc] + ' into ' + POP_LONG[r.targ] + ', transferability ' +
+        r.mean.toFixed(3) + ' plus or minus ' + r.ci.toFixed(3) });
+    const html = '<b>' + POP_LONG[r.disc] + ' → ' + POP_LONG[r.targ] + '</b><br>' +
+      'transferability ' + r.mean.toFixed(3) + '<br>95% interval ' +
+      (r.mean - r.ci).toFixed(3) + ' to ' + (r.mean + r.ci).toFixed(3) + '<br>' +
+      r.n + ' replicates kept after the trim';
+    dot.addEventListener('mouseenter', e => showTip(e, html));
+    dot.addEventListener('mousemove', e => showTip(e, html));
+    dot.addEventListener('mouseleave', hideTip);
+    dot.addEventListener('focus', () => {
+      const b = dot.getBoundingClientRect();
+      showTip({ clientX: b.left + b.width / 2, clientY: b.top }, html);
+    });
+    dot.addEventListener('blur', hideTip);
+    svg.appendChild(dot);
+    svg.appendChild(el('text', { x: X(r.mean + r.ci) + 8, y: y + 4, fill: 'var(--text-muted)',
+      'font-size': 11.5 }, r.mean.toFixed(3)));
+  });
+  for (let k = 0; k <= 4; k++) {
+    const t = lo + (hi - lo) * k / 4;
+    svg.appendChild(el('text', { x: X(t), y: H - B + 20, 'text-anchor': 'middle',
+      fill: 'var(--text-muted)', 'font-size': 11 }, t.toFixed(2)));
+  }
+  svg.appendChild(el('line', { x1: L, y1: H - B, x2: W - R, y2: H - B, stroke: 'var(--axis)' }));
+  svg.appendChild(el('text', { x: L + (W - L - R) / 2, y: H - 8, 'text-anchor': 'middle',
+    fill: 'var(--text-secondary)', 'font-size': 12, 'font-weight': 600 }, 'intrinsic transferability'));
+
+  let th = '<thead><tr><th>discovery</th><th>target</th><th>transferability</th><th>95% interval</th><th>replicates</th></tr></thead><tbody>';
+  for (const r of rows) {
+    th += '<tr><td>' + POP_LONG[r.disc] + '</td><td>' + POP_LONG[r.targ] + '</td><td>' +
+      r.mean.toFixed(3) + '</td><td>' + (r.mean - r.ci).toFixed(3) + ' to ' + (r.mean + r.ci).toFixed(3) +
+      '</td><td>' + r.n + '</td></tr>';
+  }
+  $('s6-table').innerHTML = th + '</tbody>';
+
+  drawMechanism(rows);
+
+  const intoAfr = rows.filter(r => r.targ === 'AFR').map(r => r.mean);
+  const outAfr = rows.filter(r => r.disc === 'AFR').map(r => r.mean);
+  $('s6-ours').innerHTML = 'Transferability into the African sample is ' +
+    fmt(Math.min.apply(null, intoAfr), 3) + ' to ' + fmt(Math.max.apply(null, intoAfr), 3) +
+    ', and out of it ' + fmt(Math.min.apply(null, outAfr), 3) + ' to ' +
+    fmt(Math.max.apply(null, outAfr), 3) + '. Every transfer <i>into</i> the African sample beats ' +
+    'every transfer <i>out</i> of it, and the strongest of all is ' + POP_LONG[rows[0].disc] +
+    ' into ' + POP_LONG[rows[0].targ] + '.';
+}
+function drawMechanism(rows) {
+  const h2eur = parseFloat(sim.h2);
+  // Under Hardy-Weinberg the transferability out of Europe IS the heritability
+  // ratio, so each population's heritability follows from the European value.
+  const h2 = { EUR: h2eur };
+  for (const p of ['AFR', 'ASN']) {
+    const rec = commonAt(sim.m, sim.h2, 'EUR-' + p, sim.effects);
+    h2[p] = rec[0] * h2eur;
+  }
+  const het = DATA.af.pooled.mean_het;
+  const order = DATA.populations; // AFR, EUR, ASN
+  const hetOf = p => het[order.indexOf(p)];
+
+  const tiles = [
+    { c: 'var(--text-muted)', label: '1 · demography', value: 'no bottleneck in Africa',
+      note: 'The Out-of-Africa expansion passed the European and East Asian ancestors through a bottleneck; the African sample did not.' },
+    { c: 'var(--c-disc)', label: '2 · allele frequencies', value: fmt(hetOf('AFR') / hetOf('EUR'), 2) + '×',
+      note: 'Mean p(1−p) over the shared common panel is ' + fmt(hetOf('AFR'), 4) + ' in the African sample against ' +
+            fmt(hetOf('EUR'), 4) + ' in the European one. This is the quantity additive genetic variance is proportional to.' },
+    { c: 'var(--c-T)', label: '3 · heritability', value: fmt(h2.AFR, 3) + ' vs ' + fmt(h2.EUR, 3),
+      note: 'With effect sizes shared, more variance at the causal sites means more heritability. African ' +
+            fmt(h2.AFR, 3) + ', European ' + fmt(h2.EUR, 3) + ', East Asian ' + fmt(h2.ASN, 3) + '.' },
+    { c: 'var(--c-targ)', label: '4 · transferability', value: fmt(rows[0].mean, 3),
+      note: 'Because self-kinship is one half everywhere here, transferability is exactly the ratio of those heritabilities.' }
+  ];
+  $('s6-mech').innerHTML = tiles.map(t =>
+    '<div class="tile" style="--tile-c:' + t.c + '"><div class="tile-label">' + t.label + '</div>' +
+    '<div class="tile-value">' + t.value + '</div><div class="tile-note">' + t.note + '</div></div>').join('');
+
+  // An honest consistency check rather than a silent one.
+  const predicted = h2.AFR / h2.ASN;
+  const observed = commonAt(sim.m, sim.h2, 'ASN-AFR', sim.effects)[0];
+  const obsCi = commonAt(sim.m, sim.h2, 'ASN-AFR', sim.effects)[1];
+  $('s6-mech-note').innerHTML =
+    'The heritabilities in step 3 are not stored; they are recovered from the transferabilities out of ' +
+    'Europe using the Hardy–Weinberg identity, with the European value fixed at ' + sim.h2 + ' by design. ' +
+    '<b>Consistency check:</b> those recovered heritabilities imply an East Asian to African transferability of ' +
+    fmt(predicted, 3) + ', against the simulated ' + fmt(observed, 3) + ' ± ' + fmt(obsCi, 3) +
+    '. The two agree closely but need not agree exactly, because each simulated number is a mean of ratios ' +
+    'across replicates rather than a ratio of means, and the interquartile trim is applied within each ordered pair separately.';
+}
+
+/* ── 07 · rare variants ─────────────────────────────────────────────────── */
+function buildPanel7() {
+  const pairOpts = UNORDERED.map(u =>
+    '<option value="' + u.key + '">' + POP_LONG[u.a] + ' and ' + POP_LONG[u.b] + '</option>').join('');
+  const h2opts = DATA.h2_levels.map(h => '<button type="button" data-h2b="' + h + '">' + h + '</button>').join('');
+  const ratioOpts = DATA.ratios.map(r =>
+    '<button type="button" data-ratio="' + r + '">' + r + '×</button>').join('');
+  $('panel-7').innerHTML =
+    '<div class="panel-out"><div class="l">At the selected settings</div>' +
+    '<div class="v" id="s7-out"></div><div class="s" id="s7-sub"></div></div>' +
+    '<label class="fld"><span>population pair</span><select id="s7-pair">' + pairOpts + '</select></label>' +
+    '<label class="fld"><span>heritability fixed in the European sample</span>' +
+      '<span class="seg" id="s7-h2">' + h2opts + '</span></label>' +
+    '<label class="fld"><span>rare-to-common effect-size ratio</span>' +
+      '<span class="seg" id="s7-ratio">' + ratioOpts + '</span></label>' +
+    '<div class="row" style="--knob:var(--c-rare)">' +
+      '<span class="sym" style="font-size:0.78rem">rare</span>' +
+      '<input type="range" id="s7-frac" min="0.1" max="0.9" step="0.1" value="' + sim.frac +
+      '" aria-label="fraction of the 1,000 causal variants that are rare">' +
+      '<input type="number" id="s7-fracn" min="0.1" max="0.9" step="0.1" value="' + sim.frac +
+      '" aria-label="fraction of causal variants that are rare, typed">' +
+      '<span class="row-def">the fraction of the 1,000 causal variants that are rare in the European sample</span></div>' +
+    '<p class="small muted" style="margin:0">These same controls drive section 8.</p>';
+
+  $('s7-pair').addEventListener('change', () => { sim.pair = $('s7-pair').value; fireSim(); });
+  $('s7-h2').addEventListener('click', e => {
+    const b = e.target.closest('[data-h2b]'); if (!b) return;
+    sim.h2 = b.dataset.h2; fireSim();
+  });
+  $('s7-ratio').addEventListener('click', e => {
+    const b = e.target.closest('[data-ratio]'); if (!b) return;
+    sim.ratio = parseInt(b.dataset.ratio, 10); fireSim();
+  });
+  for (const id of ['s7-frac', 's7-fracn']) {
+    $(id).addEventListener('input', () => {
+      const v = parseFloat($(id).value);
+      if (!Number.isFinite(v)) return;
+      sim.frac = Math.round(clamp(v, 0.1, 0.9) * 10) / 10;
+      fireSim();
+    });
+  }
+  $('s7-legend').innerHTML = DATA.ratios.map(r =>
+    '<span class="legend-item"><span class="legend-key" style="background:' + RATIO_COLOUR[r] +
+    '"></span>rare effects ' + r + '× common</span>').join('') +
+    '<span class="legend-item"><span class="legend-key" style="background:var(--axis)"></span>transferability of one</span>';
+}
+function drawSection7() {
+  $('s7-pair').value = sim.pair;
+  $('s7-h2').querySelectorAll('[data-h2b]').forEach(b => b.classList.toggle('on', b.dataset.h2b === sim.h2));
+  $('s7-ratio').querySelectorAll('[data-ratio]').forEach(b =>
+    b.classList.toggle('on', parseInt(b.dataset.ratio, 10) === sim.ratio));
+  $('s7-frac').value = sim.frac; $('s7-fracn').value = sim.frac;
+
+  const u = UNORDERED.find(x => x.key === sim.pair);
+  const dirs = [{ d: u.a, t: u.b, svg: 's7-a', title: 's7-title-a' },
+                { d: u.b, t: u.a, svg: 's7-b', title: 's7-title-b' }];
+
+  // A shared vertical scale across the two panels, which is what makes the
+  // asymmetry between the directions readable at a glance.
+  let lo = Infinity, hi = -Infinity;
+  for (const dir of dirs) for (const r of DATA.ratios) for (const f of DATA.fractions) {
+    const rec = rareAt(sim.h2, r, f, dir.d + '-' + dir.t);
+    if (!rec) continue;
+    lo = Math.min(lo, rec[0] - rec[1]); hi = Math.max(hi, rec[0] + rec[1]);
+  }
+  lo = Math.min(lo, 1) - 0.05; hi = Math.max(hi, 1) + 0.05;
+
+  for (const dir of dirs) {
+    $(dir.title).textContent = POP_LONG[dir.d] + ' → ' + POP_LONG[dir.t];
+    const svg = clearSvg($(dir.svg));
+    const W = 380, H = 300, L = 46, R = 12, Tp = 12, B = 46;
+    const X = f => L + (W - L - R) * (f - 0.1) / 0.8;
+    const Y = v => Tp + (H - Tp - B) * (1 - (v - lo) / (hi - lo));
+
+    for (let k = 0; k <= 4; k++) {
+      const t = lo + (hi - lo) * k / 4;
+      svg.appendChild(el('line', { x1: L, y1: Y(t), x2: W - R, y2: Y(t), stroke: 'var(--grid)' }));
+      svg.appendChild(el('text', { x: L - 6, y: Y(t) + 4, 'text-anchor': 'end',
+        fill: 'var(--text-muted)', 'font-size': 10.5 }, t.toFixed(2)));
+    }
+    svg.appendChild(el('line', { x1: L, y1: Y(1), x2: W - R, y2: Y(1),
+      stroke: 'var(--axis)', 'stroke-width': 1.3, 'stroke-dasharray': '4 3' }));
+    svg.appendChild(el('line', { x1: X(sim.frac), y1: Tp, x2: X(sim.frac), y2: H - B,
+      stroke: 'var(--text-primary)', 'stroke-width': 1, 'stroke-opacity': 0.4 }));
+
+    for (const r of DATA.ratios) {
+      const pts = DATA.fractions.map(f => {
+        const rec = rareAt(sim.h2, r, f, dir.d + '-' + dir.t);
+        return rec ? { f, m: rec[0], ci: rec[1], n: rec[2] } : null;
+      }).filter(Boolean);
+      if (!pts.length) continue;
+      const band = pts.map(p => X(p.f).toFixed(1) + ' ' + Y(p.m + p.ci).toFixed(1)).join(' L ') + ' L ' +
+        pts.slice().reverse().map(p => X(p.f).toFixed(1) + ' ' + Y(p.m - p.ci).toFixed(1)).join(' L ');
+      svg.appendChild(el('path', { d: 'M ' + band + ' Z', fill: RATIO_COLOUR[r], 'fill-opacity': 0.13 }));
+      svg.appendChild(el('path', {
+        d: pts.map((p, i) => (i ? 'L' : 'M') + X(p.f).toFixed(1) + ' ' + Y(p.m).toFixed(1)).join(' '),
+        fill: 'none', stroke: RATIO_COLOUR[r], 'stroke-width': 2, 'stroke-linejoin': 'round'
+      }));
+      for (const p of pts) {
+        const big = Math.abs(p.f - sim.frac) < 1e-9 && r === sim.ratio;
+        const dot = el('circle', { cx: X(p.f), cy: Y(p.m), r: big ? 5 : 2.8, fill: RATIO_COLOUR[r],
+          stroke: big ? 'var(--text-primary)' : 'none', 'stroke-width': big ? 1.6 : 0 });
+        const html = '<b>' + POP_LONG[dir.d] + ' → ' + POP_LONG[dir.t] + '</b><br>' +
+          'rare fraction ' + p.f.toFixed(1) + ', effects ' + r + '×<br>' +
+          'transferability ' + p.m.toFixed(3) + '<br>95% interval ' + (p.m - p.ci).toFixed(3) +
+          ' to ' + (p.m + p.ci).toFixed(3) + '<br>' + p.n + ' replicates';
+        dot.addEventListener('mouseenter', e => showTip(e, html));
+        dot.addEventListener('mousemove', e => showTip(e, html));
+        dot.addEventListener('mouseleave', hideTip);
+        svg.appendChild(dot);
+      }
+    }
+    for (const f of [0.1, 0.3, 0.5, 0.7, 0.9]) {
+      svg.appendChild(el('text', { x: X(f), y: H - B + 17, 'text-anchor': 'middle',
+        fill: 'var(--text-muted)', 'font-size': 10.5 }, f.toFixed(1)));
+    }
+    svg.appendChild(el('line', { x1: L, y1: H - B, x2: W - R, y2: H - B, stroke: 'var(--axis)' }));
+    svg.appendChild(el('text', { x: L + (W - L - R) / 2, y: H - 10, 'text-anchor': 'middle',
+      fill: 'var(--text-secondary)', 'font-size': 11.5 }, 'fraction of causal variants that are rare'));
+  }
+
+  const fwd = rareAt(sim.h2, sim.ratio, sim.frac, u.a + '-' + u.b);
+  const rev = rareAt(sim.h2, sim.ratio, sim.frac, u.b + '-' + u.a);
+  $('s7-out').textContent = fmt(fwd[0], 3) + ' / ' + fmt(rev[0], 3);
+  $('s7-sub').textContent = POP_LONG[u.a] + '→' + POP_LONG[u.b] + ' and back';
+
+  let html = '<thead><tr><th>rare fraction</th>' + DATA.ratios.map(r =>
+    '<th>' + r + '× ' + u.a + '→' + u.b + '</th><th>' + r + '× ' + u.b + '→' + u.a + '</th>').join('') +
+    '</tr></thead><tbody>';
+  for (const f of DATA.fractions) {
+    html += '<tr><td>' + f.toFixed(1) + '</td>';
+    for (const r of DATA.ratios) {
+      const x = rareAt(sim.h2, r, f, u.a + '-' + u.b), y = rareAt(sim.h2, r, f, u.b + '-' + u.a);
+      html += '<td>' + (x ? x[0].toFixed(3) : '—') + '</td><td>' + (y ? y[0].toFixed(3) : '—') + '</td>';
+    }
+    html += '</tr>';
+  }
+  $('s7-table').innerHTML = html + '</tbody>';
+}
+
+/* ── 08 · the heritability decomposition ────────────────────────────────── */
+const DECOMP_H2 = ['0.1', '0.8'], DECOMP_RATIOS = [2, 5, 10];
+function buildPanel8() {
+  $('panel-8').innerHTML =
+    '<div class="panel-out"><div class="l">African over European heritability</div>' +
+    '<div class="v" id="s8-out"></div><div class="s" id="s8-sub"></div></div>' +
+    '<p class="small" style="color:var(--text-secondary);margin-bottom:10px">This section follows the ' +
+    'controls in section 7. The decomposition was simulated on a coarser grid than the transferability ' +
+    'sweep, so not every combination exists.</p>' +
+    '<div id="s8-avail"></div>' +
+    '<div class="btn-row" id="s8-jump"></div>';
+}
+function nearestDecomp() {
+  const h2 = DECOMP_H2.includes(sim.h2) ? sim.h2
+    : (parseFloat(sim.h2) < 0.45 ? '0.1' : '0.8');
+  const ratio = DECOMP_RATIOS.includes(sim.ratio) ? sim.ratio
+    : DECOMP_RATIOS.reduce((best, r) =>
+        Math.abs(Math.log(r / sim.ratio)) < Math.abs(Math.log(best / sim.ratio)) ? r : best, DECOMP_RATIOS[0]);
+  return { h2, ratio, exact: h2 === sim.h2 && ratio === sim.ratio };
+}
+function drawSection8() {
+  const near = nearestDecomp();
+  const use = { h2: near.h2, ratio: near.ratio, frac: sim.frac };
+
+  $('s8-unavailable').hidden = near.exact;
+  if (!near.exact) {
+    $('s8-unavailable-text').textContent =
+      'The heritability decomposition was run at European heritability 0.1 and 0.8 and at effect-size ' +
+      'ratios 2, 5 and 10. Section 7 is currently set to heritability ' + sim.h2 + ' and ratio ' +
+      sim.ratio + '×, which was not simulated, so the panel shows the nearest combination that was: ' +
+      'heritability ' + near.h2 + ' and ratio ' + near.ratio + '×.';
+  }
+  $('s8-jump').innerHTML = near.exact ? '' :
+    '<button type="button" id="s8-jump-btn">Move section 7 to heritability ' + near.h2 +
+    ' and ratio ' + near.ratio + '×</button>';
+  if (!near.exact) {
+    $('s8-jump-btn').addEventListener('click', () => {
+      sim.h2 = near.h2; sim.ratio = near.ratio; fireSim();
+    });
+  }
+  $('s8-avail').innerHTML = '<p class="small muted" style="margin:0">Showing European heritability <b>' +
+    use.h2 + '</b>, effect ratio <b>' + use.ratio + '×</b>, rare fraction <b>' + use.frac.toFixed(1) + '</b>.</p>';
+
+  const order = ['ASN', 'EUR', 'AFR'];
+  const vals = order.map(p => ({
+    pop: p,
+    common: decompAt(use.h2, use.ratio, use.frac, p, 'common'),
+    rare: decompAt(use.h2, use.ratio, use.frac, p, 'rare')
+  }));
+  const total = p => (p.common || 0) + (p.rare || 0);
+  const maxTot = Math.max.apply(null, vals.map(total)) * 1.14;
+
+  const svg = clearSvg($('s8-bars'));
+  const W = 700, H = 300, L = 106, R = 128, Tp = 18, B = 46;
+  const X = v => L + (W - L - R) * v / maxTot;
+  const rowH = (H - Tp - B) / vals.length;
+  for (let i = 0; i < vals.length; i++) {
+    const v = vals[i], y = Tp + rowH * i + rowH * 0.16, h = rowH * 0.56;
+    svg.appendChild(el('text', { x: L - 12, y: y + h / 2 + 5, 'text-anchor': 'end',
+      fill: POP_COLOUR[v.pop], 'font-size': 13, 'font-weight': 640 }, POP_LONG[v.pop]));
+    const cw = X(v.common) - L, rw = X(v.rare) - L;
+    svg.appendChild(el('rect', { x: L, y, width: Math.max(cw, 0), height: h, fill: 'var(--c-common)' }));
+    svg.appendChild(el('rect', { x: L + cw, y, width: Math.max(rw, 0), height: h, fill: 'var(--c-rare)' }));
+    if (cw > 60) svg.appendChild(el('text', { x: L + cw / 2, y: y + h / 2 + 5, 'text-anchor': 'middle',
+      fill: '#fff', 'font-size': 11.5, 'font-weight': 600 }, v.common.toFixed(3)));
+    if (rw > 60) svg.appendChild(el('text', { x: L + cw + rw / 2, y: y + h / 2 + 5, 'text-anchor': 'middle',
+      fill: '#3a2a00', 'font-size': 11.5, 'font-weight': 600 }, v.rare.toFixed(3)));
+    svg.appendChild(el('text', { x: L + cw + rw + 12, y: y + h / 2 + 5, fill: 'var(--text-primary)',
+      'font-size': 12.5, 'font-weight': 620 }, 'total ' + total(v).toFixed(3)));
+  }
+  for (let k = 0; k <= 4; k++) {
+    const t = maxTot * k / 4;
+    svg.appendChild(el('text', { x: X(t), y: H - B + 20, 'text-anchor': 'middle',
+      fill: 'var(--text-muted)', 'font-size': 11 }, t.toFixed(2)));
+  }
+  svg.appendChild(el('line', { x1: L, y1: H - B, x2: W - R, y2: H - B, stroke: 'var(--axis)' }));
+  svg.appendChild(el('text', { x: L + (W - L - R) / 2, y: H - 8, 'text-anchor': 'middle',
+    fill: 'var(--text-secondary)', 'font-size': 12, 'font-weight': 600 }, 'heritability'));
+
+  const afr = vals.find(v => v.pop === 'AFR'), eur = vals.find(v => v.pop === 'EUR');
+  $('s8-out').textContent = fmt(total(afr) / total(eur), 3);
+  $('s8-sub').textContent = 'at a rare fraction of ' + use.frac.toFixed(1);
+  $('s8-cap').innerHTML = 'At this setting the variants that are rare in Europeans carry ' +
+    '<b>' + afr.rare.toFixed(3) + '</b> of heritability in the African sample against <b>' +
+    eur.rare.toFixed(3) + '</b> in the European one, a factor of <b>' +
+    fmt(afr.rare / eur.rare, 2) + '</b>. The same variants, the same effect sizes, different allele frequencies.';
+
+  let html = '<thead><tr><th>population</th><th>common</th><th>rare</th><th>total</th></tr></thead><tbody>';
+  for (const v of vals) {
+    html += '<tr><td>' + POP_LONG[v.pop] + '</td><td>' + v.common.toFixed(4) + '</td><td>' +
+      v.rare.toFixed(4) + '</td><td>' + total(v).toFixed(4) + '</td></tr>';
+  }
+  $('s8-table').innerHTML = html + '</tbody>';
+
+  drawAlleleFrequencies();
+}
+function drawAlleleFrequencies() {
+  const af = DATA.af, order = DATA.populations;
+  const cHet = af.common_class.het, rHet = af.rare_class.het;
+  const tiles = [
+    { c: 'var(--c-common)', label: 'common variants', value: fmt(cHet.AFR / cHet.EUR, 2) + '×',
+      note: 'Mean p(1−p) is ' + cHet.AFR.toFixed(4) + ' in the African sample against ' +
+            cHet.EUR.toFixed(4) + ' in the European one, over ' + af.common_class.n.toLocaleString() + ' variants.' },
+    { c: 'var(--c-rare)', label: 'European-rare variants', value: fmt(rHet.AFR / rHet.EUR, 2) + '×',
+      note: 'The same comparison over the ' + af.rare_class.n.toLocaleString() +
+            ' variants that are rare in Europeans: ' + rHet.AFR.toFixed(4) + ' against ' + rHet.EUR.toFixed(4) +
+            '. The gap is far wider than for common variants, which is the whole of section 7.' },
+    { c: 'var(--c-disc)', label: 'lost into Europe', value: af.lost.EUR.rare.toFixed(1) + '%',
+      note: 'Of the European-rare variants, this share segregates in the African sample and is monomorphic in the European one, contributing genetic variance in the first and none in the second. For common variants the figure is ' +
+            af.lost.EUR.common.toFixed(1) + '%.' },
+    { c: 'var(--c-asn)', label: 'lost into East Asia', value: af.lost.ASN.rare.toFixed(1) + '%',
+      note: 'The same quantity for the East Asian sample, against ' + af.lost.ASN.common.toFixed(1) +
+            '% for common variants.' }
+  ];
+  $('s8-af').innerHTML = tiles.map(t =>
+    '<div class="tile" style="--tile-c:' + t.c + '"><div class="tile-label">' + t.label + '</div>' +
+    '<div class="tile-value">' + t.value + '</div><div class="tile-note">' + t.note + '</div></div>').join('');
+  $('s8-af-note').textContent =
+    'Additive genetic variance is proportional to the sum of p(1−p) over the causal sites when the ' +
+    'effect sizes are shared, so these ratios are the direct cause of the heritability differences above.';
+
+  const pooled = af.pooled.mean_het, every = af.everywhere.mean_het;
+  const idx = p => order.indexOf(p);
+  $('s8-af-caution').innerHTML =
+    'Two definitions of a common variant are in use and they do not give the same ordering, so both are ' +
+    'reported rather than one being chosen. Pooling the three samples and requiring a minor allele ' +
+    'frequency of at least 0.01 in the pool, which is the panel the trait simulations actually use, gives ' +
+    'mean p(1−p) of <b>' + pooled[idx('AFR')].toFixed(4) + '</b> African, <b>' +
+    pooled[idx('EUR')].toFixed(4) + '</b> European, <b>' + pooled[idx('ASN')].toFixed(4) + '</b> East Asian, ' +
+    'over ' + af.pooled.n_variants.toLocaleString() + ' variants. Requiring instead that a variant be common ' +
+    'in every one of the three samples separately gives <b>' + every[idx('AFR')].toFixed(4) + '</b>, <b>' +
+    every[idx('EUR')].toFixed(4) + '</b> and <b>' + every[idx('ASN')].toFixed(4) + '</b> over ' +
+    af.everywhere.n_variants.toLocaleString() + ' variants, which <b>reverses the ordering</b>. That is not a ' +
+    'contradiction: demanding that a variant be common everywhere selects against exactly the variation ' +
+    'that is private to one population, which is the variation the result is about.';
+}
+
+/* ═══ 10 · unavoidable against recoverable ════════════════════════════════ */
+const gap = { obs: 0.42, mode: 'h2', tInt: 1.20, h2A: 0.30, h2B: 0.36 };
+function buildPanel10() {
+  $('panel-10').innerHTML =
+    '<div class="panel-out"><div class="l">Recoverable factor</div>' +
+    '<div class="v" id="s10-out"></div><div class="s" id="s10-sub"></div></div>' +
+    '<div class="row" style="--knob:var(--c-T)">' +
+      '<span class="sym" style="font-size:0.78rem">observed</span>' +
+      '<input type="range" id="s10-obs" min="0.05" max="1.5" step="0.01" value="' + gap.obs +
+      '" aria-label="observed empirical transferability">' +
+      '<input type="number" id="s10-obsn" min="0.05" max="1.5" step="0.01" value="' + gap.obs +
+      '" aria-label="observed empirical transferability, typed">' +
+      '<span class="row-def">the transferability actually reported for a real polygenic score, that is, ' +
+      'its accuracy in the target population divided by its accuracy in the discovery population</span></div>' +
+    '<label class="fld"><span>how to set the ceiling</span><span class="seg" id="s10-mode">' +
+      '<button type="button" data-mode="h2">from two heritabilities</button>' +
+      '<button type="button" data-mode="direct">type it directly</button></span></label>' +
+    '<div id="s10-mode-body"></div>' +
+    '<div class="btn-row" style="margin-top:8px" id="s10-presets"></div>';
+
+  for (const id of ['s10-obs', 's10-obsn']) {
+    $(id).addEventListener('input', () => {
+      const v = parseFloat($(id).value);
+      if (!Number.isFinite(v)) return;
+      gap.obs = clamp(v, 0.01, 3);
+      $('s10-obs').value = gap.obs; $('s10-obsn').value = gap.obs;
+      drawSection10();
+    });
+  }
+  $('s10-mode').addEventListener('click', e => {
+    const b = e.target.closest('[data-mode]'); if (!b) return;
+    gap.mode = b.dataset.mode; drawSection10();
+  });
+  renderMode10();
+}
+function renderMode10() {
+  const body = $('s10-mode-body');
+  if (gap.mode === 'h2') {
+    body.innerHTML =
+      '<div class="row" style="--knob:var(--c-disc)"><span class="sym" style="font-size:0.78rem">' +
+        'h² in A</span><input type="range" id="s10-h2a" min="0.05" max="0.9" step="0.005" value="' + gap.h2A +
+        '" aria-label="heritability in the discovery population"><input type="number" id="s10-h2an" min="0.05" max="0.9" step="0.005" value="' +
+        gap.h2A + '" aria-label="heritability in the discovery population, typed">' +
+        '<span class="row-def">narrow-sense heritability in the discovery population</span></div>' +
+      '<div class="row" style="--knob:var(--c-targ)"><span class="sym" style="font-size:0.78rem">' +
+        'h² in B</span><input type="range" id="s10-h2b" min="0.05" max="0.9" step="0.005" value="' + gap.h2B +
+        '" aria-label="heritability in the target population"><input type="number" id="s10-h2bn" min="0.05" max="0.9" step="0.005" value="' +
+        gap.h2B + '" aria-label="heritability in the target population, typed">' +
+        '<span class="row-def">narrow-sense heritability in the target population. Under Hardy–Weinberg ' +
+        'the ceiling is the ratio of these two.</span></div>';
+    for (const [id, key] of [['s10-h2a', 'h2A'], ['s10-h2an', 'h2A'], ['s10-h2b', 'h2B'], ['s10-h2bn', 'h2B']]) {
+      $(id).addEventListener('input', () => {
+        const v = parseFloat($(id).value);
+        if (!Number.isFinite(v)) return;
+        gap[key] = clamp(v, 0.01, 0.99);
+        $('s10-' + (key === 'h2A' ? 'h2a' : 'h2b')).value = gap[key];
+        $('s10-' + (key === 'h2A' ? 'h2an' : 'h2bn')).value = gap[key];
+        drawSection10();
+      });
+    }
+  } else {
+    body.innerHTML =
+      '<div class="row" style="--knob:var(--c-T)"><span class="sym" style="font-size:0.78rem">ceiling</span>' +
+      '<input type="range" id="s10-tint" min="0.3" max="2.5" step="0.01" value="' + gap.tInt +
+      '" aria-label="intrinsic transferability"><input type="number" id="s10-tintn" min="0.3" max="2.5" step="0.01" value="' +
+      gap.tInt + '" aria-label="intrinsic transferability, typed">' +
+      '<span class="row-def">intrinsic transferability, the ceiling this study defines</span></div>';
+    for (const id of ['s10-tint', 's10-tintn']) {
+      $(id).addEventListener('input', () => {
+        const v = parseFloat($(id).value);
+        if (!Number.isFinite(v)) return;
+        gap.tInt = clamp(v, 0.1, 4);
+        $('s10-tint').value = gap.tInt; $('s10-tintn').value = gap.tInt;
+        drawSection10();
+      });
+    }
+  }
+  // Presets taken from this study's own simulations, so the ceiling is a real
+  // number from the paper rather than an invented one.
+  const presets = [
+    { label: 'European → African ceiling', pair: 'EUR-AFR' },
+    { label: 'African → European ceiling', pair: 'AFR-EUR' },
+    { label: 'East Asian → African ceiling', pair: 'ASN-AFR' }
+  ];
+  $('s10-presets').innerHTML = '<span class="small muted" style="width:100%;margin-bottom:2px">' +
+    'Set the ceiling from section 6, at heritability ' + sim.h2 + ':</span>' +
+    presets.map((p, i) => '<button type="button" data-preset10="' + i + '">' + p.label + '</button>').join('');
+  $('s10-presets').addEventListener('click', e => {
+    const b = e.target.closest('[data-preset10]'); if (!b) return;
+    const p = presets[parseInt(b.dataset.preset10, 10)];
+    gap.mode = 'direct';
+    gap.tInt = commonAt('1000', sim.h2, p.pair, 'fixed')[0];
+    renderMode10();
+    drawSection10();
+  });
+}
+function intrinsicNow() {
+  return gap.mode === 'h2' ? gap.h2B / gap.h2A : gap.tInt;
+}
+function drawSection10() {
+  $('s10-mode').querySelectorAll('[data-mode]').forEach(b => b.classList.toggle('on', b.dataset.mode === gap.mode));
+  const Tint = intrinsicNow(), Tobs = gap.obs, R = Tobs / Tint;
+
+  $('s10-out').textContent = fmt(R, 3);
+  $('s10-sub').textContent = 'observed divided by the ceiling';
+
+  const logObs = Math.log(Tobs), logInt = Math.log(Tint), logR = Math.log(R);
+  const tiles = [
+    { c: 'var(--c-T)', label: 'observed transferability', value: fmt(Tobs, 3),
+      note: 'What a real polygenic score achieves in the target relative to the discovery population.' },
+    { c: 'var(--c-targ)', label: 'intrinsic ceiling', value: fmt(Tint, 3),
+      note: gap.mode === 'h2'
+        ? 'The ratio of heritabilities, ' + fmt(gap.h2B, 3) + ' over ' + fmt(gap.h2A, 3) +
+          ', which is the ceiling under Hardy–Weinberg.'
+        : 'Entered directly, or taken from this study’s simulations.' },
+    { c: 'var(--c-disc)', label: 'recoverable factor', value: fmt(R, 3),
+      note: R < 1
+        ? 'A real score falls short of the ceiling by this factor. Closing it is a data and methods problem, not a population-genetic one.'
+        : 'The observed value is at or above the ceiling, which under this model should not happen. See the reading note below.' },
+    { c: 'var(--text-muted)', label: 'share of the log gap', value: (() => {
+        const den = Math.abs(logInt) + Math.abs(logR);
+        return den > 1e-9 ? pct(Math.abs(logInt) / den) : '—';
+      })(),
+      note: 'How much of the total distance from no change is attributable to the population ceiling rather than to imperfect prediction.' }
+  ];
+  $('s10-tiles').innerHTML = tiles.map(t =>
+    '<div class="tile" style="--tile-c:' + t.c + '"><div class="tile-label">' + t.label + '</div>' +
+    '<div class="tile-value">' + t.value + '</div><div class="tile-note">' + t.note + '</div></div>').join('');
+
+  /* The two contributions are drawn on SEPARATE rows rather than end to end.
+     When the ceiling is above one and the observed value below it, the second
+     leg doubles back over the first, and a single row would simply paint the
+     recoverable segment on top of the intrinsic one and hide it. */
+  const svg = clearSvg($('s10-bar'));
+  const W = 700, H = 190, L = 152, R2 = 40, axisY = 150;
+  const span = Math.max(Math.abs(logObs), Math.abs(logInt), 0.35) * 1.25;
+  const X = v => L + (W - L - R2) * (clamp(v, -span, span) + span) / (2 * span);
+
+  svg.appendChild(el('line', { x1: L, y1: axisY, x2: W - R2, y2: axisY, stroke: 'var(--axis)' }));
+  for (const t of [1 / 4, 1 / 3, 1 / 2, 2 / 3, 1, 1.5, 2, 3, 4]) {
+    const lv = Math.log(t);
+    if (Math.abs(lv) > span) continue;
+    const x = X(lv), major = t === 1;
+    svg.appendChild(el('line', { x1: x, y1: 30, x2: x, y2: axisY + (major ? 8 : 4),
+      stroke: major ? 'var(--text-primary)' : 'var(--grid)',
+      'stroke-width': major ? 1.3 : 1, 'stroke-dasharray': major ? '3 3' : null }));
+    svg.appendChild(el('text', { x, y: axisY + 22, 'text-anchor': 'middle',
+      fill: major ? 'var(--text-primary)' : 'var(--text-muted)', 'font-size': major ? 12 : 10.5 },
+      t === 1 / 3 ? '0.33' : t === 2 / 3 ? '0.67' : t === 1 / 4 ? '0.25' : String(t)));
+  }
+
+  const row = (y, from, to, colour, name, detail) => {
+    svg.appendChild(el('text', { x: L - 14, y: y + 4, 'text-anchor': 'end', fill: colour,
+      'font-size': 12, 'font-weight': 640 }, name));
+    svg.appendChild(el('text', { x: L - 14, y: y + 19, 'text-anchor': 'end', fill: 'var(--text-muted)',
+      'font-size': 10.5 }, detail));
+    const a = X(from), b = X(to);
+    if (Math.abs(b - a) < 1.5) {
+      svg.appendChild(el('circle', { cx: a, cy: y, r: 3, fill: colour }));
+      return;
+    }
+    svg.appendChild(el('line', { x1: a, y1: y, x2: b, y2: y, stroke: colour, 'stroke-width': 10,
+      'stroke-linecap': 'butt' }));
+    // A caret showing which way the leg runs, since a leg can point either way.
+    const dir = b > a ? 1 : -1;
+    svg.appendChild(el('path', { d: 'M' + b + ' ' + y + ' l' + (-8 * dir) + ' -6 l0 12 z', fill: colour }));
+  };
+  row(46, 0, logInt, 'var(--c-targ)', 'intrinsic ceiling',
+      'from no change to ' + fmt(Tint, 3));
+  row(96, logInt, logObs, 'var(--c-disc)', 'recoverable',
+      'from ' + fmt(Tint, 3) + ' to ' + fmt(Tobs, 3));
+
+  svg.appendChild(el('circle', { cx: X(logObs), cy: axisY, r: 5.5, fill: 'var(--c-T)',
+    stroke: 'var(--surface-1)', 'stroke-width': 1.5 }));
+  svg.appendChild(el('line', { x1: X(logObs), y1: 30, x2: X(logObs), y2: axisY,
+    stroke: 'var(--c-T)', 'stroke-width': 1, 'stroke-dasharray': '3 3' }));
+  svg.appendChild(el('text', { x: X(logObs), y: 22, 'text-anchor': 'middle', fill: 'var(--c-T)',
+    'font-size': 12, 'font-weight': 640 }, 'observed ' + fmt(Tobs, 3)));
+  svg.appendChild(el('text', { x: L - 14, y: axisY + 22, 'text-anchor': 'end',
+    fill: 'var(--text-muted)', 'font-size': 10.5 }, 'transferability, log axis'));
+
+  // "a + -b" reads badly, so a negative second term is written as a subtraction.
+  const sum = logR < 0
+    ? fmt(logInt, 3) + ' &minus; ' + fmt(Math.abs(logR), 3)
+    : fmt(logInt, 3) + ' + ' + fmt(logR, 3);
+  $('s10-calc').innerHTML =
+    '<div class="r">observed = ceiling &times; recoverable factor</div>' +
+    '<div class="r">' + fmt(Tobs, 3) + ' = ' + fmt(Tint, 3) + ' &times; ' + fmt(R, 3) + '</div>' +
+    '<div class="r tot">on the log scale: ' + fmt(logObs, 3) + ' = ' + sum + '</div>';
+
+  $('s10-read').innerHTML = R < 0.999
+    ? ('A real score reaches ' + pct(R) + ' of what the target population’s own ceiling permits. ' +
+       'Under this framework that shortfall is the part attributable to imperfect data and methods, ' +
+       'and the ceiling itself is the part that no amount of methodological work can move. Note that a ' +
+       'ceiling above one, as the simulations here often produce, makes the observed shortfall larger ' +
+       'than a naive comparison against one would suggest.')
+    : R > 1.001
+      ? ('The observed value sits above the ceiling, which the idealized model does not allow, since the ' +
+         'optimal predictor cannot be beaten. In practice this means one of the inputs is off: the ' +
+         'heritability estimates may come from different studies or scales, the observed transferability ' +
+         'may be measured on a different quantity such as a correlation rather than a variance ratio, or ' +
+         'the two populations may differ in ways the Hardy–Weinberg simplification does not capture.')
+      : 'The observed value sits exactly at the ceiling, leaving nothing attributable to methods.';
+}
+
+/* ═══ boot ════════════════════════════════════════════════════════════════ */
+function renderHeroEquations() {
+  $('hero-eq').innerHTML =
+    mh('\\mathrm{PA} \\;=\\; \\frac{2\\sigma^{2}\\overline{\\Phi}}{2\\sigma^{2}\\overline{\\Phi} + \\tau^{2}}' +
+       '\\qquad\\qquad T_{A\\to B} \\;=\\; \\frac{\\mathrm{PA}_B}{\\mathrm{PA}_A}', true);
+  /* The symbols named in the opening paragraph. Scoped to the masthead on purpose:
+     a document-wide pass would overwrite the spark titles, whose builder sets
+     innerHTML to the rendered symbol PLUS a trailing label. */
+  document.querySelectorAll('.masthead [data-tex]').forEach(n => {
+    n.innerHTML = mh(n.dataset.tex, false);
+  });
+  $('l-gen-sym').innerHTML = mh('2\\sigma^2_A\\overline{\\Phi}_A');
+  $('l-env-sym').innerHTML = mh('\\tau^2_A');
+  $('s1-hwe-eq').innerHTML = mh('\\overline{\\Phi} = \\tfrac{1}{2} \\;\\Longrightarrow\\; ' +
+    '\\mathrm{PA} = \\frac{\\sigma^{2}}{\\sigma^{2}+\\tau^{2}} = h^{2} \\qquad\\text{and}\\qquad ' +
+    'T_{A\\to B} = \\frac{h^{2}_{B}}{h^{2}_{A}}', true);
+  $('s10-eq').innerHTML = mh('\\underbrace{T_{\\text{observed}}}_{\\text{a real score}} \\;=\\; ' +
+    '\\underbrace{T_{\\text{intrinsic}}}_{\\text{unavoidable}} \\;\\times\\; ' +
+    '\\underbrace{R}_{\\text{recoverable}}', true);
+}
+
+function boot() {
+  renderHeroEquations();
+
+  buildTheoryPanel('panel-1', ['sA', 'pA', 'tA'], { outLabel: 'Prediction accuracy ceiling', defs: true });
+  buildTheoryPanel('panel-2', ['sA', 'pA', 'tA', 'sB', 'pB', 'tB'], { outLabel: 'Transferability, A into B' });
+  buildTheoryPanel('panel-3', ['sA', 'pA', 'tA', 'sB', 'pB', 'tB'], { outLabel: 'Transferability, A into B' });
+  buildTheoryPanel('panel-4', ['sA', 'pA', 'tA', 'sB', 'pB', 'tB'], { outLabel: 'Transferability, A into B' });
+  buildSparks();
+  buildHeatControls();
+  wireHeatHover();
+  buildPanel5();
+  buildPanel6();
+  buildPanel7();
+  buildPanel8();
+  buildPanel10();
+
+  $('s1-hwe-btn').addEventListener('click', () => setTheory('pA', 0.5));
+  document.querySelectorAll('[data-preset]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const p = btn.dataset.preset;
+      if (p === 'equal') setTheoryAll(BASE);
+      else if (p === 'gt') setTheoryAll({ sA: 0.3, pA: 0.6, tA: 1.0, sB: 0.55, pB: 0.6, tB: 1.0 });
+      else if (p === 'lt') setTheoryAll({ sA: 0.55, pA: 0.6, tA: 1.0, sB: 0.3, pB: 0.6, tB: 1.0 });
+      else setTheoryAll(BASE);
+    });
+  });
+
+  onTheory(drawSection1);
+  onTheory(drawSection2);
+  onTheory(drawSparks);
+  onTheory(drawHeat);
+
+  simListeners.push(drawSection6, drawSection7, drawSection8, () => renderMode10());
+
+  drawSection1(); drawSection2(); drawSparks(); drawHeat();
+  drawSection5();
+  drawSection6(); drawSection7(); drawSection8();
+  drawSection10();
+
+  // theme
+  const toggle = $('theme-toggle');
+  const systemDark = () => window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const isDark = () => (document.documentElement.dataset.theme
+    ? document.documentElement.dataset.theme === 'dark' : systemDark());
+  const label = () => { toggle.textContent = isDark() ? 'Light' : 'Dark'; };
+  toggle.addEventListener('click', () => {
+    document.documentElement.dataset.theme = isDark() ? 'light' : 'dark';
+    label();
+    // the canvas is painted with resolved colours, so it has to be repainted
+    drawHeat();
+  });
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    if (!document.documentElement.dataset.theme) { label(); drawHeat(); }
+  });
+  label();
+}
+
+/* KaTeX is loaded with defer, so it has executed by DOMContentLoaded. Booting
+   inline would render every label through the fallback and cache it there. */
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+else boot();
+</script>
+</body>
+</html>
