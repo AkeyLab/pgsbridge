@@ -12,7 +12,7 @@ source("scripts/config.R")
 
 figure <- figure_S3(PRS_DATA)
 
-ggsave(file.path(PRS_OUTPUT, "S3_Fig.pdf"), figure, height = 5, width = 6)
-ggsave(file.path(PRS_OUTPUT, "S3_Fig.png"), figure, height = 5, width = 6,
+ggsave(file.path(PRS_OUTPUT, "S3_Fig.pdf"), figure, height = 5, width = 7)
+ggsave(file.path(PRS_OUTPUT, "S3_Fig.png"), figure, height = 5, width = 7,
        dpi = 300)
 cat("S3 Fig written to", PRS_OUTPUT, "\n")

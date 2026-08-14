@@ -23,6 +23,8 @@ pairs.}
 A \code{patchwork} object.
 }
 \description{
+Population pairs are laid out two to a row, each keeping its own legend, so a
+figure with three pairs fills the first row and puts the third below.
 \code{wrap_elements} keeps \code{patchwork} from tagging every leaf panel of the nested
 arrangements, so each population pair receives exactly one tag.
 }

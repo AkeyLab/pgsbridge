@@ -38,8 +38,8 @@ turn replicate output into the figures.
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://github.com/KaiqianZhang/pgsbridge/}
-  \item Report bugs at \url{https://github.com/KaiqianZhang/pgsbridge/issues}
+  \item \url{https://github.com/AkeyLab/pgsbridge/}
+  \item Report bugs at \url{https://github.com/AkeyLab/pgsbridge/issues}
 }
 
 }

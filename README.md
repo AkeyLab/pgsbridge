@@ -31,7 +31,7 @@ Install the development version from GitHub:
 
 ```R
 install.packages("remotes")
-remotes::install_github("KaiqianZhang/pgsbridge")
+remotes::install_github("AkeyLab/pgsbridge")
 ```
 
 The genotype readers are optional and only the simulations need them:

@@ -38,28 +38,29 @@ figure_01 <- function(data_dir) {
     panel_a <- ggplot2::ggplot(scenarios,
                                ggplot2::aes(.data$T_theoretical, .data$T_empirical)) +
         ggplot2::geom_abline(slope = 1, intercept = 0, linetype = "dashed",
-                             colour = "red") +
+                             colour = "grey30") +
         ggplot2::geom_point(colour = col_point, alpha = 0.55, size = 1.5,
                             stroke = 0) +
         ggplot2::annotate("text", x = axis_range[1], y = axis_range[2],
                           hjust = 0, vjust = 1,
                           label = sprintf("r^2 == %.3f", validation$r_squared),
                           parse = TRUE, size = 4) +
-        ggplot2::labs(x = expression(paste("Theoretical transferability  ", T[theo])),
-                      y = expression(paste("Empirical transferability  ", T[emp]))) +
+        ggplot2::labs(
+            x = expression(paste("Predicted Intrinsic Transferability  ", T[theo])),
+            y = expression(paste("Simulated Intrinsic Transferability  ", T[emp]))) +
         ggplot2::coord_fixed(xlim = axis_range, ylim = axis_range, clip = "off") +
         ggplot2::theme_classic(base_size = 12) +
         ggplot2::theme(axis.title = ggplot2::element_text(size = 11),
                        plot.margin = ggplot2::margin(6, 8, 4, 6))
 
     panel_b <- sweep_panel(seq(0.1, 1.0, length.out = 300), "sigma2",
-                           expression(paste("Additive genetic variance  ", sigma^2)),
+                           expression(paste("Additive Genetic Variance  ", sigma^2)),
                            expression(sigma[A]^2), expression(sigma[B]^2))
     panel_c <- sweep_panel(seq(0.5, 1.0, length.out = 300), "phi",
-                           expression(paste("Mean self-kinship  ", bar(Phi))),
+                           expression(paste("Mean Self-Kinship  ", bar(Phi))),
                            expression(bar(Phi)[A]), expression(bar(Phi)[B]))
     panel_d <- sweep_panel(seq(0.3, 3.0, length.out = 300), "tau2",
-                           expression(paste("Non-genetic variance  ", tau^2)),
+                           expression(paste("Non-Genetic Variance  ", tau^2)),
                            expression(tau[A]^2), expression(tau[B]^2))
 
     (panel_a | panel_b) / (panel_c | panel_d) +
@@ -105,7 +106,8 @@ sweep_panel <- function(grid, determinant, x_label, label_A, label_B) {
     ggplot2::ggplot(curves, ggplot2::aes(.data$x, .data$value,
                                          colour = .data$population,
                                          linetype = .data$population)) +
-        ggplot2::geom_hline(yintercept = 1, linetype = 3, colour = "grey55") +
+        ggplot2::geom_hline(yintercept = 1, linetype = 3, colour = "grey35",
+                            linewidth = 0.9) +
         ggplot2::geom_line(linewidth = 1.1) +
         ggplot2::scale_colour_manual(values = c(A = col_discovery, B = col_target),
                                      breaks = c("A", "B"),

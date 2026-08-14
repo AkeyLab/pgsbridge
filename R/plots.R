@@ -41,10 +41,14 @@ plot_direction_pairs <- function(summary_df, label_points = TRUE,
   summary_df$ordered_pair <- ifelse(summary_df$on_left,
                                     as.character(summary_df$pop_pair),
                                     reverse_pair(summary_df$pop_pair))
-  summary_df$label <- sprintf(
-    "%s: %.3f",
-    sub("-", " to ", summary_df$ordered_pair, fixed = TRUE),
-    summary_df$emp_tau)
+  # Plotmath, so the population pair reads bold with a true arrow between the
+  # discovery and the target while the value stays in the regular face. Written
+  # this way it renders identically on the PDF and the PNG device.
+  pair_parts <- strsplit(summary_df$ordered_pair, "-", fixed = TRUE)
+  summary_df$label <- vapply(seq_along(pair_parts), function(i) {
+    sprintf('bold("%s" %%->%% "%s") * ": %.3f"',
+            pair_parts[[i]][1], pair_parts[[i]][2], summary_df$emp_tau[i])
+  }, character(1))
 
   # Push labels apart where the lines they belong to lie close together. Working
   # upwards from the lowest label in a group, each is raised to at least
@@ -78,7 +82,7 @@ plot_direction_pairs <- function(summary_df, label_points = TRUE,
     facet_nested(. ~ heritability_title + h2) +
     scale_x_continuous(limits = c(1 - label_margin, 2 + label_margin),
                        breaks = c(1, 2)) +
-    ylab("Transferability") +
+    ylab("Intrinsic Transferability") +
     scale_color_manual("Pop Pair", values = pair_pal) +
     theme_bw(base_size = PGS_BASE_SIZE) +
     theme(axis.title.x = element_blank(),
@@ -92,7 +96,8 @@ plot_direction_pairs <- function(summary_df, label_points = TRUE,
       geom_text(aes(x = x + ifelse(on_left, -label_gap, label_gap),
                     y = label_y, label = label,
                     hjust = ifelse(on_left, 1, 0)),
-                colour = "black", size = 2.6, show.legend = FALSE)
+                colour = "black", size = 2.6, parse = TRUE,
+                show.legend = FALSE)
   }
 
   plot
@@ -120,7 +125,7 @@ plot_rare_variant_sweep <- function(summary_df, title, y_max) {
     labs(colour = "Rare/Common Effect Size Ratio") +
     scale_color_manual(values = ratio_pal) +
     xlab("Fraction of Rare Variants") +
-    ylab("Transferability") +
+    ylab("Intrinsic Transferability") +
     ggtitle(title) +
     ylim(0, y_max) +
     scale_x_continuous(breaks = seq(0, 1, by = 0.1)) +

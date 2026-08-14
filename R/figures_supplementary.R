@@ -184,6 +184,8 @@ figure_S6 <- function(data_dir) {
 
 #' Assemble a rare-variant sweep figure from a list of population pairs
 #'
+#' Population pairs are laid out two to a row, each keeping its own legend, so a
+#' figure with three pairs fills the first row and puts the third below.
 #' `wrap_elements` keeps `patchwork` from tagging every leaf panel of the nested
 #' arrangements, so each population pair receives exactly one tag.
 #'
@@ -209,15 +211,16 @@ rare_variant_figure <- function(data_dir, heritability, h2_tag, pairs,
         arrange_rare_variant_pair(directory, h2_tag, pair[1], pair[2], y_max)
     })
 
-    patchwork::wrap_plots(lapply(panels, patchwork::wrap_elements), ncol = 1) +
+    patchwork::wrap_plots(lapply(panels, patchwork::wrap_elements), ncol = 2) +
         patchwork::plot_annotation(tag_levels = "a") &
         ggplot2::theme(plot.tag = ggplot2::element_text(face = "bold", size = 14))
 }
 
 #' S7 Fig: allele frequency in African against non-African samples
 #'
-#' Common and rare variants, for the African with European and African with East
-#' Asian comparisons.  The point of the figure is the mass of rare variants lying
+#' Four panels in one row: the African with European comparison for common then
+#' rare variants, followed by the African with East Asian comparison for the
+#' same two classes.  The point of the figure is the mass of rare variants lying
 #' on the horizontal axis: variants that segregate in the African sample and have
 #' fallen to zero frequency in the non-African one.  Rare variants are lost this
 #' way far more often than common ones, which is what makes the heritability gap
@@ -249,7 +252,7 @@ figure_S7 <- function(data_dir, rare_axis_limit = 0.02) {
     density_ramp <- grDevices::colorRampPalette(
         c("white", unname(okabe_ito["blue"])))
 
-    old <- graphics::par(mfrow = c(2, 2), mar = c(4.2, 4.2, 2.4, 1.2))
+    old <- graphics::par(mfrow = c(1, 4), mar = c(4.2, 4.2, 2.4, 1.2))
     on.exit(graphics::par(old), add = TRUE)
 
     graphics::smoothScatter(common$pafr_common, common$peur_common,

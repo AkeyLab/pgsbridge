@@ -9,11 +9,11 @@
 
 source("scripts/config.R")
 
-pdf(file.path(PRS_OUTPUT, "S7_Fig.pdf"), height = 8, width = 8)
+pdf(file.path(PRS_OUTPUT, "S7_Fig.pdf"), height = 2.83, width = 9.07)
 figure_S7(PRS_DATA)
 invisible(dev.off())
 
-png(file.path(PRS_OUTPUT, "S7_Fig.png"), height = 8, width = 8,
+png(file.path(PRS_OUTPUT, "S7_Fig.png"), height = 2.83, width = 9.07,
     units = "in", res = 300)
 figure_S7(PRS_DATA)
 invisible(dev.off())

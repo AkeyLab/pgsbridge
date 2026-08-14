@@ -16,8 +16,9 @@ which occupy only a small corner of the unit square.}
 Nothing; called for the plot it draws.
 }
 \description{
-Common and rare variants, for the African with European and African with East
-Asian comparisons.  The point of the figure is the mass of rare variants lying
+Four panels in one row: the African with European comparison for common then
+rare variants, followed by the African with East Asian comparison for the
+same two classes.  The point of the figure is the mass of rare variants lying
 on the horizontal axis: variants that segregate in the African sample and have
 fallen to zero frequency in the non-African one.  Rare variants are lost this
 way far more often than common ones, which is what makes the heritability gap
