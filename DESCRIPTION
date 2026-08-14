@@ -1,0 +1,54 @@
+Package: pgstrans
+Title: Intrinsic Transferability of Polygenic Scores Between Populations
+Version: 1.0.0
+Authors@R: c(
+    person(given = "Kaiqian",
+           family = "Zhang",
+           role = c("aut", "cre"),
+           email = "zhangkaiqian2025@gmail.com"),
+    person(given = "John D.",
+           family = "Storey",
+           role = c("aut"),
+           email = "jstorey@princeton.edu",
+           comment = c(ORCID = "0000-0001-5992-402X")),
+    person(given = "Joshua M.",
+           family = "Akey",
+           role = c("aut"),
+           email = "jakey@princeton.edu")
+    )
+Description: A polygenic score built in one population usually predicts less
+    accurately in another.  This package computes the best accuracy any such
+    score can reach in a population, which is the share of the trait's variance
+    that is genetic, and the ratio of those ceilings between two populations,
+    which is their intrinsic transferability.  The ceiling is set by three
+    quantities: the additive genetic variance fixed by the allele-frequency
+    spectrum, the average self-kinship summarising within-population structure,
+    and the non-genetic variance.  Functions are provided to evaluate the closed
+    form, to simulate traits on real or simulated genotypes and measure
+    transferability from them, and to draw the resulting figures.  Method
+    described in Zhang, Storey and Akey (2026).
+Depends:
+    R (>= 4.1)
+Imports:
+    stats,
+    utils,
+    ggplot2,
+    ggh4x,
+    patchwork,
+    dplyr,
+    rlang
+Suggests:
+    scales,
+    BEDMatrix,
+    genio,
+    bnpsd,
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+VignetteBuilder: knitr
+URL: https://github.com/KaiqianZhang/prs-transferability/
+BugReports: https://github.com/KaiqianZhang/prs-transferability/issues
+Config/roxygen2/version: 8.1.0

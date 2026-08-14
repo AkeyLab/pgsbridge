@@ -1,17 +1,3 @@
-# R/plots.R
-#
-# The two plot shapes that several figures share. Everything figure-specific
-# (titles, axis limits, panel arrangement, output size) stays in the individual
-# figure scripts under figures/.
-
-source(file.path(PRS_ROOT, "R", "theme.R"))
-
-suppressMessages({
-  library(ggplot2)
-  library(ggh4x)
-  library(patchwork)
-})
-
 #' Transferability in both directions, for three population pairs
 #'
 #' The shape used by Figures 2, S2 and S3. Each unordered population pair is one
@@ -38,6 +24,7 @@ suppressMessages({
 #' @param min_label_separation Smallest vertical gap between two labels in the
 #'   same panel and on the same side, as a fraction of the vertical range.
 #' @return A ggplot object.
+#' @export
 plot_direction_pairs <- function(summary_df, label_points = TRUE,
                                  label_gap = 0.06, label_margin = 1.5,
                                  min_label_separation = 0.055) {
@@ -122,6 +109,7 @@ plot_direction_pairs <- function(summary_df, label_points = TRUE,
 #' @param y_max Upper limit of the vertical axis. The panels of one figure share
 #'   a limit so that they can be read against each other.
 #' @return A ggplot object.
+#' @export
 plot_rare_variant_sweep <- function(summary_df, title, y_max) {
   dodge <- position_dodge(0.01)
   ggplot(summary_df, aes(x = fraction, y = emp_tau, colour = ratio)) +
@@ -154,6 +142,7 @@ plot_rare_variant_sweep <- function(summary_df, title, y_max) {
 #'   The left panel is `first` to `second`.
 #' @param y_max Upper limit of the vertical axis, shared by both panels.
 #' @return A patchwork arrangement of the two panels under one legend.
+#' @export
 arrange_rare_variant_pair <- function(data_dir, h2_tag, first, second, y_max) {
   forward <- plot_rare_variant_sweep(
     read_rare_variant_sweep(data_dir, h2_tag, paste0(first, "-", second)),

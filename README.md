@@ -1,114 +1,135 @@
-# Population-genetic and environmental determinants of polygenic score transferability
+# pgstrans
 
-Code and simulation results for the manuscript.
+The `pgstrans` ('polygenic score transferability') R package computes the best
+accuracy a polygenic score can attain in a population, and how much of that
+accuracy carries over to another population. More specifically, `pgstrans`
+evaluates the closed form for that ceiling, simulates traits on real or
+simulated genotypes to measure it directly, and draws the figures of the
+accompanying manuscript.
 
-Kaiqian Zhang, John D. Storey, Joshua M. Akey.
-Lewis-Sigler Institute for Integrative Genomics, Princeton University.
-
-## The quantity being computed
-
-The best accuracy any polygenic score can reach in a population `S` is the share
-of the trait's variance that is genetic,
+A polygenic score built in one population usually predicts less accurately in
+another. Some of that loss is fixed by population history and some could still
+be recovered by better data and methods. Separating the two needs a reference
+point, and the natural one is the best case: the optimal predictor, in which the
+causal variants and their effects are known exactly, are identical across
+populations, and carry no linkage disequilibrium. The accuracy it attains is the
+share of a population's trait variance that is genetic,
 
 ```
 PA_S = 2 sigma_S^2 Phibar_S / (2 sigma_S^2 Phibar_S + tau_S^2)
 ```
 
-with `sigma_S^2` the additive genetic variance, `Phibar_S` the average
-self-kinship, and `tau_S^2` the non-genetic variance. Intrinsic transferability
-from a discovery population `A` to a target population `B` is `PA_B / PA_A`.
+set by the additive genetic variance `sigma_S^2` fixed by the allele-frequency
+spectrum, the average self-kinship `Phibar_S` summarising within-population
+structure, and the non-genetic variance `tau_S^2`. Intrinsic transferability
+from a discovery population `A` to a target population `B` is the ratio of their
+ceilings, `PA_B / PA_A`.
 
-## Layout
+## Installation
 
-```
-config.R        every file path, in one place
-R/              theory.R  traits.R  variant_pools.R  summaries.R  plots.R  theme.R
-simulation/     01-08, numbered in running order, each with a .slurm wrapper
-analysis/       compute_fst.py
-figures/        one script per manuscript figure
-data/           pre-computed results, so figures run without a cluster
-output/         figures are written here
-```
+Install the development version from GitHub:
 
-## Redraw the figures
-
-From the repository root. Nothing else is needed; no genotypes required.
-
-```
-Rscript figures/figure_01.R      ...      Rscript figures/figure_S8.R
+```R
+install.packages("remotes")
+remotes::install_github("KaiqianZhang/prs-transferability")
 ```
 
-## Rerun the simulations
+The genotype readers are optional and only the simulations need them:
 
-Needs a cluster and several days.
-
-```
-sbatch simulation/01_simulate_genotypes.slurm            genotypes, written as a VCF
-bash   simulation/02_prepare_genotypes.sh sim.vcf genotypes/
-sbatch simulation/03_theory_validation.slurm             Fig 1a
-sbatch simulation/04_traits_common_variants.slurm        Fig 2, S1, S2
-sbatch simulation/05_traits_normal_effects.slurm         S2
-sbatch simulation/06_traits_rare_and_common.slurm        Fig 3, S4-S6
-sbatch simulation/07_heritability_decomposition.slurm    Fig 4
-sbatch simulation/08_allele_frequencies.slurm            S3, S7, S8
+```R
+install.packages(c("BEDMatrix", "genio"))
 ```
 
-Step 3 is self-contained. Steps 4 to 8 read the PLINK files from step 2, whose
-location is `PRS_GENOTYPES` in `config.R`.
+## Example
 
-The fixation index quoted in the text:
+The ceiling in a single population, and how it responds to each determinant:
+
+```R
+library(pgstrans)
+
+# a population in Hardy-Weinberg equilibrium whose trait is half genetic
+prediction_accuracy(sigma2 = 1, phi_bar = 0.5, tau2 = 1)
+#> [1] 0.5
+
+# within-population structure raises the genetic variance, and the ceiling
+prediction_accuracy(sigma2 = 1, phi_bar = 0.6, tau2 = 1)
+#> [1] 0.5454545
+
+# environmental variance lowers it
+prediction_accuracy(sigma2 = 1, phi_bar = 0.5, tau2 = 2)
+#> [1] 0.3333333
+```
+
+Transferability compares two such ceilings. It exceeds one when the target
+population is the more predictable of the two:
+
+```R
+# the target has the larger additive genetic variance
+transferability(
+    sigma2_A = 1.0, phi_bar_A = 0.5, tau2_A = 1,
+    sigma2_B = 1.2, phi_bar_B = 0.5, tau2_B = 1
+)
+#> [1] 1.090909
+
+# identical populations transfer perfectly
+transferability(1, 0.5, 1, 1, 0.5, 1)
+#> [1] 1
+```
+
+## Example with simulated traits
+
+The same quantity can be measured rather than evaluated. Choose effect sizes
+that give a target heritability, simulate a trait, and compare the optimal
+predictor's measured accuracy against the closed form:
+
+```R
+library(pgstrans)
+set.seed(1)
+
+# 1,000 causal variants and 5,000 individuals in Hardy-Weinberg equilibrium
+m_loci <- 1000
+n_ind <- 5000
+p <- runif(m_loci, 0.05, 0.95)
+X <- matrix(rbinom(n_ind * m_loci, 2, rep(p, each = n_ind)), n_ind, m_loci)
+
+# one effect size shared by every causal variant, giving 40 percent heritability
+beta <- rep(shared_effect_size(h2 = 0.4, tau2 = 1, p = p), m_loci)
+
+# simulate the trait and score the optimal predictor
+trait <- simulate_trait(X, beta, alpha = 0, tau2 = 1)
+empirical_accuracy(trait$y, trait$g)
+#> [1] 0.4034
+
+# which matches the closed form at the realised allele frequencies
+prediction_accuracy(
+    sigma2 = additive_genetic_variance(beta, allele_frequencies(X)),
+    phi_bar = 0.5, tau2 = 1
+)
+#> [1] 0.4013
+```
+
+## Reproducing the manuscript
+
+The repository carries the analysis scripts and the pre-computed simulation
+results alongside the package. Clone it, then from the repository root:
 
 ```
-python analysis/compute_fst.py --dir genotypes \
-    --stems afr_all_variants eur_all_variants asn_all_variants --labels AFR EUR ASN
+Rscript scripts/figures/figure_01.R      ...      Rscript scripts/figures/figure_S8.R
 ```
 
-## Figure to code
+Each script writes a PDF and a PNG into `output/`. No genotypes and no cluster
+are needed; the replicate-level results the figures summarise are in `data/`.
 
-| Figure | Script | Input from |
-| --- | --- | --- |
-| Fig 1 | `figures/figure_01.R` | `03_theory_validation.R` for panel a; b to d are closed form |
-| Fig 2 | `figures/figure_02.R` | `04_traits_common_variants.R` |
-| Fig 3 | `figures/figure_03.R` | `06_traits_rare_and_common.R` |
-| Fig 4 | `figures/figure_04.R` | `07_heritability_decomposition.R` |
-| S1 Fig | `figures/figure_S1.R` | `04_traits_common_variants.R` |
-| S2 Fig | `figures/figure_S2.R` | `04` and `05_traits_normal_effects.R` |
-| S3 Fig | `figures/figure_S3.R` | `08_allele_frequencies.R` |
-| S4-S6 Fig | `figures/figure_S4.R` to `_S6.R` | `06_traits_rare_and_common.R` |
-| S7, S8 Fig | `figures/figure_S7.R`, `_S8.R` | `08_allele_frequencies.R` |
+Regenerating those results from scratch needs a cluster and several days. The
+scripts in `scripts/simulation/` are numbered in the order they run, each with a
+matching `.slurm` wrapper, and `vignette("reproducing-the-figures")` walks
+through both paths.
 
-S3 Fig also needs 1000 Genomes per-population allele frequencies, which are not
-included here; the script draws the simulated series only.
+## Citations
 
-## Data
+Zhang K, Storey JD, Akey JM. "Population-genetic and environmental determinants
+of polygenic score transferability."
 
-| Directory | Contents |
-| --- | --- |
-| `theory_validation/` | simulated population pairs behind Fig 1a |
-| `transferability_common_variants/` | replicates for 20, 50, 100 and 1,000 common causal variants, three heritabilities |
-| `transferability_normal_effects/` | the same at 1,000 causal variants, normally distributed effects |
-| `transferability_rare_variants/` | nine rare-variant fractions by four effect-size ratios, one directory per heritability |
-| `heritability_decomposition/` | common and rare heritability shares behind Fig 4 |
-| `allele_frequencies/` | per-population frequencies for the common and rare pools |
-
-Each transferability file is a data frame with `emp_tau`, one value per
-replicate, and `pop_comb`, the ordered pair. `ASN-AFR` means discovery East
-Asian, target African.
-
-## Software
-
-R 4.5.1 with `bnpsd`, `BEDMatrix`, `genio`, `ggplot2`, `ggh4x`, `patchwork`,
-`dplyr`, `scales`. Python 3 with `numpy`. `msprime` 0.7 for the coalescent
-simulator, which does not run under 1.x. PLINK 1.90 and 2.00.
-
-Set `PRS_RLIB` if R packages live outside the default library path.
-
-## Data availability
-
-The theory simulation is self-contained. Coalescent genotypes are regenerated by
-`simulation/01_simulate_genotypes.py` and are not redistributed. Everything
-needed to redraw the figures is in `data/`.
-
-## Licence
-
-MIT. See `LICENSE`.
+Ochoa A, Storey JD. "Estimating FST and kinship for arbitrary population
+structures." PLoS Genet 17(1): e1009241 (2021).
+[doi:10.1371/journal.pgen.1009241](https://doi.org/10.1371/journal.pgen.1009241)

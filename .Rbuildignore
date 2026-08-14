@@ -1,0 +1,9 @@
+^LICENSE\.md$
+^scripts$
+^data$
+^\.github$
+^cran-comments\.md$
+^.*\.Rproj$
+^\.Rproj\.user$
+^output$
+^genotypes$

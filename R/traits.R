@@ -1,14 +1,3 @@
-# R/traits.R
-#
-# Simulating traits on a fixed set of genotypes, and measuring the optimal
-# predictor's accuracy and transferability from the simulated data.
-#
-# Every function here is used by the scripts in simulation/. The genotypes come
-# from the coalescent simulation and are held fixed; what is simulated is the
-# choice of causal variants, the effect sizes, and the non-genetic deviations.
-
-source(file.path(PRS_ROOT, "R", "theory.R"))
-
 #' Draw causal variants spread evenly across a variant pool
 #'
 #' The pool of `n_pool` variants is cut into `m_causal` consecutive blocks of
@@ -25,6 +14,7 @@ source(file.path(PRS_ROOT, "R", "theory.R"))
 #' @param n_pool Number of variants in the pool.
 #' @param m_causal Number of causal variants to draw.
 #' @return An integer vector of `m_causal` column indices into the pool.
+#' @export
 sample_causal_variants <- function(n_pool, m_causal) {
   block_width <- floor(n_pool / m_causal)
   stopifnot(block_width >= 1)
@@ -37,6 +27,7 @@ sample_causal_variants <- function(n_pool, m_causal) {
 #' @param X Genotype matrix, individuals in rows and variants in columns, coded
 #'   as the number of copies of the reference allele.
 #' @return A numeric vector of allele frequencies, one per column.
+#' @export
 allele_frequencies <- function(X) {
   colSums(X) / (2 * nrow(X))
 }
@@ -52,6 +43,7 @@ allele_frequencies <- function(X) {
 #' @param tau2 Non-genetic variance.
 #' @return A list with `y`, the simulated trait, and `g`, the genetic value
 #'   sum_i beta_i X_ij, which is also the optimal predictor up to the intercept.
+#' @export
 simulate_trait <- function(X, beta, alpha, tau2) {
   g <- as.vector(X %*% beta)
   list(y = alpha + g + rnorm(nrow(X), mean = 0, sd = sqrt(tau2)),
@@ -84,6 +76,7 @@ simulate_trait <- function(X, beta, alpha, tau2) {
 #' @param y Simulated trait values.
 #' @param y_hat Optimal-predictor values for the same individuals.
 #' @return The estimated prediction accuracy.
+#' @export
 empirical_accuracy <- function(y, y_hat) {
   as.numeric(cor(y, y_hat))^2
 }
@@ -100,6 +93,7 @@ empirical_accuracy <- function(y, y_hat) {
 #' @param y_target,y_hat_target Trait and optimal predictor in the target
 #'   population.
 #' @return The estimated transferability ratio.
+#' @export
 empirical_transferability <- function(y_discovery, y_hat_discovery,
                                       y_target, y_hat_target) {
   empirical_accuracy(y_target, y_hat_target) /
@@ -117,6 +111,7 @@ empirical_transferability <- function(y_discovery, y_hat_discovery,
 #' @param beta_common,beta_rare The two effect sizes.
 #' @param y The simulated trait for those individuals.
 #' @return A list with `common` and `rare`, the two heritability shares.
+#' @export
 heritability_split <- function(X_common, X_rare, beta_common, beta_rare, y) {
   g_common <- as.vector(X_common %*% rep(beta_common, ncol(X_common)))
   g_rare <- as.vector(X_rare %*% rep(beta_rare, ncol(X_rare)))

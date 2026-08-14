@@ -1,0 +1,148 @@
+---
+title: "Reproducing the figures"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Reproducing the figures}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+```{r}
+library(pgstrans)
+```
+
+This vignette shows what the package computes, then how the manuscript's
+figures are produced from it. There are two routes: redrawing the figures from
+the pre-computed results, which takes seconds, and regenerating those results
+from genotypes, which takes a cluster and several days.
+
+## The ceiling
+
+The best accuracy a polygenic score can attain in a population is the share of
+that population's trait variance that is genetic. Three quantities set it: the
+additive genetic variance fixed by the allele-frequency spectrum, the average
+self-kinship summarising within-population structure, and the non-genetic
+variance.
+
+```{r}
+# equal genetic and non-genetic variance, no within-population structure
+prediction_accuracy(sigma2 = 1, phi_bar = 0.5, tau2 = 1)
+```
+
+Only the product of the additive genetic variance and the average self-kinship
+matters, never either alone. Doubling one and halving the other leaves the
+ceiling unchanged:
+
+```{r}
+prediction_accuracy(sigma2 = 2.0, phi_bar = 0.25, tau2 = 1)
+prediction_accuracy(sigma2 = 0.5, phi_bar = 1.00, tau2 = 1)
+```
+
+The non-genetic variance acts on its own, which is why environmental variation
+alone can move transferability away from one.
+
+## Transferability
+
+Transferability is the ratio of two such ceilings. It is exactly reciprocal:
+carrying a score from `A` to `B` and back must give one.
+
+```{r}
+forward <- transferability(
+    sigma2_A = 1.0, phi_bar_A = 0.5, tau2_A = 1,
+    sigma2_B = 1.4, phi_bar_B = 0.5, tau2_B = 1
+)
+backward <- transferability(
+    sigma2_A = 1.4, phi_bar_A = 0.5, tau2_A = 1,
+    sigma2_B = 1.0, phi_bar_B = 0.5, tau2_B = 1
+)
+c(forward = forward, backward = backward, product = forward * backward)
+```
+
+That identity is worth remembering when reading simulation output: an empirical
+estimate of transferability that fails it is telling you the estimator is
+biased, not that the populations are unusual.
+
+## Measuring it rather than evaluating it
+
+The same quantity can be measured from simulated traits. Choose one effect size
+shared by every causal variant so that the trait reaches a target heritability,
+simulate, and score the optimal predictor.
+
+```{r}
+set.seed(1)
+
+m_loci <- 1000
+n_ind <- 5000
+p <- runif(m_loci, 0.05, 0.95)
+X <- matrix(rbinom(n_ind * m_loci, 2, rep(p, each = n_ind)), n_ind, m_loci)
+
+beta <- rep(shared_effect_size(h2 = 0.4, tau2 = 1, p = p), m_loci)
+trait <- simulate_trait(X, beta, alpha = 0, tau2 = 1)
+```
+
+The measured accuracy and the closed form evaluated at the realised allele
+frequencies agree:
+
+```{r}
+c(
+    measured = empirical_accuracy(trait$y, trait$g),
+    closed_form = prediction_accuracy(
+        sigma2 = additive_genetic_variance(beta, allele_frequencies(X)),
+        phi_bar = 0.5, tau2 = 1
+    )
+)
+```
+
+## Redrawing the manuscript figures
+
+The repository ships the replicate-level output of every simulation under
+`data/`, so the figures need no genotypes and no cluster. From the repository
+root:
+
+```
+Rscript scripts/figures/figure_01.R
+Rscript scripts/figures/figure_02.R
+...
+Rscript scripts/figures/figure_S8.R
+```
+
+Each writes a PDF and a PNG into `output/`. The scripts read their inputs
+through `read_transferability_by_heritability()` and `read_rare_variant_sweep()`,
+which stack the replicate files and summarise them with `group_summary()`.
+
+`group_summary()` trims replicates outside 1.5 times the interquartile range
+within each group before averaging. Transferability is a ratio, and when the
+denominator accuracy is small in a replicate the ratio explodes, so a few
+replicates would otherwise dominate the mean. The number of replicates kept is
+returned as `n`.
+
+## Regenerating the results
+
+The scripts in `scripts/simulation/` are numbered in the order they run and each
+has a matching `.slurm` wrapper.
+
+| Script | Produces |
+| --- | --- |
+| `01_simulate_genotypes.py` | coalescent genotypes, written as a VCF |
+| `02_prepare_genotypes.sh` | PLINK files, split by population |
+| `03_theory_validation.R` | Figure 1a |
+| `04_traits_common_variants.R` | Figure 2, S1 Fig, S2 Fig |
+| `05_traits_normal_effects.R` | S2 Fig |
+| `06_traits_rare_and_common.R` | Figure 3, S4 to S6 Figs |
+| `07_heritability_decomposition.R` | Figure 4 |
+| `08_allele_frequencies.R` | S3, S7, S8 Figs |
+
+Step 3 is self-contained and simulates its own genotypes with `bnpsd`. Steps 4
+to 8 read the PLINK files from step 2 through `load_variant_pools()`, which
+returns column indices rather than genotypes: the rare pool runs to millions of
+variants and holding it for three populations at once would need tens of
+gigabytes. `draw_causal_genotypes()` then reads only the drawn columns.
+
+```{r eval = FALSE}
+pools <- load_variant_pools("genotypes")
+causal <- draw_causal_genotypes(pools, "rare", 100)
+```

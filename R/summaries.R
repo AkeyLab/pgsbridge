@@ -1,17 +1,3 @@
-# R/summaries.R
-#
-# Turning the raw per-replicate simulation output into the group means and
-# confidence intervals that the figures plot.
-#
-# The simulations store one transferability value per replicate, labelled by the
-# ordered population pair and by whatever else the experiment varied. Every
-# figure that shows a point with an error bar goes through `group_summary()`
-# below.
-
-suppressMessages({
-  library(dplyr)
-})
-
 #' Group means and confidence intervals, after trimming outlying replicates
 #'
 #' Transferability is a ratio of two estimated accuracies. When the denominator
@@ -19,7 +5,7 @@ suppressMessages({
 #' a handful of such replicates would dominate an ordinary mean. Within each
 #' group the replicates are therefore trimmed once by the interquartile rule:
 #' with q1 and q3 the first and third quartiles and iqr = q3 - q1, a replicate is
-#' kept if it lies in [q1 - 1.5 iqr, q3 + 1.5 iqr]. The mean, the standard
+#' kept if it lies in `[q1 - 1.5 iqr, q3 + 1.5 iqr]`. The mean, the standard
 #' error, and the confidence interval are computed from the kept replicates.
 #'
 #' The confidence interval half-width is qt(1 - (1 - level)/2, N - 1) times the
@@ -32,6 +18,7 @@ suppressMessages({
 #' @return A data frame with one row per group, holding the grouping columns and
 #'   the columns `n` (kept replicates), the mean under its original name, `sd`,
 #'   `se`, and `ci` (the confidence interval half-width).
+#' @export
 group_summary <- function(data, value, groups, level = 0.95) {
   stopifnot(value %in% names(data), all(groups %in% names(data)))
 
@@ -71,6 +58,7 @@ group_summary <- function(data, value, groups, level = 0.95) {
 #'
 #' @param ordered_pair Character vector of ordered pair labels.
 #' @return A data frame with columns `pop_pair` and `direction`.
+#' @export
 label_pair_direction <- function(ordered_pair) {
   unordered <- c("ASN-AFR" = "ASN-AFR", "AFR-ASN" = "ASN-AFR",
                  "EUR-AFR" = "EUR-AFR", "AFR-EUR" = "EUR-AFR",
@@ -95,6 +83,7 @@ label_pair_direction <- function(ordered_pair) {
 #' @param paths A character vector of three file paths, for heritability 0.1,
 #'   0.4 and 0.8 in that order.
 #' @return A data frame ready for `plot_direction_pairs()`.
+#' @export
 read_transferability_by_heritability <- function(paths) {
   stopifnot(length(paths) == 3)
   levels_h2 <- c("0.1", "0.4", "0.8")
@@ -126,6 +115,7 @@ read_transferability_by_heritability <- function(paths) {
 #' @param fractions Rare-variant fractions to read.
 #' @return A data frame with one row per (fraction, ratio), holding the mean
 #'   transferability and its confidence interval half-width.
+#' @export
 read_rare_variant_sweep <- function(data_dir, h2_tag, ordered_pair,
                                     ratios = c(1, 2, 5, 10),
                                     fractions = seq(0.1, 0.9, by = 0.1)) {
