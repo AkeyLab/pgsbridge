@@ -67,6 +67,94 @@ figure_S2 <- function(data_dir) {
     fixed / normal
 }
 
+#' S3 Fig: average minor allele frequency in the three populations
+#'
+#' The ordering of the average minor allele frequency across populations is what
+#' drives every transferability result in the paper: the population whose shared
+#' causal variants segregate at higher frequency carries more additive genetic
+#' variance, and so a higher ceiling.  This figure checks that the coalescent
+#' simulation reproduces the ordering seen in real data, by drawing the same
+#' quantity for the simulation and for the 1000 Genomes Project.
+#'
+#' Both series use the pooled definition of a common variant: minor allele
+#' frequency at least `maf_common` in the three populations taken together.
+#' This is the definition the trait simulations draw from, and it is the one
+#' used throughout the paper.  It matters which is used, because requiring a
+#' variant to be common in every population separately selects against variation
+#' private to any one of them and reverses the ordering.
+#'
+#' The 1000 Genomes series is read from alternate-allele counts over the
+#' African, European and East Asian superpopulations, computed from the phase 3
+#' genotypes by `scripts/empirical/1000g_frequencies.sh`.
+#'
+#' @param data_dir Directory holding the pre-computed results.
+#' @param maf_common The minor allele frequency defining a common variant.
+#'
+#' @return A `ggplot` object.
+#'
+#' @examples
+#' \dontrun{
+#' figure_S3("data")
+#' }
+#'
+#' @export
+figure_S3 <- function(data_dir, maf_common = 0.01) {
+    if (missing(data_dir))
+        stop('`data_dir` is required!')
+
+    populations <- c("AFR", "EUR", "ASN")
+    minor <- function(p) pmin(p, 1 - p)
+
+    # The simulated common pool is already the pooled-common set: every
+    # population contributes 1,000 diploids, so the pooled frequency is the mean
+    # of the three and the pool was filtered on it.
+    simulated <- readRDS(file.path(data_dir, "allele_frequencies",
+                                   "common_af.RDS"))
+    simulated_mean <- c(
+        AFR = mean(minor(simulated$pafr_common)),
+        EUR = mean(minor(simulated$peur_common)),
+        ASN = mean(minor(simulated$pasi_common)))
+
+    # 1000 Genomes: alternate-allele counts per superpopulation, over biallelic
+    # single-nucleotide variants.  The superpopulations differ in size, so the
+    # pooled frequency is a count ratio rather than a mean of the three.
+    empirical <- readRDS(file.path(data_dir, "allele_frequencies",
+                                   "thousand_genomes_common_af.RDS"))
+    counts <- empirical$counts
+    allele_number <- empirical$allele_number
+    pooled <- rowSums(counts) / sum(allele_number)
+    keep <- minor(pooled) >= maf_common
+    empirical_mean <- vapply(c(AFR = "AFR", EUR = "EUR", ASN = "EAS"),
+                             function(column) {
+                                 mean(minor(counts[keep, column] /
+                                            allele_number[[column]]))
+                             }, numeric(1))
+
+    summary_df <- rbind(
+        data.frame(population = populations, mean_maf = simulated_mean[populations],
+                   series = "Simulation", stringsAsFactors = FALSE),
+        data.frame(population = populations, mean_maf = empirical_mean[populations],
+                   series = "1000 Genome Project", stringsAsFactors = FALSE))
+    summary_df$population <- factor(summary_df$population, levels = populations)
+    summary_df$series <- factor(summary_df$series,
+                                levels = c("Simulation", "1000 Genome Project"))
+
+    ggplot2::ggplot(summary_df,
+                    ggplot2::aes(x = .data$population, y = .data$mean_maf,
+                                 colour = .data$series, group = .data$series)) +
+        ggplot2::geom_line(linewidth = 1) +
+        ggplot2::geom_point(size = 2.5, shape = 21, fill = "white",
+                            stroke = 1.1) +
+        ggplot2::scale_colour_manual(
+            values = unname(okabe_ito[c("vermillion", "blue")]), name = NULL) +
+        ggplot2::labs(x = "Pop", y = "Minor Allele Frequency") +
+        ggplot2::expand_limits(y = 0) +
+        ggplot2::theme_minimal(base_size = PGS_BASE_SIZE) +
+        ggplot2::theme(legend.position = c(0.98, 0.04),
+                       legend.justification = c(1, 0))
+}
+
+
 #' S4 to S6 Figs: rare-variant sweeps for the remaining population pairs
 #'
 #' Figure 3 shows the African and European pair at heritability 0.1.  These show

@@ -126,7 +126,7 @@ figure_02("data")
 | Fig 4 | `figure_04()` | `05_heritability_decomposition.R` |
 | S1 Fig | `figure_S1()` | `02_traits_common_variants.R` |
 | S2 Fig | `figure_S2()` | `02_traits_common_variants.R` and `03_traits_normal_effects.R` |
-| S3 Fig | not included | the 1000 Genomes series it shows cannot be regenerated from this repository; see `?reproducibility` |
+| S3 Fig | `figure_S3()` | `06_allele_frequencies.R` and `empirical/1000g_frequencies.sh` |
 | S4 Fig | `figure_S4()` | `04_traits_rare_and_common.R` |
 | S5 Fig | `figure_S5()` | `04_traits_rare_and_common.R` |
 | S6 Fig | `figure_S6()` | `04_traits_rare_and_common.R` |

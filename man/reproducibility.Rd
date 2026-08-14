@@ -11,40 +11,35 @@ reader is never left guessing whether a mismatch is their mistake.
 \section{What reproduces}{
 
 
-Eleven of the twelve figures redraw from the replicate-level results in
-\verb{data/}, with no genotypes and no cluster.  S3 Fig is the exception and no
-function for it is provided; see below.  The simulation scripts regenerate those results from the coalescent
+All twelve figures redraw from the replicate-level results in \verb{data/} by
+calling \code{\link[=figure_01]{figure_01()}} through \code{\link[=figure_S8]{figure_S8()}}, with no genotypes and no
+cluster.  The simulation scripts regenerate those results from the coalescent
 genotypes: \code{\link[=figure_02]{figure_02()}}'s inputs have been checked directly against the
 distributed files and agree within Monte Carlo error at every heritability.
 }
 
-\section{S3 Fig cannot be reproduced}{
+\section{S3 Fig and the definition of a common variant}{
 
 
-The published S3 Fig draws two series, one from the coalescent simulation and
-one from the 1000 Genomes Project.  Neither can be regenerated here, so no
-function for this figure is shipped: drawing a plausible-looking substitute
-would be worse than drawing nothing.
+Both series of S3 Fig use the pooled definition of a common variant: minor
+allele frequency at least 0.01 in the three populations taken together.  The
+1000 Genomes series is computed from the public phase 3 genotypes by
+\verb{scripts/empirical/1000g_frequencies.sh}, which writes the counts shipped in
+\code{data/allele_frequencies/thousand_genomes_common_af.RDS}; the genotypes
+themselves are not redistributed here.
 
-The reason is that no 1000 Genomes allele frequencies are distributed with
-this repository, and no script here computes them.  The published series
-therefore cannot be regenerated from what is here; it would have to be
-recomputed from the 1000 Genomes Project data itself.
+The definition matters.  Under the pooled definition the African sample has
+the highest average minor allele frequency, 0.1244 in the simulation and
+0.1398 in 1000 Genomes.  Requiring a variant to be common in every population
+separately selects against variation private to any one of them and reverses
+that ordering, giving 0.2152 for the African sample against 0.2398 for the
+European one.  The trait simulations draw from the pooled panel, so the
+pooled definition is the one that matches them.
 
-The simulated series would not have matched either.  Read off the published
-figure it runs at roughly 0.125, 0.089 and 0.086 for the African, European
-and East Asian samples.  From the distributed frequencies the pooled
-definition of a common variant gives 0.1244, 0.1101 and 0.1034, and the
-per-population definition gives 0.2152, 0.2398 and 0.2334.  The African value
-matches the pooled definition closely and the other two match neither, so a
-third variant definition lies behind the published curve.  Which one is not
-recorded anywhere available.
-
-Note that the two definitions order the populations differently.  Under the
-pooled definition the African sample has the highest average minor allele
-frequency; requiring a variant to be common in every population selects
-against variation private to any one of them and reverses that.  The trait
-simulations draw from the pooled panel.
+An earlier version of this figure drew a simulated series that no definition
+shipped here reproduces; it ran at roughly 0.125, 0.089 and 0.086 for the
+African, European and East Asian samples, which matches neither.  The series
+drawn now is the pooled one.
 }
 
 \section{The published Figure 2 image predates the distributed results}{
