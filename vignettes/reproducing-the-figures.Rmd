@@ -12,7 +12,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ```
 
 ```{r}
-library(pgstrans)
+library(pgsbridge)
 ```
 
 This vignette shows what the package computes, then how the manuscript's

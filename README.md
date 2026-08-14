@@ -1,8 +1,8 @@
-# pgstrans
+# pgsbridge
 
-The `pgstrans` ('polygenic score transferability') R package computes the best
+The `pgsbridge` ('polygenic score bridge') R package computes the best
 accuracy a polygenic score can attain in a population, and how much of that
-accuracy carries over to another population. More specifically, `pgstrans`
+accuracy carries over to another population. More specifically, `pgsbridge`
 evaluates the closed form for that ceiling, simulates traits on real or
 simulated genotypes to measure it directly, and draws the figures of the
 accompanying manuscript.
@@ -45,7 +45,7 @@ install.packages(c("BEDMatrix", "genio"))
 The ceiling in a single population, and how it responds to each determinant:
 
 ```R
-library(pgstrans)
+library(pgsbridge)
 
 # a population in Hardy-Weinberg equilibrium whose trait is half genetic
 prediction_accuracy(sigma2 = 1, phi_bar = 0.5, tau2 = 1)
@@ -83,7 +83,7 @@ that give a target heritability, simulate a trait, and compare the optimal
 predictor's measured accuracy against the closed form:
 
 ```R
-library(pgstrans)
+library(pgsbridge)
 set.seed(1)
 
 # 1,000 causal variants and 5,000 individuals in Hardy-Weinberg equilibrium

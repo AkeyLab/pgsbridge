@@ -25,7 +25,7 @@ PRS_CORES <- as.integer(Sys.getenv("SLURM_CPUS_PER_TASK", unset = "4"))
 dir.create(PRS_OUTPUT, showWarnings = FALSE, recursive = TRUE)
 
 suppressMessages({
-  library(pgstrans)
+  library(pgsbridge)
   library(ggplot2)
   library(patchwork)
   library(ggh4x)

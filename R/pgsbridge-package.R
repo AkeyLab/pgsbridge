@@ -1,4 +1,4 @@
-#' pgstrans: intrinsic transferability of polygenic scores between populations
+#' pgsbridge: intrinsic transferability of polygenic scores between populations
 #'
 #' A polygenic score built in one population usually predicts less accurately in
 #' another.  This package separates the part of that loss which is fixed by

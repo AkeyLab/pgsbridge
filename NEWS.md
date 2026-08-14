@@ -1,4 +1,4 @@
-# pgstrans 1.0.0
+# pgsbridge 1.0.0
 
 * First release, accompanying the manuscript.
 * Closed-form functions for the accuracy ceiling and for intrinsic

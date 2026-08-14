@@ -1,4 +1,4 @@
 library(testthat)
-library(pgstrans)
+library(pgsbridge)
 
-test_check("pgstrans")
+test_check("pgsbridge")
