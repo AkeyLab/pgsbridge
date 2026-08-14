@@ -608,20 +608,6 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
           <p class="fig-cap">Hover or focus a point for that pair's realized values. The dashed line
             is the identity, not a fit.</p>
         </div>
-        <div class="caution">
-          <span class="k">What the filters can and cannot do</span>
-          <p>The simulation drew 400 population pairs and kept the
-            <span id="s5-kept-count">382</span> that satisfied three constraints on realized
-            heritability, chosen so the pairs stay in a range reported for real complex traits. The
-            stored results are therefore <b>already filtered</b>. Moving a slider below the paper's
-            setting cannot recover the discarded pairs, so the sliders only tighten, never loosen.</p>
-          <p>Two further simulation settings are not per-pair filters and cannot be moved here. The
-            differentiation coefficient controlling population structure was sampled uniformly over
-            <b id="s5-fst"></b>, spanning the range reported among continental human populations, and
-            the within-population inbreeding coefficient over <b id="s5-inb"></b>, representative of
-            samples left after close relatives are removed. Each pair used
-            <b id="s5-nm"></b>, averaged over <b id="s5-R"></b>.</p>
-        </div>
         <div class="insight">
           <span class="k">Why the baseline predictor uses the true mean, not the sample mean</span>
           <p>These simulated individuals are related to one another, so the sample mean of the trait
@@ -1624,7 +1610,6 @@ function pearsonR2(x, y) {
   return r * r;
 }
 function buildPanel5() {
-  const s = DATA.theory.settings;
   const rows = [
     ['minA', 'smallest allowed heritability in the discovery population', 0.30, 0.85],
     ['minB', 'smallest allowed heritability in the target population', 0.30, 0.85],
@@ -1658,11 +1643,6 @@ function buildPanel5() {
     drawSection5();
   });
 
-  $('s5-kept-count').textContent = String(DATA.theory.n_kept);
-  $('s5-fst').textContent = s.fst_range[0] + ' to ' + s.fst_range[1];
-  $('s5-inb').textContent = s.inbreeding_range[0] + ' to ' + s.inbreeding_range[1];
-  $('s5-nm').textContent = s.n + ' individuals and ' + s.m + ' causal variants';
-  $('s5-R').textContent = s.redraws + ' independent redraws';
 }
 function drawSection5() {
   const th = DATA.theory;
