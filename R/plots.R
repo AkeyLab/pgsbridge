@@ -1,6 +1,6 @@
 #' Transferability in both directions, for three population pairs
 #'
-#' The shape used by Figures 2, S2 and S3. Each unordered population pair is one
+#' The shape used by Figure 2, S1 Fig and S2 Fig. Each unordered population pair is one
 #' coloured line joining its two directions, so the slope of the line shows how
 #' much transferability depends on which population is the discovery one and
 #' which is the target. Panels are the three heritability levels.
@@ -80,7 +80,7 @@ plot_direction_pairs <- function(summary_df, label_points = TRUE,
                        breaks = c(1, 2)) +
     ylab("Transferability") +
     scale_color_manual("Pop Pair", values = pair_pal) +
-    theme_bw(base_size = PRS_BASE_SIZE) +
+    theme_bw(base_size = PGS_BASE_SIZE) +
     theme(axis.title.x = element_blank(),
           axis.text.x = element_blank(),
           axis.ticks.x = element_blank(),
@@ -124,9 +124,9 @@ plot_rare_variant_sweep <- function(summary_df, title, y_max) {
     ggtitle(title) +
     ylim(0, y_max) +
     scale_x_continuous(breaks = seq(0, 1, by = 0.1)) +
-    theme_minimal(base_size = PRS_BASE_SIZE) +
+    theme_minimal(base_size = PGS_BASE_SIZE) +
     theme(legend.position = "bottom",
-          plot.title = element_text(hjust = 0.5, size = PRS_BASE_SIZE))
+          plot.title = element_text(hjust = 0.5, size = PGS_BASE_SIZE))
 }
 
 #' Both directions of one population pair, side by side

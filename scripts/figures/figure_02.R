@@ -1,28 +1,16 @@
-# figures/figure_02.R
+# scripts/figures/figure_02.R
 #
 # Figure 2. Transferability for three population pairs in both directions.
 #
-# Each ordered pair of populations gives one transferability value, and the two
-# orderings of a pair are joined by a line, so the slope shows how much the
-# result depends on which population supplies the score and which receives it.
-# The label "ASN-AFR" means a discovery population of East Asian and a target
-# population of African. The three panels are the three levels of total
-# heritability in the European sample.
-#
-# Traits carry 1,000 common causal variants. The underlying replicates are
-# produced by simulation/04_traits_common_variants.R.
+# The figure itself is built by pgsbridge::figure_02(); this script only supplies the
+# paths and writes the files, so that the figure and the code that draws it stay
+# together in the package.
 #
 # Usage:  Rscript scripts/figures/figure_02.R
 
 source("scripts/config.R")
 
-DATA_DIR <- file.path(PRS_DATA, "transferability_common_variants")
-
-summary_df <- read_transferability_by_heritability(
-  file.path(DATA_DIR, sprintf("transferability_m1000_h2%s.RDS",
-                              c("0.1", "0.4", "0.8"))))
-
-figure <- plot_direction_pairs(summary_df)
+figure <- figure_02(PRS_DATA)
 
 ggsave(file.path(PRS_OUTPUT, "Fig2.pdf"), figure, height = 5, width = 12)
 ggsave(file.path(PRS_OUTPUT, "Fig2.png"), figure, height = 5, width = 12,

@@ -2,7 +2,7 @@
 #
 # Simulates traits with common causal variants only, on the coalescent
 # genotypes, and measures transferability between every ordered pair of
-# populations. Produces the data behind Figure 2 and S2 Fig.
+# populations. Produces the data behind Figure 2, S1 Fig and S2 Fig.
 #
 # The experiment
 # --------------

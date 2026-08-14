@@ -30,7 +30,7 @@ same panel and on the same side, as a fraction of the vertical range.}
 A ggplot object.
 }
 \description{
-The shape used by Figures 2, S2 and S3. Each unordered population pair is one
+The shape used by Figure 2, S1 Fig and S2 Fig. Each unordered population pair is one
 coloured line joining its two directions, so the slope of the line shows how
 much transferability depends on which population is the discovery one and
 which is the target. Panels are the three heritability levels.

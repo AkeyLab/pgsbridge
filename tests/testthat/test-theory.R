@@ -1,8 +1,13 @@
-test_that("additive_genetic_variance matches the formula it documents", {
-    beta <- c(0.1, 0.2, 0.3)
-    p <- c(0.1, 0.5, 0.9)
+test_that("additive_genetic_variance matches an independent calculation", {
+    # worked by hand: 2 * (0.01*0.09 + 0.04*0.25 + 0.09*0.09) = 2 * 0.0190 = 0.0380
+    expect_equal(additive_genetic_variance(c(0.1, 0.2, 0.3), c(0.1, 0.5, 0.9)),
+                 0.038)
+    # it is the variance of a sum of independent binomials, so it must equal
+    # the sum of the per-variant variances computed separately
+    beta <- c(0.3, 0.7); p <- c(0.2, 0.6)
     expect_equal(additive_genetic_variance(beta, p),
-                 2 * sum(beta^2 * p * (1 - p)))
+                 additive_genetic_variance(beta[1], p[1]) +
+                     additive_genetic_variance(beta[2], p[2]))
     # a monomorphic variant contributes nothing
     expect_equal(additive_genetic_variance(1, 0), 0)
     expect_equal(additive_genetic_variance(1, 1), 0)
@@ -15,10 +20,17 @@ test_that("additive_genetic_variance rejects mismatched inputs", {
     expect_error(additive_genetic_variance(), "required")
 })
 
-test_that("population_mean matches the formula it documents", {
-    beta <- c(0.1, 0.2)
-    p <- c(0.3, 0.7)
-    expect_equal(population_mean(1, beta, p), 1 + 2 * sum(beta * p))
+test_that("population_mean matches the mean of simulated genotypes", {
+    set.seed(11)
+    beta <- c(0.1, 0.2, -0.15)
+    p <- c(0.3, 0.7, 0.5)
+    n <- 200000
+    X <- sapply(p, function(pi) rbinom(n, 2, pi))
+    # the analytic mean should match the mean of a large simulated sample
+    expect_equal(population_mean(1, beta, p), mean(1 + as.vector(X %*% beta)),
+                 tolerance = 1e-3)
+    # worked by hand: 1 + 2*(0.03 + 0.14 - 0.075) = 1.19
+    expect_equal(population_mean(1, beta, p), 1.19)
 })
 
 test_that("prediction_accuracy is the genetic share of the trait variance", {

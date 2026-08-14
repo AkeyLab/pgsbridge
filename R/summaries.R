@@ -47,8 +47,8 @@ group_summary <- function(data, value, groups, level = 0.95) {
 #' Label an ordered population pair with its unordered pair and its direction
 #'
 #' The simulations record an ordered pair such as "ASN-AFR", meaning a discovery
-#' population of East Asian and a target population of African. Figures 2, S2
-#' and S3 draw the two directions of each unordered pair as the two ends of a
+#' population of East Asian and a target population of African. Figure 2, S1
+#' Fig and S2 Fig draw the two directions of each unordered pair as the two ends of a
 #' line, so each row needs both the unordered pair and which direction it is.
 #'
 #' The direction is named for the order in which the two populations appear in
@@ -76,7 +76,7 @@ label_pair_direction <- function(ordered_pair) {
 
 #' Read the three heritability levels of a transferability experiment
 #'
-#' Figures 2, S2 and S3 all show the same quantity at European heritability
+#' Figure 2, S1 Fig and S2 Fig all show the same quantity at European heritability
 #' 0.1, 0.4 and 0.8. This reads the three files, stacks them, labels the pair
 #' and direction, and returns the group summary the figure plots.
 #'

@@ -18,8 +18,8 @@
 sample_causal_variants <- function(n_pool, m_causal) {
   block_width <- floor(n_pool / m_causal)
   stopifnot(block_width >= 1)
-  sample.int(block_width, m_causal, replace = TRUE) +
-    (seq_len(m_causal) - 1L) * block_width
+  as.integer(sample.int(block_width, m_causal, replace = TRUE) +
+               (seq_len(m_causal) - 1L) * block_width)
 }
 
 #' Reference-allele frequencies of a genotype matrix

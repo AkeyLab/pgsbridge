@@ -1,8 +1,8 @@
 #' Colour palettes shared by every figure
 #'
-#' One palette per role, so that a colour means the same thing wherever it
-#' appears.  All are drawn from Okabe and Ito's eight-colour set, which stays
-#' distinguishable under the three common forms of colour vision deficiency.
+#' One palette per role, so that within a figure family a colour always means
+#' the same thing.  All are drawn from Okabe and Ito's eight-colour set together with a
+#' neutral grey, which stays distinguishable under the three common forms of colour vision deficiency.
 #'
 #' `okabe_ito` is the full set, named by colour.  The others select from it:
 #'
@@ -78,7 +78,7 @@ decomp_pal <- c("common" = unname(okabe_ito["blue"]),
 #' @format A single number.
 #'
 #' @examples
-#' PRS_BASE_SIZE
+#' PGS_BASE_SIZE
 #'
 #' @export
-PRS_BASE_SIZE <- 11
+PGS_BASE_SIZE <- 11

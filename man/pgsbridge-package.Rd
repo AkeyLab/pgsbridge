@@ -38,17 +38,17 @@ turn replicate output into the figures.
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://github.com/KaiqianZhang/prs-transferability/}
-  \item Report bugs at \url{https://github.com/KaiqianZhang/prs-transferability/issues}
+  \item \url{https://github.com/KaiqianZhang/pgsbridge/}
+  \item Report bugs at \url{https://github.com/KaiqianZhang/pgsbridge/issues}
 }
 
 }
 \author{
-\strong{Maintainer}: Kaiqian Zhang \email{zhangkaiqian2025@gmail.com}
+\strong{Maintainer}: Kaiqian Zhang \email{zhangkaiqian2025@gmail.com} [copyright holder]
 
 Authors:
 \itemize{
-  \item Kaiqian Zhang \email{zhangkaiqian2025@gmail.com}
+  \item Kaiqian Zhang \email{zhangkaiqian2025@gmail.com} [copyright holder]
   \item John D. Storey \email{jstorey@princeton.edu} (\href{https://orcid.org/0000-0001-5992-402X}{ORCID})
   \item Joshua M. Akey \email{jakey@princeton.edu}
 }

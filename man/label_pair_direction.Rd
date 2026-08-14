@@ -14,8 +14,8 @@ A data frame with columns \code{pop_pair} and \code{direction}.
 }
 \description{
 The simulations record an ordered pair such as "ASN-AFR", meaning a discovery
-population of East Asian and a target population of African. Figures 2, S2
-and S3 draw the two directions of each unordered pair as the two ends of a
+population of East Asian and a target population of African. Figure 2, S1
+Fig and S2 Fig draw the two directions of each unordered pair as the two ends of a
 line, so each row needs both the unordered pair and which direction it is.
 }
 \details{

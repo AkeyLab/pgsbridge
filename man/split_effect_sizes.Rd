@@ -25,7 +25,8 @@ A list with elements \code{common} and \code{rare}, the two effect sizes.
 Rare causal variants are given an effect \code{s} times that of common ones.
 Writing \code{beta_c} for the common effect size, the additive genetic variance is
 \verb{2 beta_c^2 sum_c p_c (1 - p_c) + 2 s^2 beta_c^2 sum_r p_r (1 - p_r)}, so
-matching a target heritability \code{h2} at non-genetic variance \code{tau^2} gives
+matching a target heritability \code{h2} at non-genetic variance \code{tau^2} in a
+Hardy-Weinberg population gives the common effect size below.
 }
 \details{
 \verb{beta_c = sqrt( h2/(1-h2) * tau^2 / ( 2 sum_c p_c(1-p_c) + 2 s^2 sum_r p_r(1-p_r) ) )}.

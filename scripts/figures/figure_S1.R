@@ -1,35 +1,16 @@
-# figures/figure_S1.R
+# scripts/figures/figure_S1.R
 #
-# S1 Fig. Transferability for three population pairs in both directions, given
-# 20, 50 and 100 causal variants.
+# S1 Fig. Transferability is robust to the number of causal variants.
 #
-# The same quantity as Figure 2, which uses 1,000 causal variants, repeated at
-# three smaller numbers of causal variants to show that the number of causal
-# variants has only a modest effect on the result.
-#
-# The underlying replicates are produced by
-# simulation/04_traits_common_variants.R.
+# The figure itself is built by pgsbridge::figure_S1(); this script only supplies the
+# paths and writes the files, so that the figure and the code that draws it stay
+# together in the package.
 #
 # Usage:  Rscript scripts/figures/figure_S1.R
 
 source("scripts/config.R")
 
-suppressMessages(library(patchwork))
-
-DATA_DIR <- file.path(PRS_DATA, "transferability_common_variants")
-CAUSAL_VARIANT_COUNTS <- c(20, 50, 100)
-
-panels <- lapply(CAUSAL_VARIANT_COUNTS, function(m) {
-  summary_df <- read_transferability_by_heritability(
-    file.path(DATA_DIR, sprintf("transferability_m%d_h2%s.RDS",
-                                m, c("0.1", "0.4", "0.8"))))
-  plot_direction_pairs(summary_df)
-})
-
-figure <- wrap_plots(panels, ncol = 1, guides = "collect") +
-  plot_annotation(tag_levels = "a") &
-  theme(legend.position = "bottom",
-        plot.tag = element_text(face = "bold", size = 14))
+figure <- figure_S1(PRS_DATA)
 
 ggsave(file.path(PRS_OUTPUT, "S1_Fig.pdf"), figure, height = 13, width = 13)
 ggsave(file.path(PRS_OUTPUT, "S1_Fig.png"), figure, height = 13, width = 13,

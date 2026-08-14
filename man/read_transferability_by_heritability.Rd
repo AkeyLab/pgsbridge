@@ -14,7 +14,7 @@ read_transferability_by_heritability(paths)
 A data frame ready for \code{plot_direction_pairs()}.
 }
 \description{
-Figures 2, S2 and S3 all show the same quantity at European heritability
+Figure 2, S1 Fig and S2 Fig all show the same quantity at European heritability
 0.1, 0.4 and 0.8. This reads the three files, stacks them, labels the pair
 and direction, and returns the group summary the figure plots.
 }

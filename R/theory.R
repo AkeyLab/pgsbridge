@@ -91,7 +91,7 @@ population_mean <- function(alpha, beta, p) {
 #'   Hardy-Weinberg equilibrium with unrelated individuals.
 #' @param tau2 The non-genetic variance.
 #'
-#' @return The best achievable prediction accuracy, in `[0, 1)`.
+#' @return The best achievable prediction accuracy, in `[0, 1]`.
 #'
 #' @examples
 #' # a population in Hardy-Weinberg equilibrium whose trait is half genetic
@@ -148,6 +148,11 @@ prediction_accuracy <- function(sigma2, phi_bar, tau2) {
 #' @export
 transferability <- function(sigma2_A, phi_bar_A, tau2_A,
                             sigma2_B, phi_bar_B, tau2_B) {
+    for (argument in c('sigma2_A', 'phi_bar_A', 'tau2_A',
+                       'sigma2_B', 'phi_bar_B', 'tau2_B'))
+        if (eval(call('missing', as.name(argument))))
+            stop('`', argument, '` is required!')
+
     prediction_accuracy(sigma2_B, phi_bar_B, tau2_B) /
         prediction_accuracy(sigma2_A, phi_bar_A, tau2_A)
 }
@@ -189,8 +194,9 @@ noise_variance_for_accuracy <- function(target_accuracy, sigma2, phi_bar = 0.5) 
 #' With a single effect size `beta` shared by all `m` causal variants the
 #' additive genetic variance is `2 beta^2 sum_i p_i (1 - p_i)`, so reaching
 #' heritability `h2` at non-genetic variance `tau^2` in a Hardy-Weinberg
-#' population requires
+#' population requires the effect size below.
 #'
+#' @details
 #' `beta = sqrt( h2 / (1 - h2) * tau^2 / (2 sum_i p_i (1 - p_i)) )`.
 #'
 #' @param h2 The target heritability, in `(0, 1)`.
@@ -228,8 +234,10 @@ shared_effect_size <- function(h2, tau2, p) {
 #' Rare causal variants are given an effect `s` times that of common ones.
 #' Writing `beta_c` for the common effect size, the additive genetic variance is
 #' `2 beta_c^2 sum_c p_c (1 - p_c) + 2 s^2 beta_c^2 sum_r p_r (1 - p_r)`, so
-#' matching a target heritability `h2` at non-genetic variance `tau^2` gives
+#' matching a target heritability `h2` at non-genetic variance `tau^2` in a
+#' Hardy-Weinberg population gives the common effect size below.
 #'
+#' @details
 #' `beta_c = sqrt( h2/(1-h2) * tau^2 / ( 2 sum_c p_c(1-p_c) + 2 s^2 sum_r p_r(1-p_r) ) )`.
 #'
 #' @param h2 The target heritability, in `(0, 1)`.

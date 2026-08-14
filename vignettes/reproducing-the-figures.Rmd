@@ -62,9 +62,11 @@ backward <- transferability(
 c(forward = forward, backward = backward, product = forward * backward)
 ```
 
-That identity is worth remembering when reading simulation output: an empirical
-estimate of transferability that fails it is telling you the estimator is
-biased, not that the populations are unusual.
+That identity is worth remembering when reading simulation output. A single
+empirical estimate satisfies it by construction, being a ratio of the same two
+accuracies. A *mean over replicates* need not, and when it does not, that is
+Jensen's inequality telling you the ratio-of-means estimator is biased, not that
+the populations are unusual.
 
 ## Measuring it rather than evaluating it
 

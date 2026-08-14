@@ -1,7 +1,7 @@
 # simulation/08_allele_frequencies.R
 #
 # Computes the per-population allele frequency of every simulated variant, split
-# into the common and the rare pool. Produces the data behind S1, S7 and S8 Figs.
+# into the common and the rare pool. Produces the data behind S3, S7 and S8 Figs.
 #
 # These three figures are all about where a variant's frequency sits in one
 # population relative to another, and in particular about variants that
@@ -15,7 +15,7 @@
 #                   reference-allele frequency of every common variant
 #   rare_af.RDS     the same for the rare pool
 #   simulated_common_variants.RDS   the common-pool frequencies again, named
-#                   af_eur_001, af_afr_001 and af_asi_001, which is what S1 Fig
+#                   af_eur_001, af_afr_001 and af_asi_001, which is what S3 Fig
 #                   reads
 #
 # In all of these files the vectors are aligned: position k refers to the same
@@ -55,7 +55,7 @@ saveRDS(list(pafr_rare = frequencies$rare$AFR,
              pasi_rare = frequencies$rare$ASN),
         file.path(output_dir, "rare_af.RDS"))
 
-# The simulated frequencies used by S1 Fig, over the common pool.
+# The simulated frequencies used by S3 Fig, over the common pool.
 saveRDS(list(af_eur_001 = frequencies$common$EUR,
              af_afr_001 = frequencies$common$AFR,
              af_asi_001 = frequencies$common$ASN),

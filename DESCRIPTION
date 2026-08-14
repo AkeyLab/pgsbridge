@@ -4,7 +4,7 @@ Version: 1.0.0
 Authors@R: c(
     person(given = "Kaiqian",
            family = "Zhang",
-           role = c("aut", "cre"),
+           role = c("aut", "cre", "cph"),
            email = "zhangkaiqian2025@gmail.com"),
     person(given = "John D.",
            family = "Storey",
@@ -38,7 +38,6 @@ Imports:
     dplyr,
     rlang
 Suggests:
-    scales,
     BEDMatrix,
     genio,
     bnpsd,
@@ -49,6 +48,7 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 VignetteBuilder: knitr
-URL: https://github.com/KaiqianZhang/prs-transferability/
-BugReports: https://github.com/KaiqianZhang/prs-transferability/issues
+Config/testthat/edition: 3
+URL: https://github.com/KaiqianZhang/pgsbridge/
+BugReports: https://github.com/KaiqianZhang/pgsbridge/issues
 Config/roxygen2/version: 8.1.0

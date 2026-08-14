@@ -31,7 +31,7 @@ Install the development version from GitHub:
 
 ```R
 install.packages("remotes")
-remotes::install_github("KaiqianZhang/prs-transferability")
+remotes::install_github("KaiqianZhang/pgsbridge")
 ```
 
 The genotype readers are optional and only the simulations need them:
@@ -98,32 +98,70 @@ beta <- rep(shared_effect_size(h2 = 0.4, tau2 = 1, p = p), m_loci)
 # simulate the trait and score the optimal predictor
 trait <- simulate_trait(X, beta, alpha = 0, tau2 = 1)
 empirical_accuracy(trait$y, trait$g)
-#> [1] 0.4034
+#> [1] 0.3950258
 
 # which matches the closed form at the realised allele frequencies
 prediction_accuracy(
     sigma2 = additive_genetic_variance(beta, allele_frequencies(X)),
     phi_bar = 0.5, tau2 = 1
 )
-#> [1] 0.4013
+#> [1] 0.3999232
 ```
 
 ## Reproducing the manuscript
 
-The repository carries the analysis scripts and the pre-computed simulation
-results alongside the package. Clone it, then from the repository root:
+Each figure is one function. Given the `data` directory of this repository they
+need no genotypes and no cluster:
+
+```R
+library(pgsbridge)
+figure_02("data")
+```
+
+| Figure | Function | Underlying simulation |
+| --- | --- | --- |
+| Fig 1 | `figure_01()` | `03_theory_validation.R` for panel a; b to d are closed form |
+| Fig 2 | `figure_02()` | `04_traits_common_variants.R` |
+| Fig 3 | `figure_03()` | `06_traits_rare_and_common.R` |
+| Fig 4 | `figure_04()` | `07_heritability_decomposition.R` |
+| S1 Fig | `figure_S1()` | `04_traits_common_variants.R` |
+| S2 Fig | `figure_S2()` | `04_traits_common_variants.R` and `05_traits_normal_effects.R` |
+| S3 Fig | `figure_S3()` | `08_allele_frequencies.R` |
+| S4 Fig | `figure_S4()` | `06_traits_rare_and_common.R` |
+| S5 Fig | `figure_S5()` | `06_traits_rare_and_common.R` |
+| S6 Fig | `figure_S6()` | `06_traits_rare_and_common.R` |
+| S7 Fig | `figure_S7()` | `08_allele_frequencies.R` |
+| S8 Fig | `figure_S8()` | `08_allele_frequencies.R` |
+
+`scripts/figures/` holds one script per figure that calls the function and
+writes a PDF and a PNG into `output/`. From the repository root:
 
 ```
-Rscript scripts/figures/figure_01.R      ...      Rscript scripts/figures/figure_S8.R
+Rscript scripts/figures/figure_01.R
 ```
 
-Each script writes a PDF and a PNG into `output/`. No genotypes and no cluster
-are needed; the replicate-level results the figures summarise are in `data/`.
-
-Regenerating those results from scratch needs a cluster and several days. The
+Regenerating the underlying results needs a cluster and several days. The
 scripts in `scripts/simulation/` are numbered in the order they run, each with a
 matching `.slurm` wrapper, and `vignette("reproducing-the-figures")` walks
 through both paths.
+
+## What cannot be reproduced
+
+Four things cannot be regenerated from what is distributed here. `?reproducibility`
+gives the detail; in brief:
+
+- **S3 Fig** is drawn only in part. Its 1000 Genomes series needs allele
+  frequencies that are not distributed here and that no script here computes.
+  Its simulated series does not match the published curve either, because the
+  variant definition behind that curve is not recorded.
+- **The published Figure 2 image** predates the distributed replicates. The code
+  and the data agree with each other; at a heritability of 0.1 the manuscript
+  image does not, because it was never redrawn.
+- **Figure 1a** is sensitive to package versions. No versions are pinned, so a
+  rerun gives a Pearson `r^2` of 0.998 where the distributed file holds 0.997.
+- **The coalescent genotypes** cannot be regenerated exactly, because the run
+  that produced them recorded no random seed. Everything downstream is therefore
+  reproducible in distribution rather than bit for bit.
 
 ## Citations
 

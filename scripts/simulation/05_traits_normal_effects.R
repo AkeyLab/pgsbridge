@@ -2,10 +2,10 @@
 #
 # Repeats the experiment of 04_traits_common_variants.R with the effect sizes
 # drawn from a normal distribution instead of being equal across causal
-# variants. Produces the data behind the lower panel of S3 Fig.
+# variants. Produces the data behind the lower panel of S2 Fig.
 #
 # Everything else is unchanged: the same genotypes, the same common-variant
-# pool, the same number of causal variants, the same heritability targets, and
+# pool, the same 1,000 causal variants, the same heritability targets, and
 # the same accuracy measurement. The only difference is how the effect sizes are
 # obtained.
 #

@@ -16,7 +16,7 @@ Hardy-Weinberg equilibrium with unrelated individuals.}
 \item{tau2}{The non-genetic variance.}
 }
 \value{
-The best achievable prediction accuracy, in \verb{[0, 1)}.
+The best achievable prediction accuracy, in \verb{[0, 1]}.
 }
 \description{
 The optimal predictor of a trait under squared-error loss is its conditional

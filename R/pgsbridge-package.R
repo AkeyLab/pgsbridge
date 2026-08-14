@@ -30,8 +30,8 @@
 #'
 #' @keywords internal
 #'
-#' @importFrom stats cor median qt quantile rnorm runif sd var
-#' @importFrom utils head
+#' @importFrom stats cor qt quantile rnorm runif sd var
+#' @importFrom utils globalVariables
 #' @importFrom rlang .data :=
 #' @import ggplot2
 #' @import ggh4x
@@ -41,7 +41,7 @@
 
 # Column names used inside dplyr and ggplot2 calls, which R CMD check would
 # otherwise report as undefined global variables.
-utils::globalVariables(c(
+globalVariables(c(
     "se", ".mean", "n", "sd", "ci", "emp_tau", "pop_comb", "pop_pair",
     "direction", "h2", "fraction", "ratio", "x", "on_left", "label",
     "label_y", "heritability_title"

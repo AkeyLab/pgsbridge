@@ -20,7 +20,7 @@ The single effect size shared by every causal variant.
 With a single effect size \code{beta} shared by all \code{m} causal variants the
 additive genetic variance is \verb{2 beta^2 sum_i p_i (1 - p_i)}, so reaching
 heritability \code{h2} at non-genetic variance \code{tau^2} in a Hardy-Weinberg
-population requires
+population requires the effect size below.
 }
 \details{
 \verb{beta = sqrt( h2 / (1 - h2) * tau^2 / (2 sum_i p_i (1 - p_i)) )}.
