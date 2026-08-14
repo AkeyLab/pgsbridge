@@ -448,6 +448,10 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
       <div class="panel" id="panel-1"></div>
       <div>
         <div class="card">
+          <div class="eq-hero eq-block" id="s1-eq"></div>
+          <div class="eq-sub eq-block" id="s1-eq-nums"></div>
+          <p class="formula-note" style="margin-bottom:20px">The ceiling in the discovery
+            population, evaluated at the values in the panel. Every number moves as you drag.</p>
           <h3>The phenotypic variance of one individual, split in two</h3>
           <p class="legend">
             <span class="legend-item"><span class="legend-box" style="background:var(--c-gen)"></span>genetic, <span id="l-gen-sym"></span></span>
@@ -1159,12 +1163,25 @@ function drawSection1() {
   svg.appendChild(el('text', { x: x0, y: 20, fill: 'var(--text-muted)', 'font-size': 12 },
     'total phenotypic variance = ' + fmt(total, 3)));
 
+  /* The section's headline equation, symbolic above and substituted below. The
+     substitution line carries no leading PA_A because the line above it ends in
+     one, so the two read as a single continued expression. */
+  $('s1-eq').innerHTML = mh(
+    '\\mathrm{PA}_A \\;=\\; \\frac{2\\sigma^{2}_A\\overline{\\Phi}_A}' +
+    '{2\\sigma^{2}_A\\overline{\\Phi}_A + \\tau^{2}_A}', true);
+  const n = v => fmt(v, 3);
+  $('s1-eq-nums').innerHTML = mh(
+    '=\\;\\frac{2 \\times ' + n(theory.sA) + ' \\times ' + n(theory.pA) + '}' +
+    '{2 \\times ' + n(theory.sA) + ' \\times ' + n(theory.pA) + ' + ' + n(theory.tA) + '}' +
+    '\\;=\\;\\frac{' + n(g) + '}{' + n(total) + '}\\;=\\;' + n(pa), true);
+
+  // The calc block now names the two parts only; the equation above states the result.
   $('s1-calc').innerHTML =
     '<div class="r">genetic part &nbsp;' + mh('2\\sigma^2_A\\overline{\\Phi}_A') + ' &nbsp;=&nbsp; 2 &times; ' +
       fmt(theory.sA, 3) + ' &times; ' + fmt(theory.pA, 3) + ' = <b>' + fmt(g, 3) + '</b></div>' +
     '<div class="r">non-genetic part &nbsp;' + mh('\\tau^2_A') + ' &nbsp;=&nbsp; <b>' + fmt(e, 3) + '</b></div>' +
-    '<div class="r tot">' + mh('\\mathrm{PA}_A') + ' = ' + fmt(g, 3) + ' / (' + fmt(g, 3) + ' + ' + fmt(e, 3) +
-      ') = <b>' + fmt(pa, 3) + '</b></div>';
+    '<div class="r tot">total phenotypic variance = ' + fmt(g, 3) + ' + ' + fmt(e, 3) +
+      ' = <b>' + fmt(total, 3) + '</b></div>';
 
   const atHWE = Math.abs(theory.pA - 0.5) < 1e-9;
   const h2 = heritability(theory.sA, theory.tA);
