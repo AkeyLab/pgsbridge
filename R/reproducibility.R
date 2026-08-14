@@ -52,7 +52,7 @@
 #'
 #' @section Figure 1a is sensitive to the package versions:
 #'
-#' `scripts/simulation/03_theory_validation.R` seeds every scenario
+#' `scripts/simulation/01_theory_validation.R` seeds every scenario
 #' individually, so it does not depend on the number of cores, but rerunning it
 #' does not reproduce the distributed
 #' `data/theory_validation/distinct_populations.rds` exactly.  A rerun keeps 385
@@ -68,7 +68,7 @@
 #'
 #' @section The coalescent genotypes cannot be regenerated exactly:
 #'
-#' `scripts/simulation/01_simulate_genotypes.py` accepts a `--seed`, but the run
+#' `scripts/coalescent/01_simulate_genotypes.py` accepts a `--seed`, but the run
 #' that produced the genotypes behind Figures 2 to 4 and S1 to S8 was made
 #' before that option existed and its seed was not recorded.  Any rerun
 #' therefore produces a statistically equivalent but numerically different set
@@ -77,8 +77,8 @@
 #'
 #' @section The rare-variant pool is only approximately recovered:
 #'
-#' `scripts/simulation/06_traits_rare_and_common.R` and
-#' `scripts/simulation/07_heritability_decomposition.R` define the rare pool as
+#' `scripts/simulation/04_traits_rare_and_common.R` and
+#' `scripts/simulation/05_heritability_decomposition.R` define the rare pool as
 #' the complement of the pooled common panel, which is the definition the
 #' Methods give and which yields 2,817,430 variants, matching the fixation-index
 #' analysis.  The surviving intermediate files from the published run instead

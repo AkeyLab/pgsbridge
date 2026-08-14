@@ -1,4 +1,4 @@
-# simulation/07_heritability_decomposition.R
+# simulation/05_heritability_decomposition.R
 #
 # Splits each population's heritability into the part carried by common causal
 # variants and the part carried by rare ones. Produces the data behind Figure 4.
@@ -25,9 +25,9 @@
 # The shares are averaged over replicates and written as one tidy table per
 # combination of heritability and effect-size ratio.
 #
-# Runtime: hours. Use 07_heritability_decomposition.slurm.
+# Runtime: hours. Use 05_heritability_decomposition.slurm.
 #
-# Usage:  Rscript scripts/simulation/07_heritability_decomposition.R
+# Usage:  Rscript scripts/simulation/05_heritability_decomposition.R
 
 source("scripts/config.R")
 

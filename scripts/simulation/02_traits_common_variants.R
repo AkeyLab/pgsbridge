@@ -1,4 +1,4 @@
-# simulation/04_traits_common_variants.R
+# simulation/02_traits_common_variants.R
 #
 # Simulates traits with common causal variants only, on the coalescent
 # genotypes, and measures transferability between every ordered pair of
@@ -30,9 +30,9 @@
 # Accuracy is measured on a random subsample of `EVALUATION_SIZE` individuals
 # from each population rather than on all of them.
 #
-# Runtime: several hours for the full sweep. Use 04_traits_common_variants.slurm.
+# Runtime: several hours for the full sweep. Use 02_traits_common_variants.slurm.
 #
-# Usage:  Rscript scripts/simulation/04_traits_common_variants.R
+# Usage:  Rscript scripts/simulation/02_traits_common_variants.R
 
 source("scripts/config.R")
 

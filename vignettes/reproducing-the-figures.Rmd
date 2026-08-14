@@ -124,22 +124,26 @@ returned as `n`.
 
 ## Regenerating the results
 
-The scripts in `scripts/simulation/` are numbered in the order they run and each
-has a matching `.slurm` wrapper.
+`scripts/coalescent/` produces the genotypes: an out-of-Africa coalescent
+simulation, a split of the variants into common and rare pools, and a check on
+the resulting between-population differentiation.  Its own `README.md` documents
+the demographic parameters.  `scripts/simulation/` then simulates traits on
+those genotypes, numbered in the order they run.
 
 | Script | Produces |
 | --- | --- |
-| `01_simulate_genotypes.py` | coalescent genotypes, written as a VCF |
-| `02_prepare_genotypes.sh` | PLINK files, split by population |
-| `03_theory_validation.R` | Figure 1a |
-| `04_traits_common_variants.R` | Figure 2, S1 Fig, S2 Fig |
-| `05_traits_normal_effects.R` | S2 Fig |
-| `06_traits_rare_and_common.R` | Figure 3, S4 to S6 Figs |
-| `07_heritability_decomposition.R` | Figure 4 |
-| `08_allele_frequencies.R` | S3, S7, S8 Figs |
+| `coalescent/01_simulate_genotypes.py` | genotypes, written as a VCF |
+| `coalescent/02_prepare_genotypes.sh` | PLINK files, split by population |
+| `coalescent/03_compute_fst.py` | the pairwise fixation index |
+| `simulation/01_theory_validation.R` | Figure 1a |
+| `simulation/02_traits_common_variants.R` | Figure 2, S1 Fig, S2 Fig |
+| `simulation/03_traits_normal_effects.R` | S2 Fig |
+| `simulation/04_traits_rare_and_common.R` | Figure 3, S4 to S6 Figs |
+| `simulation/05_heritability_decomposition.R` | Figure 4 |
+| `simulation/06_allele_frequencies.R` | S3, S7, S8 Figs |
 
-Step 3 is self-contained and simulates its own genotypes with `bnpsd`. Steps 4
-to 8 read the PLINK files from step 2 through `load_variant_pools()`, which
+Step 1 of the trait simulations is self-contained and simulates its own
+genotypes with `bnpsd`.  Steps 2 to 6 read the PLINK files from step 2 through `load_variant_pools()`, which
 returns column indices rather than genotypes: the rare pool runs to millions of
 variants and holding it for three populations at once would need tens of
 gigabytes. `draw_causal_genotypes()` then reads only the drawn columns.

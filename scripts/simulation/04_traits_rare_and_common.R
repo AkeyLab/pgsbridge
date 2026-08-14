@@ -1,4 +1,4 @@
-# simulation/06_traits_rare_and_common.R
+# simulation/04_traits_rare_and_common.R
 #
 # Simulates traits whose causal variants are part common and part rare, and
 # measures transferability between every ordered pair of populations. Produces
@@ -42,12 +42,12 @@
 #
 # Accuracy is measured on a random subsample of `EVALUATION_SIZE` individuals
 # from each population rather than on all of them, as in
-# 04_traits_common_variants.R.
+# 02_traits_common_variants.R.
 #
 # Runtime: many hours for the full sweep of 9 rare fractions by 4 effect-size
-# ratios by 3 heritabilities. Use 06_traits_rare_and_common.slurm.
+# ratios by 3 heritabilities. Use 04_traits_rare_and_common.slurm.
 #
-# Usage:  Rscript scripts/simulation/06_traits_rare_and_common.R
+# Usage:  Rscript scripts/simulation/04_traits_rare_and_common.R
 
 source("scripts/config.R")
 

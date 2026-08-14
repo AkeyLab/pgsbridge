@@ -120,18 +120,18 @@ figure_02("data")
 
 | Figure | Function | Underlying simulation |
 | --- | --- | --- |
-| Fig 1 | `figure_01()` | `03_theory_validation.R` for panel a; b to d are closed form |
-| Fig 2 | `figure_02()` | `04_traits_common_variants.R` |
-| Fig 3 | `figure_03()` | `06_traits_rare_and_common.R` |
-| Fig 4 | `figure_04()` | `07_heritability_decomposition.R` |
-| S1 Fig | `figure_S1()` | `04_traits_common_variants.R` |
-| S2 Fig | `figure_S2()` | `04_traits_common_variants.R` and `05_traits_normal_effects.R` |
-| S3 Fig | `figure_S3()` | `08_allele_frequencies.R` |
-| S4 Fig | `figure_S4()` | `06_traits_rare_and_common.R` |
-| S5 Fig | `figure_S5()` | `06_traits_rare_and_common.R` |
-| S6 Fig | `figure_S6()` | `06_traits_rare_and_common.R` |
-| S7 Fig | `figure_S7()` | `08_allele_frequencies.R` |
-| S8 Fig | `figure_S8()` | `08_allele_frequencies.R` |
+| Fig 1 | `figure_01()` | `01_theory_validation.R` for panel a; b to d are closed form |
+| Fig 2 | `figure_02()` | `02_traits_common_variants.R` |
+| Fig 3 | `figure_03()` | `04_traits_rare_and_common.R` |
+| Fig 4 | `figure_04()` | `05_heritability_decomposition.R` |
+| S1 Fig | `figure_S1()` | `02_traits_common_variants.R` |
+| S2 Fig | `figure_S2()` | `02_traits_common_variants.R` and `03_traits_normal_effects.R` |
+| S3 Fig | `figure_S3()` | `06_allele_frequencies.R` |
+| S4 Fig | `figure_S4()` | `04_traits_rare_and_common.R` |
+| S5 Fig | `figure_S5()` | `04_traits_rare_and_common.R` |
+| S6 Fig | `figure_S6()` | `04_traits_rare_and_common.R` |
+| S7 Fig | `figure_S7()` | `06_allele_frequencies.R` |
+| S8 Fig | `figure_S8()` | `06_allele_frequencies.R` |
 
 `scripts/figures/` holds one script per figure that calls the function and
 writes a PDF and a PNG into `output/`. From the repository root:
@@ -140,28 +140,36 @@ writes a PDF and a PNG into `output/`. From the repository root:
 Rscript scripts/figures/figure_01.R
 ```
 
-Regenerating the underlying results needs a cluster and several days. The
-scripts in `scripts/simulation/` are numbered in the order they run, each with a
-matching `.slurm` wrapper, and `vignette("reproducing-the-figures")` walks
-through both paths.
+Regenerating the underlying results needs a cluster and several days.
 
-## What cannot be reproduced
+`scripts/coalescent/` simulates the genotypes under an out-of-Africa demographic
+model, splits the variants into common and rare pools, and checks the resulting
+between-population differentiation. `scripts/coalescent/README.md` documents the
+demographic parameters and the variant definitions.
 
-Four things cannot be regenerated from what is distributed here. `?reproducibility`
-gives the detail; in brief:
+```
+sbatch scripts/coalescent/01_simulate_genotypes.slurm
+bash   scripts/coalescent/02_prepare_genotypes.sh sim.vcf genotypes/
+python scripts/coalescent/03_compute_fst.py --dir genotypes \
+       --stems afr_all_variants eur_all_variants asn_all_variants --labels AFR EUR ASN
+```
 
-- **S3 Fig** is drawn only in part. Its 1000 Genomes series needs allele
-  frequencies that are not distributed here and that no script here computes.
-  Its simulated series does not match the published curve either, because the
-  variant definition behind that curve is not recorded.
-- **The published Figure 2 image** predates the distributed replicates. The code
-  and the data agree with each other; at a heritability of 0.1 the manuscript
-  image does not, because it was never redrawn.
-- **Figure 1a** is sensitive to package versions. No versions are pinned, so a
-  rerun gives a Pearson `r^2` of 0.998 where the distributed file holds 0.997.
-- **The coalescent genotypes** cannot be regenerated exactly, because the run
-  that produced them recorded no random seed. Everything downstream is therefore
-  reproducible in distribution rather than bit for bit.
+`scripts/simulation/` then simulates traits on those genotypes, numbered in the
+order they run, each with a matching `.slurm` wrapper.
+
+| Script | Produces |
+| --- | --- |
+| `01_theory_validation.R` | Figure 1a |
+| `02_traits_common_variants.R` | Figure 2, S1 Fig, S2 Fig |
+| `03_traits_normal_effects.R` | S2 Fig |
+| `04_traits_rare_and_common.R` | Figure 3, S4 to S6 Figs |
+| `05_heritability_decomposition.R` | Figure 4 |
+| `06_allele_frequencies.R` | S3, S7, S8 Figs |
+
+Step 1 is self-contained and simulates its own genotypes with `bnpsd`. Steps 2
+to 6 read the PLINK files from `scripts/coalescent/`, whose location is
+`PRS_GENOTYPES` in `scripts/config.R`. `vignette("reproducing-the-figures")`
+walks through both paths.
 
 ## Citations
 

@@ -1,4 +1,4 @@
-# simulation/08_allele_frequencies.R
+# simulation/06_allele_frequencies.R
 #
 # Computes the per-population allele frequency of every simulated variant, split
 # into the common and the rare pool. Produces the data behind S3, S7 and S8 Figs.
@@ -21,7 +21,7 @@
 # In all of these files the vectors are aligned: position k refers to the same
 # variant in all three populations.
 #
-# Usage:  Rscript scripts/simulation/08_allele_frequencies.R
+# Usage:  Rscript scripts/simulation/06_allele_frequencies.R
 
 source("scripts/config.R")
 

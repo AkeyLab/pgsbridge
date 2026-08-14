@@ -7,8 +7,8 @@
 #SBATCH --time=24:00:00
 #SBATCH --output=simulate_genotypes_%j.out
 
-# Submit from the repository root:  sbatch simulation/01_simulate_genotypes.slurm
+# Submit from the repository root:  sbatch coalescent/01_simulate_genotypes.slurm
 
 module load anaconda3
 
-python simulation/01_simulate_genotypes.py --out sim.vcf --seed 20220926
+python scripts/coalescent/01_simulate_genotypes.py --out sim.vcf --seed 20220926

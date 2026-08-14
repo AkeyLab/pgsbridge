@@ -7,8 +7,8 @@
 #SBATCH --time=24:00:00
 #SBATCH --output=heritability_decomp_%j.out
 
-# Submit from the repository root:  sbatch simulation/07_heritability_decomposition.slurm
+# Submit from the repository root:  sbatch scripts/simulation/05_heritability_decomposition.slurm
 
 module load R/4.5.1
 
-Rscript simulation/07_heritability_decomposition.R
+Rscript scripts/simulation/05_heritability_decomposition.R

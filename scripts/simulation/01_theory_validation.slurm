@@ -7,8 +7,8 @@
 #SBATCH --time=04:00:00
 #SBATCH --output=theory_validation_%j.out
 
-# Submit from the repository root:  sbatch simulation/03_theory_validation.slurm
+# Submit from the repository root:  sbatch scripts/simulation/01_theory_validation.slurm
 
 module load R/4.5.1
 
-Rscript simulation/03_theory_validation.R
+Rscript scripts/simulation/01_theory_validation.R

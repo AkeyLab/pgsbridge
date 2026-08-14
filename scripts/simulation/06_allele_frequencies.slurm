@@ -7,8 +7,8 @@
 #SBATCH --time=04:00:00
 #SBATCH --output=allele_frequencies_%j.out
 
-# Submit from the repository root:  sbatch simulation/08_allele_frequencies.slurm
+# Submit from the repository root:  sbatch scripts/simulation/06_allele_frequencies.slurm
 
 module load R/4.5.1
 
-Rscript simulation/08_allele_frequencies.R
+Rscript scripts/simulation/06_allele_frequencies.R

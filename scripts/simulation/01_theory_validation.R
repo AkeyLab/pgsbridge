@@ -1,4 +1,4 @@
-# simulation/03_theory_validation.R
+# simulation/01_theory_validation.R
 #
 # Validates the closed form of transferability against forward simulation.
 # Produces the data behind Figure 1a.
@@ -65,9 +65,9 @@
 # MAX_ABS_TRANSFERABILITY in absolute value, as a numerical failure rather than
 # a result.
 #
-# Runtime: about two minutes on 28 cores. Use 03_theory_validation.slurm.
+# Runtime: about two minutes on 28 cores. Use 01_theory_validation.slurm.
 #
-# Usage:  Rscript scripts/simulation/03_theory_validation.R
+# Usage:  Rscript scripts/simulation/01_theory_validation.R
 
 source("scripts/config.R")
 

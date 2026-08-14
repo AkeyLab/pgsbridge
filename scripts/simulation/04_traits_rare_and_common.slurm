@@ -7,8 +7,8 @@
 #SBATCH --time=48:00:00
 #SBATCH --output=traits_rare_common_%j.out
 
-# Submit from the repository root:  sbatch simulation/06_traits_rare_and_common.slurm
+# Submit from the repository root:  sbatch scripts/simulation/04_traits_rare_and_common.slurm
 
 module load R/4.5.1
 
-Rscript simulation/06_traits_rare_and_common.R
+Rscript scripts/simulation/04_traits_rare_and_common.R

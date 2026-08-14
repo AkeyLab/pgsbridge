@@ -1,6 +1,6 @@
-# simulation/05_traits_normal_effects.R
+# simulation/03_traits_normal_effects.R
 #
-# Repeats the experiment of 04_traits_common_variants.R with the effect sizes
+# Repeats the experiment of 02_traits_common_variants.R with the effect sizes
 # drawn from a normal distribution instead of being equal across causal
 # variants. Produces the data behind the lower panel of S2 Fig.
 #
@@ -26,12 +26,12 @@
 #
 # Accuracy is measured on a random subsample of `EVALUATION_SIZE` individuals
 # from each population rather than on all of them, as in
-# 04_traits_common_variants.R.
+# 02_traits_common_variants.R.
 #
-# Runtime: comparable to 04_traits_common_variants.R for a single causal-variant
-# count. Use 05_traits_normal_effects.slurm.
+# Runtime: comparable to 02_traits_common_variants.R for a single causal-variant
+# count. Use 03_traits_normal_effects.slurm.
 #
-# Usage:  Rscript scripts/simulation/05_traits_normal_effects.R
+# Usage:  Rscript scripts/simulation/03_traits_normal_effects.R
 
 source("scripts/config.R")
 
