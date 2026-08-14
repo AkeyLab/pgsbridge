@@ -223,44 +223,53 @@ figure_04 <- function(data_dir) {
     decomposition$type <- factor(decomposition$type, levels = c("rare", "common"))
     decomposition$ratio <- factor(decomposition$ratio, levels = ratios)
     decomposition$h2_level <- factor(decomposition$h2_level, levels = heritabilities)
-    decomposition$ratio_title <- factor("Effect size ratio")
-    decomposition$fraction_title <- factor("Fraction of rare variants")
+    decomposition$ratio_title <- factor("Effect Size Ratio")
+    decomposition$h2_title <- factor("Heritability in EUR")
+    decomposition$fraction_title <- factor("Fraction of Rare Variants")
 
-    block <- function(heritability, ratio, show_title) {
+    # One block per heritability and effect-size ratio.  Within a block the nine
+    # rare-variant fractions share a vertical scale, so the bars can be compared
+    # across fractions; between blocks the scale is free, because the two
+    # heritability levels differ by nearly an order of magnitude and one scale
+    # would flatten the 0.1 column.  Only the top row carries the heritability
+    # strip, and the effect-size ratio runs down the left.
+    block <- function(heritability, ratio, top_row) {
         subset <- decomposition[decomposition$h2_level == heritability &
                                     decomposition$ratio == ratio, ]
-        plot <- ggplot2::ggplot(subset, ggplot2::aes(.data$pop, .data$h2,
-                                                     fill = .data$type)) +
+        facets <- if (top_row)
+            ggh4x::facet_nested(ratio_title + ratio ~ h2_title + h2_level +
+                                    fraction_title + fraction, switch = "y")
+        else
+            ggh4x::facet_nested(ratio_title + ratio ~ fraction_title + fraction,
+                                switch = "y")
+
+        ggplot2::ggplot(subset, ggplot2::aes(.data$pop, .data$h2,
+                                             fill = .data$type)) +
             ggplot2::geom_col(position = "stack", width = 0.8) +
-            ggh4x::facet_nested(ratio_title + ratio ~ fraction_title + fraction) +
-            ggplot2::scale_fill_manual("Variant type", values = decomp_pal,
+            facets +
+            ggplot2::scale_fill_manual("Variant Type", values = decomp_pal,
                                        breaks = c("common", "rare")) +
             ggplot2::scale_y_continuous(
                 expand = ggplot2::expansion(mult = c(0, 0.05))) +
-            ggplot2::labs(x = "Population", y = "Heritability") +
+            ggplot2::labs(x = "Pop", y = "Heritability") +
             ggplot2::theme_minimal(base_size = 8) +
             ggplot2::theme(
                 axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.5,
                                                     hjust = 1, size = 5.5),
                 strip.text = ggplot2::element_text(size = 7),
-                strip.background = ggplot2::element_rect(fill = "grey92",
+                strip.background = ggplot2::element_rect(fill = "grey85",
                                                          colour = NA),
-                panel.spacing = ggplot2::unit(1.5, "pt"),
-                plot.title = ggplot2::element_text(hjust = 0.5, size = 10,
-                                                   face = "bold"))
-        if (show_title)
-            plot <- plot + ggplot2::ggtitle(
-                sprintf("Heritability in EUR: %s", heritability))
-        plot
+                strip.placement = "outside",
+                panel.spacing = ggplot2::unit(1.5, "pt"))
     }
 
-    blocks <- list()
-    for (ratio in ratios)
-        for (heritability in heritabilities)
-            blocks[[length(blocks) + 1]] <- block(heritability, ratio,
-                                                  identical(ratio, ratios[1]))
+    rows <- lapply(seq_along(ratios), function(i) {
+        left <- block(heritabilities[1], ratios[i], i == 1)
+        right <- block(heritabilities[2], ratios[i], i == 1)
+        (left | right) +
+            patchwork::plot_layout(guides = "collect") &
+            ggplot2::theme(legend.position = "right")
+    })
 
-    patchwork::wrap_plots(blocks, ncol = length(heritabilities),
-                          guides = "collect") &
-        ggplot2::theme(legend.position = "right")
+    patchwork::wrap_plots(rows, ncol = 1)
 }

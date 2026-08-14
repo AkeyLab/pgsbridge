@@ -12,7 +12,7 @@ source("scripts/config.R")
 
 figure <- figure_04(PRS_DATA)
 
-ggsave(file.path(PRS_OUTPUT, "Fig4.pdf"), figure, height = 9, width = 15)
-ggsave(file.path(PRS_OUTPUT, "Fig4.png"), figure, height = 9, width = 15,
+ggsave(file.path(PRS_OUTPUT, "Fig4.pdf"), figure, height = 11.43, width = 10.28)
+ggsave(file.path(PRS_OUTPUT, "Fig4.png"), figure, height = 11.43, width = 10.28,
        dpi = 300)
 cat("Figure 4 written to", PRS_OUTPUT, "\n")
