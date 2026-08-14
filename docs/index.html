@@ -513,9 +513,9 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
       curve varies it in the <span style="color:var(--c-targ);font-weight:620">target</span>
       population; the dashed curve varies it in the
       <span style="color:var(--c-disc);font-weight:620">discovery</span> population. The two always
-      move in opposite directions, because the discovery population sits in the denominator, and they
-      cross wherever the two populations are identical. This is Figure 1b to 1d of the manuscript,
-      except that you can move the point the curves are drawn around.</p>
+      move in opposite directions, because the discovery population sits in the denominator. This is
+      Figure 1b to 1d of the manuscript, except that you can move the point the curves are drawn
+      around.</p>
     <div class="sec-grid">
       <div class="panel" id="panel-3"></div>
       <div>
@@ -524,12 +524,19 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
             <span class="legend-item"><span class="legend-key" style="background:var(--c-targ)"></span>varied in the target B</span>
             <span class="legend-item"><span class="legend-key" style="background:var(--c-disc)"></span>varied in the discovery population A</span>
             <span class="legend-item"><span class="legend-key" style="background:var(--axis)"></span>transferability of one</span>
+            <span class="legend-item"><span class="legend-dot" style="background:var(--surface-1);box-shadow:inset 0 0 0 1.8px var(--text-muted)"></span>where a curve reaches one</span>
           </p>
           <div class="spark-grid" id="s3-sparks"></div>
-          <p class="fig-cap">The sliders start where the manuscript's Figure 1b to 1d starts, with
-            both populations identical at an additive genetic variance of 0.3, an average
-            self-kinship of 0.6 and a non-genetic variance of 1, which is why the curves cross at a
-            transferability of one. <b>Reset the sliders</b> returns to those values.</p>
+          <p class="fig-cap"><b>The open circles are where each curve meets a transferability of
+            one.</b> That happens where the determinant being varied equals its counterpart in the
+            other population, since the two populations are then equally predictable. The place
+            where the two curves cross <i>each other</i> is a different point and carries no
+            meaning: when only this determinant differs, they cross at the square root of the
+            current transferability, which is one only if the populations already agree. The
+            manuscript draws these panels from a setting where the populations are identical, so
+            there all three coincide. <b>Reset the sliders</b> returns to that setting, which is
+            Figure 1b to 1d exactly: an additive genetic variance of 0.3, an average self-kinship
+            of 0.6 and a non-genetic variance of 1 in both populations.</p>
           <details class="tableview"><summary>as a table</summary>
             <div class="tbl-scroll"><table class="data" id="s3-table"></table></div></details>
         </div>
@@ -1328,6 +1335,28 @@ function drawSparks() {
       svg.appendChild(el('text', { x: X(t), y: H - B + 15, 'text-anchor': 'middle',
         fill: 'var(--text-muted)', 'font-size': 10 }, String(+t.toFixed(2))));
     }
+    /* Where each curve meets transferability one. That is the meaningful landmark:
+       it is the value at which the swept determinant equals its counterpart in the
+       other population, making the two equally predictable. It is NOT where the two
+       curves cross each other. With the remaining determinants matched, the curves
+       cross at the square root of the current transferability, which equals one only
+       when the populations already agree. */
+    const markUnit = (curve, colour) => {
+      for (let i = 1; i < curve.length; i++) {
+        const a = curve[i - 1], b = curve[i];
+        if (!Number.isFinite(a[1]) || !Number.isFinite(b[1])) continue;
+        if ((a[1] - 1) * (b[1] - 1) > 0 || a[1] === b[1]) continue;
+        const f = (1 - a[1]) / (b[1] - a[1]);
+        svg.appendChild(el('circle', {
+          cx: X(a[0] + (b[0] - a[0]) * f).toFixed(2), cy: Y(1).toFixed(2), r: 3.6,
+          fill: 'var(--surface-1)', stroke: colour, 'stroke-width': 1.8
+        }));
+        return;
+      }
+    };
+    markUnit(curveA, 'var(--c-disc)');
+    markUnit(curveB, 'var(--c-targ)');
+
     // current positions
     const nowA = theory[s.kind + 'A'], nowB = theory[s.kind + 'B'];
     const Tnow = transferability(theory.sA, theory.pA, theory.tA, theory.sB, theory.pB, theory.tB);
