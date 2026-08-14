@@ -25,10 +25,11 @@ figure_S1 <- function(data_dir) {
                               c("0.1", "0.4", "0.8")))))
     })
 
-    patchwork::wrap_plots(panels, ncol = 1, guides = "collect") +
+    # Each panel keeps its own legend and the panels are tagged a, b, c, which is
+    # how the figure appears in the manuscript.
+    patchwork::wrap_plots(panels, ncol = 1) +
         patchwork::plot_annotation(tag_levels = "a") &
-        ggplot2::theme(legend.position = "bottom",
-                       plot.tag = ggplot2::element_text(face = "bold", size = 14))
+        ggplot2::theme(plot.tag = ggplot2::element_text(face = "bold", size = 14))
 }
 
 #' S2 Fig: transferability is robust to the effect-size distribution
@@ -60,11 +61,10 @@ figure_S2 <- function(data_dir) {
         file.path(data_dir, "transferability_normal_effects",
                   sprintf("transferability_m1000_h2%s.RDS", heritabilities))))
 
-    (fixed / normal) +
-        patchwork::plot_layout(guides = "collect") +
-        patchwork::plot_annotation(tag_levels = "a") &
-        ggplot2::theme(legend.position = "bottom",
-                       plot.tag = ggplot2::element_text(face = "bold", size = 14))
+    # No tags and one legend per panel: the caption names the top and the bottom
+    # panel rather than (a) and (b), which is how the figure appears in the
+    # manuscript.
+    fixed / normal
 }
 
 #' S3 Fig: average minor allele frequency in the three populations
