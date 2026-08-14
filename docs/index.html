@@ -502,10 +502,6 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
           </svg>
           <div class="calc" id="s2-calc"></div>
         </div>
-        <div class="insight">
-          <span class="k">The rule behind the gauge</span>
-          <p id="s2-rule"></p>
-        </div>
       </div>
     </div>
   </section>
@@ -1265,17 +1261,6 @@ function drawSection2() {
     '<div class="r">' + mh('\\mathrm{PA}_B') + ' = ' + fmt(gB, 3) + ' / ' + fmt(vB, 3) + ' = <b>' + fmt(paB, 3) + '</b></div>' +
     '<div class="r tot">' + mh('T_{A\\to B}') + ' = ' + fmt(paB, 3) + ' / ' + fmt(paA, 3) + ' = <b>' + fmt(T, 3) + '</b></div>';
 
-  const sameTau = Math.abs(theory.tA - theory.tB) < 1e-9;
-  $('s2-rule').innerHTML = sameTau
-    ? ('The two non-genetic variances are equal right now, and in that case the rule is simple: ' +
-       'transferability exceeds one exactly when the target has the larger genetically predictable ' +
-       'variance, which is the same as saying it has the larger total trait variance. Here the target ' +
-       'has ' + fmt(gB, 3) + ' against ' + fmt(gA, 3) + ' in the discovery population, so transferability ' +
-       'is ' + (gB > gA ? 'above' : gB < gA ? 'below' : 'exactly') + ' one.')
-    : ('When the non-genetic variances differ, as they do now (' + fmt(theory.tA, 3) + ' against ' +
-       fmt(theory.tB, 3) + '), the comparison of genetic variances alone no longer settles the question. ' +
-       'Environmental variation is a genuinely non-genetic route by which two populations can differ in ' +
-       'how predictable a trait is. Set the two equal to recover the clean rule.');
 }
 
 /* ═══ 03 · one determinant at a time ══════════════════════════════════════ */
