@@ -653,7 +653,6 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
         <div class="card" style="margin-top:16px">
           <h3>The mechanism, in four steps</h3>
           <div class="tiles" id="s6-mech"></div>
-          <p class="fig-cap" id="s6-mech-note"></p>
         </div>
 
         <div class="card" style="margin-top:16px">
@@ -1898,17 +1897,6 @@ function drawMechanism(rows) {
     '<div class="tile" style="--tile-c:' + t.c + '"><div class="tile-label">' + t.label + '</div>' +
     '<div class="tile-value">' + t.value + '</div><div class="tile-note">' + t.note + '</div></div>').join('');
 
-  // An honest consistency check rather than a silent one.
-  const predicted = h2.AFR / h2.ASN;
-  const observed = commonAt(sim.m, sim.h2, 'ASN-AFR', sim.effects)[0];
-  const obsCi = commonAt(sim.m, sim.h2, 'ASN-AFR', sim.effects)[1];
-  $('s6-mech-note').innerHTML =
-    'The heritabilities in step 3 are not stored; they are recovered from the transferabilities out of ' +
-    'Europe using the Hardy–Weinberg identity, with the European value fixed at ' + sim.h2 + ' by design. ' +
-    '<b>Consistency check:</b> those recovered heritabilities imply an East Asian to African transferability of ' +
-    fmt(predicted, 3) + ', against the simulated ' + fmt(observed, 3) + ' ± ' + fmt(obsCi, 3) +
-    '. The two agree closely but need not agree exactly, because each simulated number is a mean of ratios ' +
-    'across replicates rather than a ratio of means, and the interquartile trim is applied within each ordered pair separately.';
 }
 
 /* ── 07 · rare variants ─────────────────────────────────────────────────── */
