@@ -370,9 +370,9 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
         <li>Sections <b>1 to 4</b> are the theory. They compute the closed form directly in your
           browser, so every number you see is exact rather than simulated. Move a slider and
           everything downstream of it moves.</li>
-        <li>Sections <b>5 to 8</b> are the simulations. Their numbers are the stored results from
+        <li>Sections <b>5 to 7</b> are the simulations. Their numbers are the stored results from
           the paper, aggregated exactly as the manuscript figures aggregate them.</li>
-        <li>Sections <b>9 and 10</b> are the framing: what the idealized model leaves out, and how
+        <li>Sections <b>8 and 9</b> are the framing: what the idealized model leaves out, and how
           to read an observed transferability against the ceiling this work defines.</li>
         <li>Every figure has an <b>as a table</b> control underneath it if you would rather read the
           numbers than the picture.</li>
@@ -405,12 +405,9 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
         <span class="toc-title">Rare variants amplify the asymmetry</span>
         <span class="toc-desc">One widget covering Figure 3 and three supplementary figures.</span></a>
       <a class="toc-card" href="#s8" data-tone="8"><span class="toc-num">08</span>
-        <span class="toc-title">Where the heritability goes</span>
-        <span class="toc-desc">The mechanism underneath section 7, variant class by variant class.</span></a>
-      <a class="toc-card" href="#s9" data-tone="9"><span class="toc-num">09</span>
         <span class="toc-title">What the model deliberately removes</span>
         <span class="toc-desc">Five assumptions, why each was made, what it costs.</span></a>
-      <a class="toc-card" href="#s10" data-tone="10"><span class="toc-num">10</span>
+      <a class="toc-card" href="#s9" data-tone="9"><span class="toc-num">09</span>
         <span class="toc-title">Unavoidable against recoverable</span>
         <span class="toc-desc">Reading a published transferability against the ceiling.</span></a>
     </nav>
@@ -724,67 +721,14 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
           <details class="tableview"><summary>as a table</summary>
             <div class="tbl-scroll"><table class="data" id="s7-table"></table></div></details>
         </div>
-        <div class="insight">
-          <span class="k">Why the model produces this without any tagging argument</span>
-          <p>Rare variants are usually said to hurt portability because linkage disequilibrium tags
-            them poorly and because selection can make their effects population-specific. Neither
-            mechanism exists here: every causal variant is known and every effect size is shared. The
-            widening comes from one thing only. The rare pool is defined on the three samples
-            pooled, so a variant in it is frequently absent from any one of them, and it is absent
-            outside Africa most often: <b>69.2%</b> of rare variants sit at zero frequency in the
-            European sample and <b>70.1%</b> in the East Asian, against <b>57.5%</b> in the African.
-            A variant that is absent contributes no additive genetic variance in that population and
-            contributes as usual wherever it still segregates.</p>
-        </div>
       </div>
     </div>
   </section>
 
-  <!-- ══ 08 ══════════════════════════════════════════════════════════════ -->
-  <section id="s8" data-tone="8">
-    <div class="section-head"><span class="section-num">08</span><h2>Where the heritability goes</h2></div>
-    <p class="section-sub">Section 7 shows the consequence. This is the cause. Heritability is split
-      into the part carried by the common pool and the part carried by the rare pool. Both pools are
-      defined once on the <b>three samples pooled</b>, not on any single population, and the same
-      classification is then applied to all three. So a variant in the rare pool is rare in the
-      combined sample and need not be rare in any one population, and it may be missing from one
-      altogether. This panel is driven by the same controls as section 7.</p>
-    <div class="sec-grid">
-      <div class="panel" id="panel-8"></div>
-      <div>
-        <div class="card">
-          <p class="legend">
-            <span class="legend-item"><span class="legend-box" style="background:var(--c-common)"></span>carried by pooled-common variants</span>
-            <span class="legend-item"><span class="legend-box" style="background:var(--c-rare)"></span>carried by pooled-rare variants</span>
-          </p>
-          <svg id="s8-bars" viewBox="0 0 700 300" role="img" aria-labelledby="s8-t">
-            <title id="s8-t">Heritability in each population divided into the parts carried by common and rare variants</title>
-          </svg>
-          <p class="fig-cap" id="s8-cap"></p>
-          <div id="s8-unavailable" hidden class="caution">
-            <span class="k">Not simulated at this combination</span>
-            <p id="s8-unavailable-text"></p>
-          </div>
-          <details class="tableview"><summary>as a table</summary>
-            <div class="tbl-scroll"><table class="data" id="s8-table"></table></div></details>
-        </div>
-
-        <div class="card" style="margin-top:16px">
-          <h3>The allele frequencies underneath all of it</h3>
-          <div class="tiles" id="s8-af"></div>
-          <p class="fig-cap" id="s8-af-note"></p>
-          <div class="caution" style="margin-top:14px">
-            <span class="k">One definition of "common" matters a great deal</span>
-            <p id="s8-af-caution"></p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
 
   <!-- ══ 09 ══════════════════════════════════════════════════════════════ -->
-  <section id="s9" data-tone="9">
-    <div class="section-head"><span class="section-num">09</span><h2>What the model deliberately removes</h2></div>
+  <section id="s8" data-tone="8">
+    <div class="section-head"><span class="section-num">08</span><h2>What the model deliberately removes</h2></div>
     <p class="section-sub">Every assumption here was made on purpose, and each one costs something.
       The point of the idealization is not that it is realistic. It is that removing a difficulty is
       the only way to find out how much of the outcome that difficulty was responsible for.</p>
@@ -859,8 +803,8 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
   </section>
 
   <!-- ══ 10 ══════════════════════════════════════════════════════════════ -->
-  <section id="s10" data-tone="10">
-    <div class="section-head"><span class="section-num">10</span><h2>Unavoidable against recoverable</h2></div>
+  <section id="s9" data-tone="9">
+    <div class="section-head"><span class="section-num">09</span><h2>Unavoidable against recoverable</h2></div>
     <p class="section-sub">This last panel is not a result of the paper. It is the Discussion's
       closing proposal made arithmetic, so that the idea can be handled rather than only read.</p>
     <div class="caution" style="margin-bottom:18px">
@@ -877,18 +821,18 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
       <div class="panel" id="panel-10"></div>
       <div>
         <div class="card">
-          <div class="eq-sub eq-block" id="s10-eq"></div>
+          <div class="eq-sub eq-block" id="s9-eq"></div>
           <p class="fig-cap" style="text-align:center;margin-bottom:14px">Transferability is a ratio,
             so the split is multiplicative, and additive on the logarithmic scale.</p>
-          <div class="tiles" id="s10-tiles"></div>
-          <svg id="s10-bar" viewBox="0 0 700 190" role="img" aria-labelledby="s10-t" style="margin-top:16px">
-            <title id="s10-t">The observed transferability gap divided into an intrinsic and a recoverable part on a logarithmic scale</title>
+          <div class="tiles" id="s9-tiles"></div>
+          <svg id="s9-bar" viewBox="0 0 700 190" role="img" aria-labelledby="s9-t" style="margin-top:16px">
+            <title id="s9-t">The observed transferability gap divided into an intrinsic and a recoverable part on a logarithmic scale</title>
           </svg>
-          <div class="calc" id="s10-calc"></div>
+          <div class="calc" id="s9-calc"></div>
         </div>
         <div class="insight">
           <span class="k">How to read the result</span>
-          <p id="s10-read"></p>
+          <p id="s9-read"></p>
         </div>
       </div>
     </div>
@@ -1792,8 +1736,6 @@ const RARE_SCALE = (() => {
   }
   return { lo: Math.min(lo, 1) - 0.05, hi: Math.max(hi, 1) + 0.05 };
 })();
-const decompAt = (h2, ratio, frac, pop, type) =>
-  DATA.decomp[h2 + '|' + ratio + '|' + frac.toFixed(1) + '|' + pop + '|' + type];
 
 function buildPanel6() {
   const h2opts = DATA.h2_levels.map(h =>
@@ -1971,7 +1913,7 @@ function buildPanel7() {
       '<button type="button" data-fit="1">fit to view</button>' +
       '<button type="button" data-fit="0">same at every setting</button></span></label>' +
     '<p class="small muted" id="s7-scale-note" style="margin:0 0 10px"></p>' +
-    '<p class="small muted" style="margin:0">These same controls drive section 8.</p>';
+    '';
 
   $('s7-pair').addEventListener('change', () => { sim.pair = $('s7-pair').value; fireSim(); });
   wireSeg('s7-h2', 'h2b', v => { sim.h2 = v; });
@@ -2144,253 +2086,117 @@ function drawSection7() {
 }
 
 /* ── 08 · the heritability decomposition ────────────────────────────────── */
-const DECOMP_H2 = ['0.1', '0.8'], DECOMP_RATIOS = [2, 5, 10];
-function buildPanel8() {
-  $('panel-8').innerHTML =
-    '<div class="panel-out"><div class="l">African over European heritability</div>' +
-    '<div class="v" id="s8-out"></div><div class="s" id="s8-sub"></div></div>' +
-    '<p class="small" style="color:var(--text-secondary);margin-bottom:10px">This section follows the ' +
-    'controls in section 7. The decomposition was simulated on a coarser grid than the transferability ' +
-    'sweep, so not every combination exists.</p>' +
-    '<div id="s8-avail"></div>' +
-    '<div class="btn-row" id="s8-jump"></div>';
-}
-function nearestDecomp() {
-  const h2 = DECOMP_H2.includes(sim.h2) ? sim.h2
-    : (parseFloat(sim.h2) < 0.45 ? '0.1' : '0.8');
-  const ratio = DECOMP_RATIOS.includes(sim.ratio) ? sim.ratio
-    : DECOMP_RATIOS.reduce((best, r) =>
-        Math.abs(Math.log(r / sim.ratio)) < Math.abs(Math.log(best / sim.ratio)) ? r : best, DECOMP_RATIOS[0]);
-  return { h2, ratio, exact: h2 === sim.h2 && ratio === sim.ratio };
-}
-function drawSection8() {
-  const near = nearestDecomp();
-  const use = { h2: near.h2, ratio: near.ratio, frac: sim.frac };
-
-  $('s8-unavailable').hidden = near.exact;
-  if (!near.exact) {
-    $('s8-unavailable-text').textContent =
-      'The heritability decomposition was run at European heritability 0.1 and 0.8 and at effect-size ' +
-      'ratios 2, 5 and 10. Section 7 is currently set to heritability ' + sim.h2 + ' and ratio ' +
-      sim.ratio + '×, which was not simulated, so the panel shows the nearest combination that was: ' +
-      'heritability ' + near.h2 + ' and ratio ' + near.ratio + '×.';
-  }
-  $('s8-jump').innerHTML = near.exact ? '' :
-    '<button type="button" id="s8-jump-btn">Move section 7 to heritability ' + near.h2 +
-    ' and ratio ' + near.ratio + '×</button>';
-  if (!near.exact) {
-    $('s8-jump-btn').addEventListener('click', () => {
-      sim.h2 = near.h2; sim.ratio = near.ratio; fireSim();
-    });
-  }
-  $('s8-avail').innerHTML = '<p class="small muted" style="margin:0">Showing European heritability <b>' +
-    use.h2 + '</b>, effect ratio <b>' + use.ratio + '×</b>, rare fraction <b>' + use.frac.toFixed(1) + '</b>.</p>';
-
-  const order = ['ASN', 'EUR', 'AFR'];
-  const vals = order.map(p => ({
-    pop: p,
-    common: decompAt(use.h2, use.ratio, use.frac, p, 'common'),
-    rare: decompAt(use.h2, use.ratio, use.frac, p, 'rare')
-  }));
-  const total = p => (p.common || 0) + (p.rare || 0);
-  const maxTot = Math.max.apply(null, vals.map(total)) * 1.14;
-
-  const svg = clearSvg($('s8-bars'));
-  const W = 700, H = 300, L = 106, R = 128, Tp = 18, B = 46;
-  const X = v => L + (W - L - R) * v / maxTot;
-  const rowH = (H - Tp - B) / vals.length;
-  for (let i = 0; i < vals.length; i++) {
-    const v = vals[i], y = Tp + rowH * i + rowH * 0.16, h = rowH * 0.56;
-    svg.appendChild(el('text', { x: L - 12, y: y + h / 2 + 5, 'text-anchor': 'end',
-      fill: POP_COLOUR[v.pop], 'font-size': 13, 'font-weight': 640 }, POP_LONG[v.pop]));
-    const cw = X(v.common) - L, rw = X(v.rare) - L;
-    svg.appendChild(el('rect', { x: L, y, width: Math.max(cw, 0), height: h, fill: 'var(--c-common)' }));
-    svg.appendChild(el('rect', { x: L + cw, y, width: Math.max(rw, 0), height: h, fill: 'var(--c-rare)' }));
-    if (cw > 60) svg.appendChild(el('text', { x: L + cw / 2, y: y + h / 2 + 5, 'text-anchor': 'middle',
-      fill: '#fff', 'font-size': 11.5, 'font-weight': 600 }, v.common.toFixed(3)));
-    if (rw > 60) svg.appendChild(el('text', { x: L + cw + rw / 2, y: y + h / 2 + 5, 'text-anchor': 'middle',
-      fill: '#3a2a00', 'font-size': 11.5, 'font-weight': 600 }, v.rare.toFixed(3)));
-    svg.appendChild(el('text', { x: L + cw + rw + 12, y: y + h / 2 + 5, fill: 'var(--text-primary)',
-      'font-size': 12.5, 'font-weight': 620 }, 'total ' + total(v).toFixed(3)));
-  }
-  for (let k = 0; k <= 4; k++) {
-    const t = maxTot * k / 4;
-    svg.appendChild(el('text', { x: X(t), y: H - B + 20, 'text-anchor': 'middle',
-      fill: 'var(--text-muted)', 'font-size': 11 }, t.toFixed(2)));
-  }
-  svg.appendChild(el('line', { x1: L, y1: H - B, x2: W - R, y2: H - B, stroke: 'var(--axis)' }));
-  svg.appendChild(el('text', { x: L + (W - L - R) / 2, y: H - 8, 'text-anchor': 'middle',
-    fill: 'var(--text-secondary)', 'font-size': 12, 'font-weight': 600 }, 'heritability'));
-
-  const afr = vals.find(v => v.pop === 'AFR'), eur = vals.find(v => v.pop === 'EUR');
-  $('s8-out').textContent = fmt(total(afr) / total(eur), 3);
-  $('s8-sub').textContent = 'at a rare fraction of ' + use.frac.toFixed(1);
-  $('s8-cap').innerHTML = 'At this setting the rare-pool variants carry ' +
-    '<b>' + afr.rare.toFixed(3) + '</b> of heritability in the African sample against <b>' +
-    eur.rare.toFixed(3) + '</b> in the European one, a factor of <b>' +
-    fmt(afr.rare / eur.rare, 2) + '</b>. The same variants, the same effect sizes, different allele frequencies.';
-
-  let html = '<thead><tr><th>population</th><th>common</th><th>rare</th><th>total</th></tr></thead><tbody>';
-  for (const v of vals) {
-    html += '<tr><td>' + POP_LONG[v.pop] + '</td><td>' + v.common.toFixed(4) + '</td><td>' +
-      v.rare.toFixed(4) + '</td><td>' + total(v).toFixed(4) + '</td></tr>';
-  }
-  $('s8-table').innerHTML = html + '</tbody>';
-
-  drawAlleleFrequencies();
-}
-function drawAlleleFrequencies() {
-  const af = DATA.af, order = DATA.populations;
-  const cHet = af.common_class.het, rHet = af.rare_class.het;
-  const zero = af.zero_frequency;
-  const tiles = [
-    { c: 'var(--c-common)', label: 'common pool', value: fmt(cHet.AFR / cHet.EUR, 2) + '×',
-      note: 'Mean p(1−p) is ' + cHet.AFR.toFixed(4) + ' in the African sample against ' +
-            cHet.EUR.toFixed(4) + ' in the European one, over ' + af.common_class.n.toLocaleString() + ' variants.' },
-    { c: 'var(--c-rare)', label: 'rare pool', value: fmt(rHet.AFR / rHet.EUR, 2) + '×',
-      note: 'The same comparison over the ' + af.rare_class.n.toLocaleString() +
-            ' rare-pool variants: ' + rHet.AFR.toFixed(4) + ' against ' + rHet.EUR.toFixed(4) +
-            '. The gap is far wider than for the common pool, which is the whole of section 7.' },
-    /* The manuscript's S7 Fig reports this per population as the share sitting at
-       zero frequency, rather than as a directional "present in Africans, absent
-       elsewhere" comparison. These reproduce it exactly. */
-    { c: 'var(--c-rare)', label: 'rare pool absent', value: zero.rare.EUR.toFixed(1) + '%',
-      note: 'Rare-pool variants at zero frequency in the European sample, against ' +
-            zero.rare.ASN.toFixed(1) + '% in the East Asian and only ' + zero.rare.AFR.toFixed(1) +
-            '% in the African. A variant absent from a population contributes no genetic variance there.' },
-    { c: 'var(--c-common)', label: 'common pool absent', value: zero.common.EUR.toFixed(1) + '%',
-      note: 'The same quantity for the common pool: ' + zero.common.EUR.toFixed(1) + '% European, ' +
-            zero.common.ASN.toFixed(1) + '% East Asian, ' + zero.common.AFR.toFixed(1) +
-            '% African. Far smaller, which is why common variants do not drive the asymmetry.' }
-  ];
-  $('s8-af').innerHTML = tiles.map(t =>
-    '<div class="tile" style="--tile-c:' + t.c + '"><div class="tile-label">' + t.label + '</div>' +
-    '<div class="tile-value">' + t.value + '</div><div class="tile-note">' + t.note + '</div></div>').join('');
-  $('s8-af-note').textContent =
-    'Additive genetic variance is proportional to the sum of p(1−p) over the causal sites when the ' +
-    'effect sizes are shared, so these ratios are the direct cause of the heritability differences above.';
-
-  const pooled = af.pooled.mean_het, every = af.everywhere.mean_het;
-  const idx = p => order.indexOf(p);
-  $('s8-af-caution').innerHTML =
-    'Two definitions of a common variant are in use and they do not give the same ordering, so both are ' +
-    'reported rather than one being chosen. Pooling the three samples and requiring a minor allele ' +
-    'frequency of at least 0.01 in the pool, which is the panel the trait simulations actually use, gives ' +
-    'mean p(1−p) of <b>' + pooled[idx('AFR')].toFixed(4) + '</b> African, <b>' +
-    pooled[idx('EUR')].toFixed(4) + '</b> European, <b>' + pooled[idx('ASN')].toFixed(4) + '</b> East Asian, ' +
-    'over ' + af.pooled.n_variants.toLocaleString() + ' variants. Requiring instead that a variant be common ' +
-    'in every one of the three samples separately gives <b>' + every[idx('AFR')].toFixed(4) + '</b>, <b>' +
-    every[idx('EUR')].toFixed(4) + '</b> and <b>' + every[idx('ASN')].toFixed(4) + '</b> over ' +
-    af.everywhere.n_variants.toLocaleString() + ' variants, which <b>reverses the ordering</b>. That is not a ' +
-    'contradiction: demanding that a variant be common everywhere selects against exactly the variation ' +
-    'that is private to one population, which is the variation the result is about.';
-}
-
 /* ═══ 10 · unavoidable against recoverable ════════════════════════════════ */
 const gap = { obs: 0.42, mode: 'h2', tInt: 1.20, h2A: 0.30, h2B: 0.36 };
+// Ceilings taken from this study's own simulations, so the number is a real one
+// from the paper rather than an invented one.
+const GAP_PRESETS = [
+  { label: 'European → African ceiling', pair: 'EUR-AFR' },
+  { label: 'African → European ceiling', pair: 'AFR-EUR' },
+  { label: 'East Asian → African ceiling', pair: 'ASN-AFR' }
+];
 function buildPanel10() {
   $('panel-10').innerHTML =
     '<div class="panel-out"><div class="l">Recoverable factor</div>' +
-    '<div class="v" id="s10-out"></div><div class="s" id="s10-sub"></div></div>' +
+    '<div class="v" id="s9-out"></div><div class="s" id="s9-sub"></div></div>' +
     '<div class="row" style="--knob:var(--c-T)">' +
       '<span class="sym" style="font-size:0.78rem">observed</span>' +
-      '<input type="range" id="s10-obs" min="0.05" max="1.5" step="0.01" value="' + gap.obs +
+      '<input type="range" id="s9-obs" min="0.05" max="1.5" step="0.01" value="' + gap.obs +
       '" aria-label="observed empirical transferability">' +
-      '<input type="number" id="s10-obsn" min="0.05" max="1.5" step="0.01" value="' + gap.obs +
+      '<input type="number" id="s9-obsn" min="0.05" max="1.5" step="0.01" value="' + gap.obs +
       '" aria-label="observed empirical transferability, typed">' +
       '<span class="row-def">the transferability actually reported for a real polygenic score, that is, ' +
       'its accuracy in the target population divided by its accuracy in the discovery population</span></div>' +
-    '<label class="fld"><span>how to set the ceiling</span><span class="seg" id="s10-mode">' +
+    '<label class="fld"><span>how to set the ceiling</span><span class="seg" id="s9-mode">' +
       '<button type="button" data-mode="h2">from two heritabilities</button>' +
       '<button type="button" data-mode="direct">type it directly</button></span></label>' +
-    '<div id="s10-mode-body"></div>' +
-    '<div class="btn-row" style="margin-top:8px" id="s10-presets"></div>';
+    '<div id="s9-mode-body"></div>' +
+    '<div class="btn-row" style="margin-top:8px" id="s9-presets"></div>';
 
-  for (const id of ['s10-obs', 's10-obsn']) {
+  for (const id of ['s9-obs', 's9-obsn']) {
     $(id).addEventListener('input', () => {
       const v = parseFloat($(id).value);
       if (!Number.isFinite(v)) return;
       gap.obs = clamp(v, 0.01, 3);
-      $('s10-obs').value = gap.obs; $('s10-obsn').value = gap.obs;
+      $('s9-obs').value = gap.obs; $('s9-obsn').value = gap.obs;
       drawSection10();
     });
   }
-  $('s10-mode').addEventListener('click', e => {
+  /* Attached once. #s9-presets is a persistent element whose innerHTML is
+     rewritten by renderMode10, so wiring it there added a duplicate listener on
+     every redraw and one click eventually fired many times over. */
+  $('s9-presets').addEventListener('click', e => {
+    const b = e.target.closest('[data-preset10]'); if (!b) return;
+    gap.mode = 'direct';
+    gap.tInt = commonAt('1000', sim.h2, GAP_PRESETS[parseInt(b.dataset.preset10, 10)].pair, 'fixed')[0];
+    renderMode10();
+    drawSection10();
+  });
+  $('s9-mode').addEventListener('click', e => {
     const b = e.target.closest('[data-mode]'); if (!b) return;
-    gap.mode = b.dataset.mode; drawSection10();
+    /* renderMode10 rebuilds the inputs for the chosen mode. Without it the mode
+       buttons only changed which one looked selected, and the body kept whichever
+       inputs it was last built with. */
+    gap.mode = b.dataset.mode; renderMode10(); drawSection10();
   });
   renderMode10();
 }
 function renderMode10() {
-  const body = $('s10-mode-body');
+  const body = $('s9-mode-body');
   if (gap.mode === 'h2') {
     body.innerHTML =
       '<div class="row" style="--knob:var(--c-disc)"><span class="sym" style="font-size:0.78rem">' +
-        'h² in A</span><input type="range" id="s10-h2a" min="0.05" max="0.9" step="0.005" value="' + gap.h2A +
-        '" aria-label="heritability in the discovery population"><input type="number" id="s10-h2an" min="0.05" max="0.9" step="0.005" value="' +
+        'h² in A</span><input type="range" id="s9-h2a" min="0.05" max="0.9" step="0.005" value="' + gap.h2A +
+        '" aria-label="heritability in the discovery population"><input type="number" id="s9-h2an" min="0.05" max="0.9" step="0.005" value="' +
         gap.h2A + '" aria-label="heritability in the discovery population, typed">' +
         '<span class="row-def">narrow-sense heritability in the discovery population</span></div>' +
       '<div class="row" style="--knob:var(--c-targ)"><span class="sym" style="font-size:0.78rem">' +
-        'h² in B</span><input type="range" id="s10-h2b" min="0.05" max="0.9" step="0.005" value="' + gap.h2B +
-        '" aria-label="heritability in the target population"><input type="number" id="s10-h2bn" min="0.05" max="0.9" step="0.005" value="' +
+        'h² in B</span><input type="range" id="s9-h2b" min="0.05" max="0.9" step="0.005" value="' + gap.h2B +
+        '" aria-label="heritability in the target population"><input type="number" id="s9-h2bn" min="0.05" max="0.9" step="0.005" value="' +
         gap.h2B + '" aria-label="heritability in the target population, typed">' +
         '<span class="row-def">narrow-sense heritability in the target population. Under Hardy–Weinberg ' +
         'the ceiling is the ratio of these two.</span></div>';
-    for (const [id, key] of [['s10-h2a', 'h2A'], ['s10-h2an', 'h2A'], ['s10-h2b', 'h2B'], ['s10-h2bn', 'h2B']]) {
+    for (const [id, key] of [['s9-h2a', 'h2A'], ['s9-h2an', 'h2A'], ['s9-h2b', 'h2B'], ['s9-h2bn', 'h2B']]) {
       $(id).addEventListener('input', () => {
         const v = parseFloat($(id).value);
         if (!Number.isFinite(v)) return;
         gap[key] = clamp(v, 0.01, 0.99);
-        $('s10-' + (key === 'h2A' ? 'h2a' : 'h2b')).value = gap[key];
-        $('s10-' + (key === 'h2A' ? 'h2an' : 'h2bn')).value = gap[key];
+        $('s9-' + (key === 'h2A' ? 'h2a' : 'h2b')).value = gap[key];
+        $('s9-' + (key === 'h2A' ? 'h2an' : 'h2bn')).value = gap[key];
         drawSection10();
       });
     }
   } else {
     body.innerHTML =
       '<div class="row" style="--knob:var(--c-T)"><span class="sym" style="font-size:0.78rem">ceiling</span>' +
-      '<input type="range" id="s10-tint" min="0.3" max="2.5" step="0.01" value="' + gap.tInt +
-      '" aria-label="intrinsic transferability"><input type="number" id="s10-tintn" min="0.3" max="2.5" step="0.01" value="' +
+      '<input type="range" id="s9-tint" min="0.3" max="2.5" step="0.01" value="' + gap.tInt +
+      '" aria-label="intrinsic transferability"><input type="number" id="s9-tintn" min="0.3" max="2.5" step="0.01" value="' +
       gap.tInt + '" aria-label="intrinsic transferability, typed">' +
       '<span class="row-def">intrinsic transferability, the ceiling this study defines</span></div>';
-    for (const id of ['s10-tint', 's10-tintn']) {
+    for (const id of ['s9-tint', 's9-tintn']) {
       $(id).addEventListener('input', () => {
         const v = parseFloat($(id).value);
         if (!Number.isFinite(v)) return;
         gap.tInt = clamp(v, 0.1, 4);
-        $('s10-tint').value = gap.tInt; $('s10-tintn').value = gap.tInt;
+        $('s9-tint').value = gap.tInt; $('s9-tintn').value = gap.tInt;
         drawSection10();
       });
     }
   }
-  // Presets taken from this study's own simulations, so the ceiling is a real
-  // number from the paper rather than an invented one.
-  const presets = [
-    { label: 'European → African ceiling', pair: 'EUR-AFR' },
-    { label: 'African → European ceiling', pair: 'AFR-EUR' },
-    { label: 'East Asian → African ceiling', pair: 'ASN-AFR' }
-  ];
-  $('s10-presets').innerHTML = '<span class="small muted" style="width:100%;margin-bottom:2px">' +
+  $('s9-presets').innerHTML = '<span class="small muted" style="width:100%;margin-bottom:2px">' +
     'Set the ceiling from section 6, at heritability ' + sim.h2 + ':</span>' +
-    presets.map((p, i) => '<button type="button" data-preset10="' + i + '">' + p.label + '</button>').join('');
-  $('s10-presets').addEventListener('click', e => {
-    const b = e.target.closest('[data-preset10]'); if (!b) return;
-    const p = presets[parseInt(b.dataset.preset10, 10)];
-    gap.mode = 'direct';
-    gap.tInt = commonAt('1000', sim.h2, p.pair, 'fixed')[0];
-    renderMode10();
-    drawSection10();
-  });
+    GAP_PRESETS.map((p, i) =>
+      '<button type="button" data-preset10="' + i + '">' + p.label + '</button>').join('');
 }
 function intrinsicNow() {
   return gap.mode === 'h2' ? gap.h2B / gap.h2A : gap.tInt;
 }
 function drawSection10() {
-  $('s10-mode').querySelectorAll('[data-mode]').forEach(b => b.classList.toggle('on', b.dataset.mode === gap.mode));
+  $('s9-mode').querySelectorAll('[data-mode]').forEach(b => b.classList.toggle('on', b.dataset.mode === gap.mode));
   const Tint = intrinsicNow(), Tobs = gap.obs, R = Tobs / Tint;
 
-  $('s10-out').textContent = fmt(R, 3);
-  $('s10-sub').textContent = 'observed divided by the ceiling';
+  $('s9-out').textContent = fmt(R, 3);
+  $('s9-sub').textContent = 'observed divided by the ceiling';
 
   const logObs = Math.log(Tobs), logInt = Math.log(Tint), logR = Math.log(R);
   const tiles = [
@@ -2411,7 +2217,7 @@ function drawSection10() {
       })(),
       note: 'How much of the total distance from no change is attributable to the population ceiling rather than to imperfect prediction.' }
   ];
-  $('s10-tiles').innerHTML = tiles.map(t =>
+  $('s9-tiles').innerHTML = tiles.map(t =>
     '<div class="tile" style="--tile-c:' + t.c + '"><div class="tile-label">' + t.label + '</div>' +
     '<div class="tile-value">' + t.value + '</div><div class="tile-note">' + t.note + '</div></div>').join('');
 
@@ -2419,7 +2225,7 @@ function drawSection10() {
      When the ceiling is above one and the observed value below it, the second
      leg doubles back over the first, and a single row would simply paint the
      recoverable segment on top of the intrinsic one and hide it. */
-  const svg = clearSvg($('s10-bar'));
+  const svg = clearSvg($('s9-bar'));
   const W = 700, H = 190, L = 152, R2 = 40, axisY = 150;
   const span = Math.max(Math.abs(logObs), Math.abs(logInt), 0.35) * 1.25;
   const X = v => L + (W - L - R2) * (clamp(v, -span, span) + span) / (2 * span);
@@ -2471,12 +2277,12 @@ function drawSection10() {
   const sum = logR < 0
     ? fmt(logInt, 3) + ' &minus; ' + fmt(Math.abs(logR), 3)
     : fmt(logInt, 3) + ' + ' + fmt(logR, 3);
-  $('s10-calc').innerHTML =
+  $('s9-calc').innerHTML =
     '<div class="r">observed = ceiling &times; recoverable factor</div>' +
     '<div class="r">' + fmt(Tobs, 3) + ' = ' + fmt(Tint, 3) + ' &times; ' + fmt(R, 3) + '</div>' +
     '<div class="r tot">on the log scale: ' + fmt(logObs, 3) + ' = ' + sum + '</div>';
 
-  $('s10-read').innerHTML = R < 0.999
+  $('s9-read').innerHTML = R < 0.999
     ? ('A real score reaches ' + pct(R) + ' of what the target population’s own ceiling permits. ' +
        'Under this framework that shortfall is the part attributable to imperfect data and methods, ' +
        'and the ceiling itself is the part that no amount of methodological work can move. Note that a ' +
@@ -2508,7 +2314,7 @@ function renderHeroEquations() {
      heritabilities belongs in section 2, where A and B are introduced. */
   $('s1-hwe-eq').innerHTML = mh('\\overline{\\Phi} = \\tfrac{1}{2} \\;\\Longrightarrow\\; ' +
     '\\mathrm{PA} = \\frac{\\sigma^{2}}{\\sigma^{2}+\\tau^{2}} = h^{2}', true);
-  $('s10-eq').innerHTML = mh('\\underbrace{T_{\\text{observed}}}_{\\text{a real score}} \\;=\\; ' +
+  $('s9-eq').innerHTML = mh('\\underbrace{T_{\\text{observed}}}_{\\text{a real score}} \\;=\\; ' +
     '\\underbrace{T_{\\text{intrinsic}}}_{\\text{unavoidable}} \\;\\times\\; ' +
     '\\underbrace{R}_{\\text{recoverable}}', true);
 }
@@ -2527,7 +2333,6 @@ function boot() {
   buildPanel5();
   buildPanel6();
   buildPanel7();
-  buildPanel8();
   buildPanel10();
 
   $('s1-hwe-btn').addEventListener('click', () => setTheory('pA', 0.5));
@@ -2545,11 +2350,11 @@ function boot() {
   onTheory(drawSparks);
   onTheory(drawHeat);
 
-  simListeners.push(drawSection6, drawSection7, drawSection8, () => renderMode10());
+  simListeners.push(drawSection6, drawSection7, () => renderMode10());
 
   drawSection1(); drawSection2(); drawSparks(); drawHeat();
   drawSection5();
-  drawSection6(); drawSection7(); drawSection8();
+  drawSection6(); drawSection7();
   drawSection10();
 
   /* Theme. The page is light unless the reader asks for dark, and the system
