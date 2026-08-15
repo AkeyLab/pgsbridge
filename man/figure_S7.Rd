@@ -2,37 +2,32 @@
 % Please edit documentation in R/figures_supplementary.R
 \name{figure_S7}
 \alias{figure_S7}
-\title{S7 Fig: allele frequency in African against non-African samples}
+\title{S7 Fig: rare variants are lost outside Africa more often than common ones}
 \usage{
-figure_S7(data_dir, rare_axis_limit = 0.02)
+figure_S7(data_dir)
 }
 \arguments{
 \item{data_dir}{Directory holding the pre-computed results.}
-
-\item{rare_axis_limit}{Upper limit of both axes in the rare-variant panels,
-which occupy only a small corner of the unit square.}
 }
 \value{
-Nothing; called for the plot it draws.
+A \code{ggplot} object.
 }
 \description{
-Four panels in one row: the African with European comparison for common then
-rare variants, followed by the African with East Asian comparison for the
-same two classes.  The point of the figure is the mass of rare variants lying
-on the horizontal axis: variants that segregate in the African sample and have
-fallen to zero frequency in the non-African one.  Rare variants are lost this
-way far more often than common ones, which is what makes the heritability gap
-widen as more of the causal signal is placed on rare variants.
+The rare-variant results rest on a single asymmetry: a causal variant that
+segregates in the African sample is far more likely to have drifted to zero
+frequency outside Africa than a common one, and a variant at zero frequency
+contributes no additive genetic variance at all in that population. This
+figure states that asymmetry directly, for both variant pools.
 }
 \details{
-This function draws with base graphics onto the device that is already open,
-so it returns nothing.  Open a device first.
+Earlier versions of the manuscript carried two figures here, a smoothed
+scatter of the joint allele-frequency distribution and a bar chart of the
+variants lost from Africa outward. Neither stated the claim the text makes,
+so both were replaced by this one.
 }
 \examples{
 \dontrun{
-pdf("S7_Fig.pdf", height = 8, width = 8)
 figure_S7("data")
-dev.off()
 }
 
 }
