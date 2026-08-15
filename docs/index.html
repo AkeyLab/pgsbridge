@@ -713,9 +713,12 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
               </svg>
             </div>
           </div>
-          <p class="fig-cap">Both panels share a vertical scale so they can be read against each
-            other. Shaded bands are 95% confidence intervals over 200 replicates per point. The
-            vertical rule marks the rare-variant fraction selected in the panel.</p>
+          <p class="fig-cap"><b>The vertical scale is the same in both panels and at every
+            setting</b>, so changing the heritability or the population pair moves the curves
+            instead of the axis. That is what makes the heritability control worth using: at a
+            European heritability of 0.8 the curves barely leave the line at one, and at 0.1 they
+            span the panel. Shaded bands are 95% confidence intervals over 200 replicates per
+            point, and the dashed rule marks the selected rare-variant fraction.</p>
           <details class="tableview"><summary>as a table</summary>
             <div class="tbl-scroll"><table class="data" id="s7-table"></table></div></details>
         </div>
@@ -1741,6 +1744,24 @@ const commonAt = (m, h2, pair, effects) =>
   (effects === 'normal' ? DATA.normal : DATA.common)[m + '|' + h2 + '|' + pair];
 const rareAt = (h2, ratio, frac, pair) =>
   DATA.rare[h2 + '|' + ratio + '|' + frac.toFixed(1) + '|' + pair];
+
+/* ONE vertical scale for section 7, fixed across every heritability and every
+   population pair, derived once from the whole rare-variant dataset.
+
+   Rescaling per view would defeat the section. At a European heritability of 0.8
+   the curves span only about 0.86 to 1.18, and at 0.1 they span about 0.46 to
+   2.48; an axis fitted to each in turn makes both look equally dramatic, so the
+   heritability control appears to do nothing. The manuscript's Figure 3 shares one
+   scale across its panels for exactly this reason. */
+const RARE_SCALE = (() => {
+  let lo = Infinity, hi = -Infinity;
+  for (const k in DATA.rare) {
+    const v = DATA.rare[k];
+    lo = Math.min(lo, v[0] - v[1]);
+    hi = Math.max(hi, v[0] + v[1]);
+  }
+  return { lo: Math.min(lo, 1) - 0.05, hi: Math.max(hi, 1) + 0.05 };
+})();
 const decompAt = (h2, ratio, frac, pop, type) =>
   DATA.decomp[h2 + '|' + ratio + '|' + frac.toFixed(1) + '|' + pop + '|' + type];
 
@@ -1965,15 +1986,9 @@ function drawSection7() {
   const dirs = [{ d: u.a, t: u.b, svg: 's7-a', title: 's7-title-a' },
                 { d: u.b, t: u.a, svg: 's7-b', title: 's7-title-b' }];
 
-  // A shared vertical scale across the two panels, which is what makes the
-  // asymmetry between the directions readable at a glance.
-  let lo = Infinity, hi = -Infinity;
-  for (const dir of dirs) for (const r of DATA.ratios) for (const f of DATA.fractions) {
-    const rec = rareAt(sim.h2, r, f, dir.d + '-' + dir.t);
-    if (!rec) continue;
-    lo = Math.min(lo, rec[0] - rec[1]); hi = Math.max(hi, rec[0] + rec[1]);
-  }
-  lo = Math.min(lo, 1) - 0.05; hi = Math.max(hi, 1) + 0.05;
+  // Shared by both panels AND held constant across every setting, so that changing
+  // the heritability or the pair moves the curves rather than the axis.
+  const lo = RARE_SCALE.lo, hi = RARE_SCALE.hi;
 
   for (const dir of dirs) {
     $(dir.title).textContent = POP_LONG[dir.d] + ' → ' + POP_LONG[dir.t];
@@ -2062,8 +2077,8 @@ function drawSection7() {
   const fwd = rareAt(sim.h2, sim.ratio, sim.frac, u.a + '-' + u.b);
   const rev = rareAt(sim.h2, sim.ratio, sim.frac, u.b + '-' + u.a);
   $('s7-out').textContent = fmt(fwd[0], 3) + ' / ' + fmt(rev[0], 3);
-  $('s7-sub').innerHTML = POP_LONG[u.a] + '&rarr;' + POP_LONG[u.b] + ' and back, at ' +
-    sim.ratio + '&times; and a rare fraction of ' + sim.frac.toFixed(1);
+  $('s7-sub').innerHTML = POP_LONG[u.a] + '&rarr;' + POP_LONG[u.b] + ' and back, at heritability ' +
+    sim.h2 + ', ' + sim.ratio + '&times;, rare fraction ' + sim.frac.toFixed(1);
 
   let html = '<thead><tr><th>rare fraction</th>' + DATA.ratios.map(r =>
     '<th>' + r + '× ' + u.a + '→' + u.b + '</th><th>' + r + '× ' + u.b + '→' + u.a + '</th>').join('') +
