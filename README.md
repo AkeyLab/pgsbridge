@@ -2,7 +2,7 @@
 
 **Interactive companion to the manuscript:
 [akeylab.github.io/pgsbridge](https://akeylab.github.io/pgsbridge/)** — a
-ten-section page that evaluates the closed form live, and shows the paper's
+seven-section page that evaluates the closed form live, and shows the paper's
 simulation results, so the results can be manipulated rather than only read.
 Its source is in `docs/`, and it is excluded from the package build.
 
