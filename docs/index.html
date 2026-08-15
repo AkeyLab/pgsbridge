@@ -20,8 +20,8 @@
    COLOUR
 
    Every hue on this page is taken from the Okabe and Ito eight-colour set that
-   the paper's own figures use, so a colour means the same thing here as it does
-   in the manuscript. The assignments come straight from repo_build/R/theme.R.
+   our own figures use, so a colour means the same thing here as it does
+   in the paper. The assignments come straight from repo_build/R/theme.R.
 
      vermillion  discovery population A, and the African sample
      blue        target population B, and the European sample, and common variants
@@ -65,7 +65,7 @@
 }
 /* DELIBERATELY NO prefers-color-scheme BLOCK.
    The page defaults to light for every reader regardless of their system setting,
-   because it is a figure-led document meant to match the manuscript's own figures,
+   because it is a figure-led document meant to match our own figures,
    which are drawn on white. Dark is available on request through the toggle, which
    sets data-theme="dark". Do not reintroduce an automatic dark switch here: it would
    silently override the intended default. */
@@ -296,19 +296,6 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
 .caution p { margin: 0; }
 .caution p + p { margin-top: 8px; }
 
-.ledger { display: grid; gap: 10px; }
-.ledger details { border: 1px solid var(--border); border-radius: 9px; background: var(--surface-1); }
-.ledger summary { cursor: pointer; padding: 11px 14px; font-weight: 600; font-size: 0.89rem; list-style: none;
-  display: flex; align-items: baseline; gap: 9px; }
-.ledger summary::-webkit-details-marker { display: none; }
-.ledger summary::before { content: "+"; color: var(--c-T); font-weight: 700; font-size: 1rem; line-height: 1; }
-.ledger details[open] summary::before { content: "\2212"; }
-.ledger summary:focus-visible { outline: 2px solid var(--c-targ); outline-offset: -2px; border-radius: 9px; }
-.ledger .body { padding: 0 14px 13px 32px; font-size: 0.86rem; color: var(--text-secondary); line-height: 1.6; }
-.ledger .body p { margin: 0 0 9px; }
-.ledger .body p:last-child { margin: 0; }
-.ledger .tagline { font-size: 0.74rem; font-weight: 600; color: var(--text-muted); margin-left: auto; white-space: nowrap; }
-@media (max-width: 620px) { .ledger .tagline { display: none; } }
 
 .footer { border-top: 1px solid var(--border); padding-top: 18px; margin-top: 40px; font-size: 0.82rem; color: var(--text-secondary); }
 .footer a { color: var(--c-targ); }
@@ -336,15 +323,15 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
     </div>
 
     <p class="lede">Polygenic scores lose accuracy when they are carried across populations. The
-      question this study asks is which part of that loss is <b>unavoidable</b> and which part is
-      <b>recoverable</b> through better data and better methods. It answers the question by removing
-      every practical difficulty at once. Suppose every causal variant and every effect size were
+      question we set out to answer is which part of that loss is <b>unavoidable</b> and which part is
+      <b>recoverable</b> through better data and better methods. We answer it by removing every practical
+      difficulty at once. Suppose every causal variant and every effect size were
       known exactly, were the same in both populations, and there were no linkage disequilibrium.
       What transferability would remain?</p>
 
-    <p class="lede">The answer is that a population has a ceiling on how well any genotype-based
-      predictor can do, and that ceiling is a property of the population rather than of the
-      predictor. Transferability is the ratio of two such ceilings.</p>
+    <p class="lede">What we find is that a population has a ceiling on how well any genotype-based
+      predictor can do, and that the ceiling belongs to the population rather than to the predictor.
+      Transferability is simply the ratio of two such ceilings.</p>
 
     <p class="lede">Both of those statements can be made exact, and the two expressions below are
       the whole of the theory. The first says that a population's ceiling is fixed by just three
@@ -353,9 +340,8 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
       which summarises relatedness and structure within the sample; and the non-genetic variance
       <span data-tex="\tau^2"></span>, which is everything about the trait that no genotype can
       reach. The second says that transferability from a discovery population A to a target
-      population B is the target's ceiling divided by the discovery population's. Section 1 takes
-      the first expression apart and section 2 the second, so nothing here has to be absorbed at
-      once.</p>
+      population B is the target's ceiling divided by the discovery population's. We take the first expression apart in section 1 and the second in
+      section 2, so there is nothing here you need to absorb all at once.</p>
 
     <div class="eq-hero eq-block" id="hero-eq"></div>
     <p class="formula-note">Written PA for prediction accuracy and T for transferability. Under
@@ -367,13 +353,11 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
     <div class="section-head"><span class="section-num">&#9656;</span><h2>How to use this page</h2></div>
     <div class="card">
       <ul class="howto">
-        <li>Sections <b>1 to 4</b> are the theory. They compute the closed form directly in your
+        <li>Sections <b>1 to 4</b> are the theory. They compute our closed form directly in your
           browser, so every number you see is exact rather than simulated. Move a slider and
-          everything downstream of it moves.</li>
+          everything downstream of it moves with it.</li>
         <li>Sections <b>5 to 7</b> are the simulations. Their numbers are the stored results from
-          the paper, aggregated exactly as the manuscript figures aggregate them.</li>
-        <li>Sections <b>8 and 9</b> are the framing: what the idealized model leaves out, and how
-          to read an observed transferability against the ceiling this work defines.</li>
+          our paper, aggregated exactly the way we aggregate them for our own figures.</li>
         <li>Every figure has an <b>as a table</b> control underneath it if you would rather read the
           numbers than the picture.</li>
       </ul>
@@ -404,12 +388,6 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
       <a class="toc-card" href="#s7" data-tone="7"><span class="toc-num">07</span>
         <span class="toc-title">Rare variants amplify the asymmetry</span>
         <span class="toc-desc">One widget covering Figure 3 and three supplementary figures.</span></a>
-      <a class="toc-card" href="#s8" data-tone="8"><span class="toc-num">08</span>
-        <span class="toc-title">What the model deliberately removes</span>
-        <span class="toc-desc">Five assumptions, why each was made, what it costs.</span></a>
-      <a class="toc-card" href="#s9" data-tone="9"><span class="toc-num">09</span>
-        <span class="toc-title">Unavoidable against recoverable</span>
-        <span class="toc-desc">Reading a published transferability against the ceiling.</span></a>
     </nav>
   </section>
 
@@ -418,7 +396,8 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
     <div class="section-head"><span class="section-num">01</span><h2>The ceiling in one population</h2></div>
     <p class="section-sub">Give a predictor perfect knowledge: every causal variant, every effect
       size, no estimation error at all. It still cannot predict the part of the trait that is not
-      genetic. What is left is a ceiling, and it belongs to the population.</p>
+      genetic. What is left is a ceiling, and it belongs to the population. Everything else we do
+      rests on this one expression, so it is worth a moment.</p>
     <div class="sec-grid">
       <div class="panel" id="panel-1"></div>
       <div>
@@ -439,12 +418,12 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
             of phenotypic variance a perfect genotype-based predictor removes, and nothing can remove
             more. <b>The whole bar is the baseline</b>: the error left by a predictor that ignores
             genotype entirely and gives every individual the population mean. That is the comparison
-            the manuscript measures accuracy against, and its expected loss is exactly the total
+            we measure accuracy against, and its expected loss is exactly the total
             phenotypic variance.</p>
           <div class="calc" id="s1-calc"></div>
         </div>
         <div class="card" style="margin-top:16px">
-          <h3>The special case that makes the rest of the paper simple</h3>
+          <h3>The special case that makes the rest of our paper simple</h3>
           <p class="small" style="color:var(--text-secondary)">Self-kinship is the probability that
             the two alleles an individual carries at a site are identical by descent. Under
             Hardy&ndash;Weinberg equilibrium every individual has self-kinship exactly one half, so the
@@ -511,7 +490,7 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
       population; the dashed curve varies it in the
       <span style="color:var(--c-disc);font-weight:620">discovery</span> population. The two always
       move in opposite directions, because the discovery population sits in the denominator. This is
-      Figure 1b to 1d of the manuscript, except that you can move the point the curves are drawn
+      Figure 1b to 1d of our paper, except that here you can move the point the curves are drawn
       around.</p>
     <div class="sec-grid">
       <div class="panel" id="panel-3"></div>
@@ -530,7 +509,7 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
             where the two curves cross <i>each other</i> is a different point and carries no
             meaning: when only this determinant differs, they cross at the square root of the
             current transferability, which is one only if the populations already agree. The
-            manuscript draws these panels from a setting where the populations are identical, so
+            we draw these panels in the paper from a setting where the populations are identical, so
             there all three coincide. <b>Reset the sliders</b> returns to that setting, which is
             Figure 1b to 1d exactly: an additive genetic variance of 0.3, an average self-kinship
             of 0.6 and a non-genetic variance of 1 in both populations.</p>
@@ -553,8 +532,8 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
   <section id="s4" data-tone="4">
     <div class="section-head"><span class="section-num">04</span><h2>Where transferability exceeds one</h2>
       <span class="pill hot" id="s4-pill"></span></div>
-    <p class="section-sub">The claim that transferability above one is common rather than exotic
-      deserves a measurement, not an assertion. Pick any two of the six quantities for the two axes
+    <p class="section-sub">We think our claim that transferability above one is common rather than
+      exotic deserves a measurement rather than an assertion, so here is one. Pick any two of the six quantities for the two axes
       and the map below reports what fraction of the displayed rectangle lies above one.</p>
     <div class="sec-grid">
       <div class="panel" id="panel-4"></div>
@@ -589,8 +568,8 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
   <section id="s5" data-tone="5">
     <div class="section-head"><span class="section-num">05</span><h2>Theory against simulation</h2>
       <span class="pill" id="s5-pill"></span></div>
-    <p class="section-sub">The closed form is algebra. This is the check that it describes simulated
-      data. Each point is one pair of populations simulated independently in every determinant:
+    <p class="section-sub">The closed form is algebra, so we owe you a check that it really describes
+      simulated data. Here it is. Each point is one pair of populations simulated independently in every determinant:
       allele frequencies drawn separately, within-population structure drawn separately, non-genetic
       variance drawn separately. The horizontal position is the closed form evaluated at the
       realized parameters, and the vertical position is the ratio of accuracies measured in the
@@ -607,13 +586,13 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
         </div>
         <div class="insight">
           <span class="k">Why the baseline predictor uses the true mean, not the sample mean</span>
-          <p>These simulated individuals are related to one another, so the sample mean of the trait
+          <p>Our simulated individuals are related to one another, so the sample mean of the trait
             carries a term in the average off-diagonal kinship that the closed form, which concerns a
             single individual's variance, does not. Comparing against the true population mean removes
             that mismatch, and averaging the numerator and denominator losses over 50 redraws before
-            dividing removes the variance a ratio of two noisy estimates would otherwise carry. In the
-            coalescent simulations of sections 6 to 8 the individuals are unrelated, the off-diagonal
-            term is zero, and the ordinary sample estimator is used unchanged.</p>
+            dividing removes the variance a ratio of two noisy estimates would otherwise carry. In our
+            coalescent simulations, in sections 6 and 7, the individuals are unrelated, the
+            off-diagonal term is zero, and we use the ordinary sample estimator unchanged.</p>
         </div>
       </div>
     </div>
@@ -622,8 +601,8 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
   <!-- ══ 06 ══════════════════════════════════════════════════════════════ -->
   <section id="s6" data-tone="6">
     <div class="section-head"><span class="section-num">06</span><h2>Out of Africa, and a reversed direction</h2></div>
-    <p class="section-sub">Now let demographic history set the allele frequencies rather than
-      specifying them. African, European and East Asian samples were simulated under an
+    <p class="section-sub">Now we let demographic history set the allele frequencies rather than
+      specifying them ourselves. We simulated African, European and East Asian samples under an
       Out-of-Africa coalescent model. The individuals within each sample are unrelated, so every
       population has average self-kinship one half, and transferability is exactly the ratio of
       heritabilities. Every difference below therefore comes from demography alone.</p>
@@ -641,7 +620,7 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
             <title id="s6-t">Mean intrinsic transferability with confidence intervals for the six ordered population pairs</title>
           </svg>
           <p class="fig-cap">Points are means over 1,000 simulation replicates with 95% confidence
-            intervals, after the same single interquartile trim the manuscript figures apply.
+            intervals, after the same single interquartile trim we apply in the paper.
             Bars are ordered by transferability, so the pattern is the ordering itself.</p>
           <details class="tableview"><summary>as a table</summary>
             <div class="tbl-scroll"><table class="data" id="s6-table"></table></div></details>
@@ -656,7 +635,7 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
           <h3>Against the empirical literature</h3>
           <div class="split">
             <div>
-              <h4>What this idealized model predicts</h4>
+              <h4>What our idealized model predicts</h4>
               <p class="small" style="color:var(--text-secondary)" id="s6-ours"></p>
             </div>
             <div>
@@ -671,11 +650,11 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
             <span class="k">The two are not in conflict</span>
             <p>They answer different questions. An empirical transferability is shaped at once by
               linkage disequilibrium, incomplete ascertainment of causal variants, finite training
-              samples, estimation error and possible effect-size heterogeneity. This model removes
-              all of them by construction. So the reversal is informative rather than contradictory:
+              samples, estimation error and possible effect-size heterogeneity. We remove all of
+              them by construction. So the reversal is informative rather than contradictory:
               allele-frequency differences on their own favour transfer <i>into</i> African
-              populations, which means the factors left out of the model must not only dominate the
-              empirical pattern but be strong enough to turn it around.</p>
+              populations, which means the factors we left out must not only dominate the empirical
+              pattern but be strong enough to turn it around.</p>
           </div>
         </div>
       </div>
@@ -686,8 +665,8 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
   <section id="s7" data-tone="7">
     <div class="section-head"><span class="section-num">07</span><h2>Rare variants amplify the asymmetry</h2></div>
     <p class="section-sub">If allele-frequency differences drive the pattern, then loading more of
-      the trait onto rare variants should widen it, because the Out-of-Africa bottleneck fell hardest
-      on low-frequency alleles. Each trait carries 1,000 causal variants; the controls set what
+      the trait onto rare variants ought to widen it, because the Out-of-Africa bottleneck fell
+      hardest on low-frequency alleles. That is the prediction we test here. Each trait carries 1,000 causal variants; the controls set what
       fraction of them are rare and how much larger a rare variant's effect is than a common one's.
       The two panels are the two directions of the same pair, which is what makes the asymmetry
       legible.</p>
@@ -726,121 +705,12 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
   </section>
 
 
-  <!-- ══ 09 ══════════════════════════════════════════════════════════════ -->
-  <section id="s8" data-tone="8">
-    <div class="section-head"><span class="section-num">08</span><h2>What the model deliberately removes</h2></div>
-    <p class="section-sub">Every assumption here was made on purpose, and each one costs something.
-      The point of the idealization is not that it is realistic. It is that removing a difficulty is
-      the only way to find out how much of the outcome that difficulty was responsible for.</p>
-    <div class="ledger">
-      <details>
-        <summary>Linkage disequilibrium is absent <span class="tagline">removes imperfect tagging</span></summary>
-        <div class="body">
-          <p>Causal variants are assumed uncorrelated with one another, and the predictor is built
-            on the causal variants themselves rather than on markers that tag them.</p>
-          <p><b>Why remove it.</b> In a real polygenic score, a marker that tags a causal variant
-            well in the discovery population may tag it poorly elsewhere, and that alone reduces
-            portability. Leaving linkage disequilibrium in makes it impossible to say whether an
-            observed loss came from population genetics or from tagging.</p>
-          <p><b>What it costs.</b> The framework cannot speak to how much of a real portability gap
-            is a tagging problem. It can only say that whatever remains after tagging is fixed is
-            bounded by the ceiling computed here.</p>
-        </div>
-      </details>
-      <details>
-        <summary>Effect sizes are identical across populations <span class="tagline">removes heterogeneity</span></summary>
-        <div class="body">
-          <p>The same causal variants carry the same effects in every population. Only allele
-            frequencies, relatedness structure and non-genetic variance differ.</p>
-          <p><b>Why remove it.</b> This is the assumption that isolates population genetics. If
-            effects were allowed to differ, any difference in prediction accuracy could be attributed
-            to the effects rather than to the populations, and the question being asked would
-            disappear.</p>
-          <p><b>What it costs.</b> Real effects may genuinely differ through gene-by-environment
-            interaction or local adaptation. The manuscript names extending the framework to
-            population-specific effects as the most important next step.</p>
-        </div>
-      </details>
-      <details>
-        <summary>Every causal variant is known, and none is missed <span class="tagline">removes ascertainment</span></summary>
-        <div class="body">
-          <p>The predictor is the true genetic value, not an estimate of it. There is no discovery
-            step, no significance threshold and no variant selection.</p>
-          <p><b>Why remove it.</b> Incomplete ascertainment is itself population-dependent: a
-            variant common enough to be discovered in one population may be too rare to be discovered
-            in another. That interacts with allele frequency in exactly the place this study wants to
-            look.</p>
-          <p><b>What it costs.</b> Real scores are built from an ascertained subset, so the ceiling
-            here is not attainable in practice. That is the intended reading: it is a bound, and the
-            distance to it is the quantity of interest.</p>
-        </div>
-      </details>
-      <details>
-        <summary>The discovery sample is effectively infinite <span class="tagline">removes estimation error</span></summary>
-        <div class="body">
-          <p>Because the predictor is specified rather than fitted, it carries no sampling
-            variability, no shrinkage, no hyperparameter tuning and no winner's curse.</p>
-          <p><b>Why remove it.</b> Finite discovery samples are the single largest practical driver
-            of poor portability, and they are also the one most likely to improve. Separating them
-            out is what makes the intrinsic and recoverable split in section 10 meaningful.</p>
-          <p><b>What it costs.</b> None of the results here describe how quickly a real score
-            approaches the ceiling as sample size grows. They describe only where the ceiling is.</p>
-        </div>
-      </details>
-      <details>
-        <summary>Only additive effects exist <span class="tagline">removes interaction</span></summary>
-        <div class="body">
-          <p>The trait follows Fisher's polygenic model with additive genetic effects, an
-            uncorrelated non-genetic component of constant variance, and no interaction of any kind.</p>
-          <p><b>Why remove it.</b> Additivity is what makes the optimal predictor the conditional
-            expectation and gives the ceiling a closed form in three quantities.</p>
-          <p><b>What it costs.</b> Gene-by-gene and gene-by-environment interaction are excluded, and
-            the manuscript lists both as directions for a more complete account of the limits of
-            polygenic prediction.</p>
-        </div>
-      </details>
-    </div>
-  </section>
 
-  <!-- ══ 10 ══════════════════════════════════════════════════════════════ -->
-  <section id="s9" data-tone="9">
-    <div class="section-head"><span class="section-num">09</span><h2>Unavoidable against recoverable</h2></div>
-    <p class="section-sub">This last panel is not a result of the paper. It is the Discussion's
-      closing proposal made arithmetic, so that the idea can be handled rather than only read.</p>
-    <div class="caution" style="margin-bottom:18px">
-      <span class="k">Read this before the numbers</span>
-      <p>The manuscript proposes that a cross-population prediction gap separates into an intrinsic
-        component, arising from population differences in genetic predictability, and a recoverable
-        component, arising from imperfect data and methods. It proposes the split; it does not derive
-        or validate a formula for it. The arithmetic below is the natural way to carry out that split
-        given that transferability is a ratio, and it is offered as an illustration of the proposal,
-        not as a validated estimator. Treat every number it produces as a way of organising a
-        comparison rather than as a measurement.</p>
-    </div>
-    <div class="sec-grid">
-      <div class="panel" id="panel-10"></div>
-      <div>
-        <div class="card">
-          <div class="eq-sub eq-block" id="s9-eq"></div>
-          <p class="fig-cap" style="text-align:center;margin-bottom:14px">Transferability is a ratio,
-            so the split is multiplicative, and additive on the logarithmic scale.</p>
-          <div class="tiles" id="s9-tiles"></div>
-          <svg id="s9-bar" viewBox="0 0 700 190" role="img" aria-labelledby="s9-t" style="margin-top:16px">
-            <title id="s9-t">The observed transferability gap divided into an intrinsic and a recoverable part on a logarithmic scale</title>
-          </svg>
-          <div class="calc" id="s9-calc"></div>
-        </div>
-        <div class="insight">
-          <span class="k">How to read the result</span>
-          <p id="s9-read"></p>
-        </div>
-      </div>
-    </div>
-  </section>
 
   <footer class="footer">
-    <p>An interactive companion to the manuscript. Every simulated number on this page is read from
-      the stored results of the study and aggregated with the same rule the manuscript figures use:
+    <p>This is an interactive companion to our paper, and we hope it makes the results easier to get a
+      feel for. Every simulated number on this page is read from our stored results and aggregated with
+      the same rule we use for our figures:
       within each group the replicates are trimmed once by the interquartile rule, and the mean is
       reported with a t-based 95% confidence interval. The theory sections evaluate the closed form
       directly and involve no simulation at all.</p>
@@ -965,8 +835,8 @@ const hideTip = () => { tip.dataset.show = '0'; };
 /* ═══ THEORY STATE ═════════════════════════════════════════════════════════
    Sections 1 to 4 read one shared six-parameter state, so moving a slider in
    section 1 moves the curves in section 3 and the map in section 4. The ranges and
-   the symmetric reference point are the ones the manuscript's Methods specify for
-   Figure 1b to 1d. Note the manuscript uses "baseline" in two senses: the BASELINE
+   the symmetric reference point are the ones our Methods specify for
+   Figure 1b to 1d. Note that we use "baseline" in two senses: the BASELINE
    PREDICTOR, which gives everyone the population mean and whose loss is the total
    phenotypic variance, and the SYMMETRIC baseline or reference point, which is this
    parameter starting point. On this page only the first is ever called a baseline.
@@ -1578,7 +1448,7 @@ function buildPanel5() {
       '" step="0.005" value="' + filt[key] + '" aria-label="' + label + ', typed">' +
       '<span class="row-def">' + label + '</span></div>';
   }
-  html += '<div class="btn-row"><button type="button" id="s5-reset">Back to the paper’s setting</button></div>';
+  html += '<div class="btn-row"><button type="button" id="s5-reset">Back to our setting</button></div>';
   $('panel-5').innerHTML = html;
   $('panel-5').querySelectorAll('input').forEach(inp => {
     inp.addEventListener('input', () => {
@@ -1611,8 +1481,8 @@ function drawSection5() {
   const atPaper = Math.abs(filt.minA - 0.3) < 1e-9 && Math.abs(filt.minB - 0.3) < 1e-9 &&
                   Math.abs(filt.maxGap - 0.3) < 1e-9;
   $('s5-pill').textContent = atPaper
-    ? 'at the manuscript’s constraints, matching the reported ' + th.r_squared.toFixed(3)
-    : 'tightened beyond the manuscript’s constraints';
+    ? 'at our constraints, matching the reported ' + th.r_squared.toFixed(3)
+    : 'tightened beyond our constraints';
 
   const svg = clearSvg($('s5-scatter'));
   const W = 620, H = 560, L = 62, R = 16, Tp = 16, B = 56;
@@ -1725,7 +1595,7 @@ const rareAt = (h2, ratio, frac, pair) =>
    Rescaling per view would defeat the section. At a European heritability of 0.8
    the curves span only about 0.86 to 1.18, and at 0.1 they span about 0.46 to
    2.48; an axis fitted to each in turn makes both look equally dramatic, so the
-   heritability control appears to do nothing. The manuscript's Figure 3 shares one
+   heritability control appears to do nothing. Our Figure 3 shares one
    scale across its panels for exactly this reason. */
 const RARE_SCALE = (() => {
   let lo = Infinity, hi = -Infinity;
@@ -2087,216 +1957,6 @@ function drawSection7() {
 
 /* ── 08 · the heritability decomposition ────────────────────────────────── */
 /* ═══ 10 · unavoidable against recoverable ════════════════════════════════ */
-const gap = { obs: 0.42, mode: 'h2', tInt: 1.20, h2A: 0.30, h2B: 0.36 };
-// Ceilings taken from this study's own simulations, so the number is a real one
-// from the paper rather than an invented one.
-const GAP_PRESETS = [
-  { label: 'European → African ceiling', pair: 'EUR-AFR' },
-  { label: 'African → European ceiling', pair: 'AFR-EUR' },
-  { label: 'East Asian → African ceiling', pair: 'ASN-AFR' }
-];
-function buildPanel10() {
-  $('panel-10').innerHTML =
-    '<div class="panel-out"><div class="l">Recoverable factor</div>' +
-    '<div class="v" id="s9-out"></div><div class="s" id="s9-sub"></div></div>' +
-    '<div class="row" style="--knob:var(--c-T)">' +
-      '<span class="sym" style="font-size:0.78rem">observed</span>' +
-      '<input type="range" id="s9-obs" min="0.05" max="1.5" step="0.01" value="' + gap.obs +
-      '" aria-label="observed empirical transferability">' +
-      '<input type="number" id="s9-obsn" min="0.05" max="1.5" step="0.01" value="' + gap.obs +
-      '" aria-label="observed empirical transferability, typed">' +
-      '<span class="row-def">the transferability actually reported for a real polygenic score, that is, ' +
-      'its accuracy in the target population divided by its accuracy in the discovery population</span></div>' +
-    '<label class="fld"><span>how to set the ceiling</span><span class="seg" id="s9-mode">' +
-      '<button type="button" data-mode="h2">from two heritabilities</button>' +
-      '<button type="button" data-mode="direct">type it directly</button></span></label>' +
-    '<div id="s9-mode-body"></div>' +
-    '<div class="btn-row" style="margin-top:8px" id="s9-presets"></div>';
-
-  for (const id of ['s9-obs', 's9-obsn']) {
-    $(id).addEventListener('input', () => {
-      const v = parseFloat($(id).value);
-      if (!Number.isFinite(v)) return;
-      gap.obs = clamp(v, 0.01, 3);
-      $('s9-obs').value = gap.obs; $('s9-obsn').value = gap.obs;
-      drawSection10();
-    });
-  }
-  /* Attached once. #s9-presets is a persistent element whose innerHTML is
-     rewritten by renderMode10, so wiring it there added a duplicate listener on
-     every redraw and one click eventually fired many times over. */
-  $('s9-presets').addEventListener('click', e => {
-    const b = e.target.closest('[data-preset10]'); if (!b) return;
-    gap.mode = 'direct';
-    gap.tInt = commonAt('1000', sim.h2, GAP_PRESETS[parseInt(b.dataset.preset10, 10)].pair, 'fixed')[0];
-    renderMode10();
-    drawSection10();
-  });
-  $('s9-mode').addEventListener('click', e => {
-    const b = e.target.closest('[data-mode]'); if (!b) return;
-    /* renderMode10 rebuilds the inputs for the chosen mode. Without it the mode
-       buttons only changed which one looked selected, and the body kept whichever
-       inputs it was last built with. */
-    gap.mode = b.dataset.mode; renderMode10(); drawSection10();
-  });
-  renderMode10();
-}
-function renderMode10() {
-  const body = $('s9-mode-body');
-  if (gap.mode === 'h2') {
-    body.innerHTML =
-      '<div class="row" style="--knob:var(--c-disc)"><span class="sym" style="font-size:0.78rem">' +
-        'h² in A</span><input type="range" id="s9-h2a" min="0.05" max="0.9" step="0.005" value="' + gap.h2A +
-        '" aria-label="heritability in the discovery population"><input type="number" id="s9-h2an" min="0.05" max="0.9" step="0.005" value="' +
-        gap.h2A + '" aria-label="heritability in the discovery population, typed">' +
-        '<span class="row-def">narrow-sense heritability in the discovery population</span></div>' +
-      '<div class="row" style="--knob:var(--c-targ)"><span class="sym" style="font-size:0.78rem">' +
-        'h² in B</span><input type="range" id="s9-h2b" min="0.05" max="0.9" step="0.005" value="' + gap.h2B +
-        '" aria-label="heritability in the target population"><input type="number" id="s9-h2bn" min="0.05" max="0.9" step="0.005" value="' +
-        gap.h2B + '" aria-label="heritability in the target population, typed">' +
-        '<span class="row-def">narrow-sense heritability in the target population. Under Hardy–Weinberg ' +
-        'the ceiling is the ratio of these two.</span></div>';
-    for (const [id, key] of [['s9-h2a', 'h2A'], ['s9-h2an', 'h2A'], ['s9-h2b', 'h2B'], ['s9-h2bn', 'h2B']]) {
-      $(id).addEventListener('input', () => {
-        const v = parseFloat($(id).value);
-        if (!Number.isFinite(v)) return;
-        gap[key] = clamp(v, 0.01, 0.99);
-        $('s9-' + (key === 'h2A' ? 'h2a' : 'h2b')).value = gap[key];
-        $('s9-' + (key === 'h2A' ? 'h2an' : 'h2bn')).value = gap[key];
-        drawSection10();
-      });
-    }
-  } else {
-    body.innerHTML =
-      '<div class="row" style="--knob:var(--c-T)"><span class="sym" style="font-size:0.78rem">ceiling</span>' +
-      '<input type="range" id="s9-tint" min="0.3" max="2.5" step="0.01" value="' + gap.tInt +
-      '" aria-label="intrinsic transferability"><input type="number" id="s9-tintn" min="0.3" max="2.5" step="0.01" value="' +
-      gap.tInt + '" aria-label="intrinsic transferability, typed">' +
-      '<span class="row-def">intrinsic transferability, the ceiling this study defines</span></div>';
-    for (const id of ['s9-tint', 's9-tintn']) {
-      $(id).addEventListener('input', () => {
-        const v = parseFloat($(id).value);
-        if (!Number.isFinite(v)) return;
-        gap.tInt = clamp(v, 0.1, 4);
-        $('s9-tint').value = gap.tInt; $('s9-tintn').value = gap.tInt;
-        drawSection10();
-      });
-    }
-  }
-  $('s9-presets').innerHTML = '<span class="small muted" style="width:100%;margin-bottom:2px">' +
-    'Set the ceiling from section 6, at heritability ' + sim.h2 + ':</span>' +
-    GAP_PRESETS.map((p, i) =>
-      '<button type="button" data-preset10="' + i + '">' + p.label + '</button>').join('');
-}
-function intrinsicNow() {
-  return gap.mode === 'h2' ? gap.h2B / gap.h2A : gap.tInt;
-}
-function drawSection10() {
-  $('s9-mode').querySelectorAll('[data-mode]').forEach(b => b.classList.toggle('on', b.dataset.mode === gap.mode));
-  const Tint = intrinsicNow(), Tobs = gap.obs, R = Tobs / Tint;
-
-  $('s9-out').textContent = fmt(R, 3);
-  $('s9-sub').textContent = 'observed divided by the ceiling';
-
-  const logObs = Math.log(Tobs), logInt = Math.log(Tint), logR = Math.log(R);
-  const tiles = [
-    { c: 'var(--c-T)', label: 'observed transferability', value: fmt(Tobs, 3),
-      note: 'What a real polygenic score achieves in the target relative to the discovery population.' },
-    { c: 'var(--c-targ)', label: 'intrinsic ceiling', value: fmt(Tint, 3),
-      note: gap.mode === 'h2'
-        ? 'The ratio of heritabilities, ' + fmt(gap.h2B, 3) + ' over ' + fmt(gap.h2A, 3) +
-          ', which is the ceiling under Hardy–Weinberg.'
-        : 'Entered directly, or taken from this study’s simulations.' },
-    { c: 'var(--c-disc)', label: 'recoverable factor', value: fmt(R, 3),
-      note: R < 1
-        ? 'A real score falls short of the ceiling by this factor. Closing it is a data and methods problem, not a population-genetic one.'
-        : 'The observed value is at or above the ceiling, which under this model should not happen. See the reading note below.' },
-    { c: 'var(--text-muted)', label: 'share of the log gap', value: (() => {
-        const den = Math.abs(logInt) + Math.abs(logR);
-        return den > 1e-9 ? pct(Math.abs(logInt) / den) : '—';
-      })(),
-      note: 'How much of the total distance from no change is attributable to the population ceiling rather than to imperfect prediction.' }
-  ];
-  $('s9-tiles').innerHTML = tiles.map(t =>
-    '<div class="tile" style="--tile-c:' + t.c + '"><div class="tile-label">' + t.label + '</div>' +
-    '<div class="tile-value">' + t.value + '</div><div class="tile-note">' + t.note + '</div></div>').join('');
-
-  /* The two contributions are drawn on SEPARATE rows rather than end to end.
-     When the ceiling is above one and the observed value below it, the second
-     leg doubles back over the first, and a single row would simply paint the
-     recoverable segment on top of the intrinsic one and hide it. */
-  const svg = clearSvg($('s9-bar'));
-  const W = 700, H = 190, L = 152, R2 = 40, axisY = 150;
-  const span = Math.max(Math.abs(logObs), Math.abs(logInt), 0.35) * 1.25;
-  const X = v => L + (W - L - R2) * (clamp(v, -span, span) + span) / (2 * span);
-
-  svg.appendChild(el('line', { x1: L, y1: axisY, x2: W - R2, y2: axisY, stroke: 'var(--axis)' }));
-  for (const t of [1 / 4, 1 / 3, 1 / 2, 2 / 3, 1, 1.5, 2, 3, 4]) {
-    const lv = Math.log(t);
-    if (Math.abs(lv) > span) continue;
-    const x = X(lv), major = t === 1;
-    svg.appendChild(el('line', { x1: x, y1: 30, x2: x, y2: axisY + (major ? 8 : 4),
-      stroke: major ? 'var(--text-primary)' : 'var(--grid)',
-      'stroke-width': major ? 1.3 : 1, 'stroke-dasharray': major ? '3 3' : null }));
-    svg.appendChild(el('text', { x, y: axisY + 22, 'text-anchor': 'middle',
-      fill: major ? 'var(--text-primary)' : 'var(--text-muted)', 'font-size': major ? 12 : 10.5 },
-      t === 1 / 3 ? '0.33' : t === 2 / 3 ? '0.67' : t === 1 / 4 ? '0.25' : String(t)));
-  }
-
-  const row = (y, from, to, colour, name, detail) => {
-    svg.appendChild(el('text', { x: L - 14, y: y + 4, 'text-anchor': 'end', fill: colour,
-      'font-size': 12, 'font-weight': 640 }, name));
-    svg.appendChild(el('text', { x: L - 14, y: y + 19, 'text-anchor': 'end', fill: 'var(--text-muted)',
-      'font-size': 10.5 }, detail));
-    const a = X(from), b = X(to);
-    if (Math.abs(b - a) < 1.5) {
-      svg.appendChild(el('circle', { cx: a, cy: y, r: 3, fill: colour }));
-      return;
-    }
-    svg.appendChild(el('line', { x1: a, y1: y, x2: b, y2: y, stroke: colour, 'stroke-width': 10,
-      'stroke-linecap': 'butt' }));
-    // A caret showing which way the leg runs, since a leg can point either way.
-    const dir = b > a ? 1 : -1;
-    svg.appendChild(el('path', { d: 'M' + b + ' ' + y + ' l' + (-8 * dir) + ' -6 l0 12 z', fill: colour }));
-  };
-  row(46, 0, logInt, 'var(--c-targ)', 'intrinsic ceiling',
-      'from no change to ' + fmt(Tint, 3));
-  row(96, logInt, logObs, 'var(--c-disc)', 'recoverable',
-      'from ' + fmt(Tint, 3) + ' to ' + fmt(Tobs, 3));
-
-  svg.appendChild(el('circle', { cx: X(logObs), cy: axisY, r: 5.5, fill: 'var(--c-T)',
-    stroke: 'var(--surface-1)', 'stroke-width': 1.5 }));
-  svg.appendChild(el('line', { x1: X(logObs), y1: 30, x2: X(logObs), y2: axisY,
-    stroke: 'var(--c-T)', 'stroke-width': 1, 'stroke-dasharray': '3 3' }));
-  svg.appendChild(el('text', { x: X(logObs), y: 22, 'text-anchor': 'middle', fill: 'var(--c-T)',
-    'font-size': 12, 'font-weight': 640 }, 'observed ' + fmt(Tobs, 3)));
-  svg.appendChild(el('text', { x: L - 14, y: axisY + 22, 'text-anchor': 'end',
-    fill: 'var(--text-muted)', 'font-size': 10.5 }, 'transferability, log axis'));
-
-  // "a + -b" reads badly, so a negative second term is written as a subtraction.
-  const sum = logR < 0
-    ? fmt(logInt, 3) + ' &minus; ' + fmt(Math.abs(logR), 3)
-    : fmt(logInt, 3) + ' + ' + fmt(logR, 3);
-  $('s9-calc').innerHTML =
-    '<div class="r">observed = ceiling &times; recoverable factor</div>' +
-    '<div class="r">' + fmt(Tobs, 3) + ' = ' + fmt(Tint, 3) + ' &times; ' + fmt(R, 3) + '</div>' +
-    '<div class="r tot">on the log scale: ' + fmt(logObs, 3) + ' = ' + sum + '</div>';
-
-  $('s9-read').innerHTML = R < 0.999
-    ? ('A real score reaches ' + pct(R) + ' of what the target population’s own ceiling permits. ' +
-       'Under this framework that shortfall is the part attributable to imperfect data and methods, ' +
-       'and the ceiling itself is the part that no amount of methodological work can move. Note that a ' +
-       'ceiling above one, as the simulations here often produce, makes the observed shortfall larger ' +
-       'than a naive comparison against one would suggest.')
-    : R > 1.001
-      ? ('The observed value sits above the ceiling, which the idealized model does not allow, since the ' +
-         'optimal predictor cannot be beaten. In practice this means one of the inputs is off: the ' +
-         'heritability estimates may come from different studies or scales, the observed transferability ' +
-         'may be measured on a different quantity such as a correlation rather than a variance ratio, or ' +
-         'the two populations may differ in ways the Hardy–Weinberg simplification does not capture.')
-      : 'The observed value sits exactly at the ceiling, leaving nothing attributable to methods.';
-}
-
 /* ═══ boot ════════════════════════════════════════════════════════════════ */
 function renderHeroEquations() {
   $('hero-eq').innerHTML =
@@ -2314,9 +1974,6 @@ function renderHeroEquations() {
      heritabilities belongs in section 2, where A and B are introduced. */
   $('s1-hwe-eq').innerHTML = mh('\\overline{\\Phi} = \\tfrac{1}{2} \\;\\Longrightarrow\\; ' +
     '\\mathrm{PA} = \\frac{\\sigma^{2}}{\\sigma^{2}+\\tau^{2}} = h^{2}', true);
-  $('s9-eq').innerHTML = mh('\\underbrace{T_{\\text{observed}}}_{\\text{a real score}} \\;=\\; ' +
-    '\\underbrace{T_{\\text{intrinsic}}}_{\\text{unavoidable}} \\;\\times\\; ' +
-    '\\underbrace{R}_{\\text{recoverable}}', true);
 }
 
 function boot() {
@@ -2333,7 +1990,6 @@ function boot() {
   buildPanel5();
   buildPanel6();
   buildPanel7();
-  buildPanel10();
 
   $('s1-hwe-btn').addEventListener('click', () => setTheory('pA', 0.5));
   document.querySelectorAll('[data-preset]').forEach(btn => {
@@ -2350,12 +2006,11 @@ function boot() {
   onTheory(drawSparks);
   onTheory(drawHeat);
 
-  simListeners.push(drawSection6, drawSection7, () => renderMode10());
+  simListeners.push(drawSection6, drawSection7);
 
   drawSection1(); drawSection2(); drawSparks(); drawHeat();
   drawSection5();
   drawSection6(); drawSection7();
-  drawSection10();
 
   /* Theme. The page is light unless the reader asks for dark, and the system
      setting is deliberately not consulted, matching the stylesheet. */
