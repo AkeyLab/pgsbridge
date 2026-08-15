@@ -1621,7 +1621,7 @@ function buildPanel6() {
       '<span class="seg" id="s6-m">' + mopts + '</span></label>' +
     // A select rather than a segmented control: these two labels are sentences,
     // and side by side they overflow the panel at its narrowest.
-    '<label class="fld"><span>effect sizes <span class="muted">(S2 Fig)</span></span>' +
+    '<label class="fld" id="s6-eff-field"><span>effect sizes <span class="muted">(S2 Fig)</span></span>' +
       '<select id="s6-eff">' +
       '<option value="fixed">equal at every locus</option>' +
       '<option value="normal">drawn from a normal distribution</option></select></label>' +
@@ -1639,12 +1639,15 @@ function drawSection6() {
   // segmented-control states
   $('s6-h2').querySelectorAll('[data-h2]').forEach(b => b.classList.toggle('on', b.dataset.h2 === sim.h2));
   $('s6-m').querySelectorAll('[data-m]').forEach(b => b.classList.toggle('on', b.dataset.m === sim.m));
+  /* We only ran the normal-effects experiment at 1,000 causal variants, so at any
+     other count the choice has a single option. Rather than leave a dropdown that
+     cannot be used, we take it away and say why. */
+  const effAvailable = sim.m === '1000';
+  $('s6-eff-field').hidden = !effAvailable;
   $('s6-eff').value = sim.effects;
-  // The normal-effects experiment exists only at 1,000 causal variants.
-  $('s6-eff').querySelector('option[value="normal"]').disabled = (sim.m !== '1000');
-  $('s6-eff-note').textContent = sim.m === '1000'
-    ? 'Both effect-size models were run at 1,000 causal variants.'
-    : 'Normally distributed effect sizes were simulated only at 1,000 causal variants.';
+  $('s6-eff-note').textContent = effAvailable
+    ? 'We ran both effect-size models at 1,000 causal variants.'
+    : 'We only drew effect sizes from a normal distribution at 1,000 causal variants, so we do not offer that choice here.';
 
   const rows = DATA.pairs.map(p => {
     const rec = commonAt(sim.m, sim.h2, p, sim.effects);
