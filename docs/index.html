@@ -1749,6 +1749,23 @@ const sim = { h2: '0.1', m: '1000', effects: 'fixed', pair: 'AFR-EUR', ratio: 5,
 const simListeners = [];
 function fireSim() { simListeners.forEach(fn => fn()); }
 
+/* One wiring helper for every segmented control.
+   Each control used to name its attribute twice, once in the selector and once in
+   the dataset read, and the two drifted apart: the section 7 heritability control
+   queried [data-h2b] but read dataset.h2, so every click set the heritability to
+   undefined and threw, leaving sections 7, 8 and 10 frozen. Naming it once removes
+   that possibility. */
+function wireSeg(hostId, attr, apply) {
+  $(hostId).addEventListener('click', e => {
+    const b = e.target.closest('[data-' + attr + ']');
+    if (!b || b.disabled) return;
+    const value = b.dataset[attr];
+    if (value == null) return;
+    apply(value);
+    fireSim();
+  });
+}
+
 const commonAt = (m, h2, pair, effects) =>
   (effects === 'normal' ? DATA.normal : DATA.common)[m + '|' + h2 + '|' + pair];
 const rareAt = (h2, ratio, frac, pair) =>
@@ -1794,16 +1811,11 @@ function buildPanel6() {
       '<option value="normal">drawn from a normal distribution</option></select></label>' +
     '<p class="small muted" id="s6-eff-note" style="margin:0"></p>';
 
-  $('s6-h2').addEventListener('click', e => {
-    const b = e.target.closest('[data-h2]'); if (!b) return;
-    sim.h2 = b.dataset.h2; fireSim();
-  });
-  $('s6-m').addEventListener('click', e => {
-    const b = e.target.closest('[data-m]'); if (!b) return;
-    sim.m = b.dataset.m;
+  wireSeg('s6-h2', 'h2', v => { sim.h2 = v; });
+  wireSeg('s6-m', 'm', v => {
+    sim.m = v;
     // The normal-effects experiment was run only at 1,000 causal variants.
     if (sim.m !== '1000') sim.effects = 'fixed';
-    fireSim();
   });
   $('s6-eff').addEventListener('change', () => { sim.effects = $('s6-eff').value; fireSim(); });
 }
@@ -1958,18 +1970,9 @@ function buildPanel7() {
     '<p class="small muted" style="margin:0">These same controls drive section 8.</p>';
 
   $('s7-pair').addEventListener('change', () => { sim.pair = $('s7-pair').value; fireSim(); });
-  $('s7-h2').addEventListener('click', e => {
-    const b = e.target.closest('[data-h2b]'); if (!b) return;
-    sim.h2 = b.dataset.h2; fireSim();
-  });
-  $('s7-ratio').addEventListener('click', e => {
-    const b = e.target.closest('[data-ratio]'); if (!b) return;
-    sim.ratio = parseInt(b.dataset.ratio, 10); fireSim();
-  });
-  $('s7-scale').addEventListener('click', e => {
-    const b = e.target.closest('[data-fit]'); if (!b) return;
-    sim.fitScale = b.dataset.fit === '1'; fireSim();
-  });
+  wireSeg('s7-h2', 'h2b', v => { sim.h2 = v; });
+  wireSeg('s7-ratio', 'ratio', v => { sim.ratio = parseInt(v, 10); });
+  wireSeg('s7-scale', 'fit', v => { sim.fitScale = v === '1'; });
   for (const id of ['s7-frac', 's7-fracn']) {
     $(id).addEventListener('input', () => {
       const v = parseFloat($(id).value);
