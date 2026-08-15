@@ -713,12 +713,14 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
               </svg>
             </div>
           </div>
-          <p class="fig-cap"><b>The vertical scale is the same in both panels and at every
-            setting</b>, so changing the heritability or the population pair moves the curves
-            instead of the axis. That is what makes the heritability control worth using: at a
-            European heritability of 0.8 the curves barely leave the line at one, and at 0.1 they
-            span the panel. Shaded bands are 95% confidence intervals over 200 replicates per
-            point, and the dashed rule marks the selected rare-variant fraction.</p>
+          <p class="fig-cap">The two panels always share one vertical scale, so the two directions
+            can be read against each other. Whether that scale is <b>fitted to the current
+            setting</b> or <b>pinned across all of them</b> is a control in the panel. Fitting
+            keeps every view readable; pinning shows how much the heritability matters, since the
+            curves span roughly 0.46 to 2.48 at a European heritability of 0.1 but only 0.86 to
+            1.18 at 0.8. The panel reports that span either way. Shaded bands are 95% confidence
+            intervals over 200 replicates per point, and the dashed rule marks the selected
+            rare-variant fraction.</p>
           <details class="tableview"><summary>as a table</summary>
             <div class="tbl-scroll"><table class="data" id="s7-table"></table></div></details>
         </div>
@@ -1736,7 +1738,14 @@ const UNORDERED = [
   { key: 'AFR-ASN', a: 'AFR', b: 'ASN' },
   { key: 'EUR-ASN', a: 'EUR', b: 'ASN' }
 ];
-const sim = { h2: '0.1', m: '1000', effects: 'fixed', pair: 'AFR-EUR', ratio: 5, frac: 0.5 };
+/* fitScale: fit the vertical axis to whatever is on screen. Readable, but it hides
+   how much the heritability matters, because the axis shrinks by as much as the
+   curves do. Turning it off pins the axis to the range of the whole dataset, which
+   makes the comparison honest but squashes the high-heritability settings into a
+   band. Neither is right for every question, so it is the reader's choice; readable
+   is the default. */
+const sim = { h2: '0.1', m: '1000', effects: 'fixed', pair: 'AFR-EUR', ratio: 5,
+              frac: 0.5, fitScale: true };
 const simListeners = [];
 function fireSim() { simListeners.forEach(fn => fn()); }
 
@@ -1942,6 +1951,10 @@ function buildPanel7() {
       '<input type="number" id="s7-fracn" min="0.1" max="0.9" step="0.1" value="' + sim.frac +
       '" aria-label="fraction of causal variants that are rare, typed">' +
       '<span class="row-def">the fraction of the 1,000 causal variants that are rare in the European sample</span></div>' +
+    '<label class="fld"><span>vertical scale</span><span class="seg" id="s7-scale">' +
+      '<button type="button" data-fit="1">fit to view</button>' +
+      '<button type="button" data-fit="0">same at every setting</button></span></label>' +
+    '<p class="small muted" id="s7-scale-note" style="margin:0 0 10px"></p>' +
     '<p class="small muted" style="margin:0">These same controls drive section 8.</p>';
 
   $('s7-pair').addEventListener('change', () => { sim.pair = $('s7-pair').value; fireSim(); });
@@ -1952,6 +1965,10 @@ function buildPanel7() {
   $('s7-ratio').addEventListener('click', e => {
     const b = e.target.closest('[data-ratio]'); if (!b) return;
     sim.ratio = parseInt(b.dataset.ratio, 10); fireSim();
+  });
+  $('s7-scale').addEventListener('click', e => {
+    const b = e.target.closest('[data-fit]'); if (!b) return;
+    sim.fitScale = b.dataset.fit === '1'; fireSim();
   });
   for (const id of ['s7-frac', 's7-fracn']) {
     $(id).addEventListener('input', () => {
@@ -1986,9 +2003,34 @@ function drawSection7() {
   const dirs = [{ d: u.a, t: u.b, svg: 's7-a', title: 's7-title-a' },
                 { d: u.b, t: u.a, svg: 's7-b', title: 's7-title-b' }];
 
-  // Shared by both panels AND held constant across every setting, so that changing
-  // the heritability or the pair moves the curves rather than the axis.
-  const lo = RARE_SCALE.lo, hi = RARE_SCALE.hi;
+  /* Both panels of a pair always share one axis, so the two directions can be read
+     against each other, which is the point of the side-by-side layout. Whether that
+     axis is fitted to the current setting or pinned to the whole dataset is the
+     reader's choice. */
+  let lo, hi, span;
+  {
+    let a = Infinity, b = -Infinity;
+    for (const dir of dirs) for (const r of DATA.ratios) for (const f of DATA.fractions) {
+      const rec = rareAt(sim.h2, r, f, dir.d + '-' + dir.t);
+      if (!rec) continue;
+      a = Math.min(a, rec[0] - rec[1]); b = Math.max(b, rec[0] + rec[1]);
+    }
+    span = { lo: a, hi: b };   // the true extent of what is displayed
+    if (sim.fitScale) {
+      lo = Math.min(a, 1) - 0.05; hi = Math.max(b, 1) + 0.05;
+    } else {
+      lo = RARE_SCALE.lo; hi = RARE_SCALE.hi;
+    }
+  }
+  $('s7-scale').querySelectorAll('[data-fit]').forEach(b =>
+    b.classList.toggle('on', (b.dataset.fit === '1') === sim.fitScale));
+  /* Stating the span as a number means the heritability control demonstrably does
+     something even when the axis is fitted and the picture looks similar. */
+  $('s7-scale-note').innerHTML = (sim.fitScale
+    ? 'Axis fitted to this setting, so the picture stays readable. '
+    : 'Axis pinned to ' + fmt(RARE_SCALE.lo, 2) + '&ndash;' + fmt(RARE_SCALE.hi, 2) +
+      ' for every setting, so settings can be compared directly. ') +
+    'These curves span <b>' + fmt(span.lo, 2) + '&ndash;' + fmt(span.hi, 2) + '</b>.';
 
   for (const dir of dirs) {
     $(dir.title).textContent = POP_LONG[dir.d] + ' → ' + POP_LONG[dir.t];
