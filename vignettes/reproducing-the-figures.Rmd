@@ -140,13 +140,20 @@ those genotypes, numbered in the order they run.
 | `simulation/03_traits_normal_effects.R` | S2 Fig |
 | `simulation/04_traits_rare_and_common.R` | Figure 3, S4 to S6 Figs |
 | `simulation/05_heritability_decomposition.R` | Figure 4 |
-| `simulation/06_allele_frequencies.R` | S3, S7, S8 Figs |
+| `simulation/06_allele_frequencies.R` | S3, S7 Figs |
+| `simulation/07_ascertainment_schemes.R` | S8 Fig |
 
 Step 1 of the trait simulations is self-contained and simulates its own
-genotypes with `bnpsd`.  Steps 2 to 6 read the PLINK files from step 2 through `load_variant_pools()`, which
+genotypes with `bnpsd`.  Steps 2 to 7 read the PLINK files from step 2 through `load_variant_pools()`, which
 returns column indices rather than genotypes: the rare pool runs to millions of
 variants and holding it for three populations at once would need tens of
 gigabytes. `draw_causal_genotypes()` then reads only the drawn columns.
+
+Step 7 additionally requires that the three per-population panels share one
+coded allele, because it adds allele counts across populations to build the
+pooled and all-three variant pools. `coalescent/02_prepare_genotypes.sh`
+guarantees this with `--keep-allele-order`; step 7 checks it and stops if the
+panels disagree.
 
 ```{r eval = FALSE}
 pools <- load_variant_pools("genotypes")

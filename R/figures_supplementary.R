@@ -294,3 +294,142 @@ figure_S7 <- function(data_dir) {
                                                                 colour = NA),
                        strip.text = ggplot2::element_text(face = "bold"))
 }
+
+#' S8 Fig: intrinsic transferability under five causal-variant ascertainment schemes
+#'
+#' Figure 3 decides which causal variants are common and which are rare on the
+#' three populations pooled. That is a modelling choice, and a variant that is
+#' rare in the pooled sample need not be rare in any single population. This
+#' figure repeats the Figure 3 sweep under five rules for making that decision.
+#'
+#' Writing `m_S` for the minor allele count in population `S`, out of the 2,000
+#' alleles it contributes, and `m_global` for the count out of all 6,000, the
+#' threshold of 0.01 is 20 within a population and 60 globally. The rules are
+#'
+#' \describe{
+#'   \item{Model 1, all three}{common when `m_S >= 20` in every population, rare
+#'     when `m_S < 20` in every population. A variant may be absent in one or two
+#'     populations and still count as rare. Variants common in one population and
+#'     rare in another belong to neither pool.}
+#'   \item{Model 2, European}{the rule applied to the European sample alone,
+#'     among the variants that segregate there.}
+#'   \item{Model 3, African}{the same, applied to the African sample.}
+#'   \item{Model 4a, pooled}{common when `m_global >= 60`. This is the rule used
+#'     for Figure 3, and it is also the global allele-frequency rule, since
+#'     pooling the samples and computing one frequency over 6,000 alleles is the
+#'     same calculation.}
+#'   \item{Model 4b, random}{no ascertainment at all. Causal variants are drawn
+#'     uniformly from the whole panel, and the Model 4a split is applied
+#'     afterwards only to decide which of them receive the larger effect size.}
+#' }
+#'
+#' Ascertaining on European frequencies roughly doubles the asymmetry between the
+#' two directions of transfer, requiring the same class in all three populations
+#' removes it, random sampling reproduces the pooled result, and ascertaining on
+#' African frequencies reverses its sign. In every scheme the value is the one
+#' the closed form gives from the additive genetic variance the ascertained
+#' variants carry in each population, so the ascertainment sets which population
+#' the mechanism favours rather than whether it operates.
+#'
+#' The first four schemes choose what fraction of the causal variants is rare, so
+#' that fraction is their horizontal axis. Model 4b does not choose it: drawing
+#' without reference to frequency realises a rare fraction near 0.88 whatever
+#' else is done, so plotting it on the same axis would put its points on top of
+#' one another. It is therefore drawn underneath, on its own axis, against the
+#' number of causal variants. The vertical axis is shared throughout.
+#'
+#' @param data_dir Directory holding the pre-computed results.
+#'
+#' @return A `patchwork` object.
+#'
+#' @examples
+#' \dontrun{
+#' figure_S8("data")
+#' }
+#'
+#' @export
+figure_S8 <- function(data_dir) {
+    if (missing(data_dir))
+        stop('`data_dir` is required!')
+
+    scheme_labels <- c(model1_allthree = "Model 1 all three",
+                       model2_european = "Model 2 European",
+                       model3_african  = "Model 3 African",
+                       model4a_pooled  = "Model 4a pooled",
+                       model4b_random  = "Model 4b random")
+
+    results <- utils::read.csv(file.path(data_dir, "ascertainment",
+                                         "transferability_by_scheme.csv"))
+    results <- results[results$pop_comb %in% c("AFR-EUR", "EUR-AFR"), ]
+
+    results$ratio <- factor(results$ratio, levels = c(1, 2, 5, 10))
+    results$direction <- factor(
+        ifelse(results$pop_comb == "AFR-EUR", "AFR to EUR", "EUR to AFR"),
+        levels = c("AFR to EUR", "EUR to AFR"))
+    results$scheme <- factor(unname(scheme_labels[results$model]),
+                             levels = unname(scheme_labels))
+
+    y_max <- 3.6
+    hidden <- results$emp_tau + results$ci > y_max | results$emp_tau - results$ci < 0
+    if (any(hidden))
+        stop("the vertical limit would hide ", sum(hidden), " point(s)")
+
+    random <- results$model == "model4b_random"
+    ascertained <- results[!random, ]
+    unascertained <- results[random, ]
+
+    common_layers <- function(plot) {
+        plot +
+            ggplot2::geom_hline(yintercept = 1, linetype = "dotted",
+                                colour = "black") +
+            ggplot2::scale_colour_manual(values = ratio_pal) +
+            ggplot2::coord_cartesian(ylim = c(0, y_max)) +
+            ggplot2::labs(colour = "Rare/Common Effect Size Ratio",
+                          y = "Intrinsic Transferability") +
+            ggplot2::theme_minimal(base_size = PGS_BASE_SIZE) +
+            ggplot2::theme(legend.position = "bottom",
+                           legend.margin = ggplot2::margin(0, 0, 0, 0),
+                           panel.spacing = ggplot2::unit(0.5, "lines"),
+                           strip.text.y = ggplot2::element_text(
+                               size = PGS_BASE_SIZE - 2))
+    }
+
+    # The four schemes that choose a rare fraction, on that shared axis.
+    upper <- common_layers(
+        ggplot2::ggplot(ascertained,
+                        ggplot2::aes(.data$fraction, .data$emp_tau,
+                                     colour = .data$ratio))) +
+        ggplot2::geom_errorbar(
+            ggplot2::aes(ymin = .data$emp_tau - .data$ci,
+                         ymax = .data$emp_tau + .data$ci), width = 0.06) +
+        ggplot2::geom_line(linewidth = 0.6) +
+        ggplot2::geom_point(size = 1.0) +
+        ggplot2::facet_grid(scheme ~ direction) +
+        ggplot2::scale_x_continuous(breaks = seq(0, 1, by = 0.2),
+                                    limits = c(0, 1)) +
+        ggplot2::labs(x = "Fraction of Rare Variants")
+
+    # Model 4b, on its own axis, because it realises a rare fraction rather than
+    # choosing one.
+    realised <- sprintf("%.3f", mean(unascertained$rare_share))
+    lower <- common_layers(
+        ggplot2::ggplot(unascertained,
+                        ggplot2::aes(.data$n_causal, .data$emp_tau,
+                                     colour = .data$ratio))) +
+        ggplot2::geom_errorbar(
+            ggplot2::aes(ymin = .data$emp_tau - .data$ci,
+                         ymax = .data$emp_tau + .data$ci), width = 0.05) +
+        ggplot2::geom_line(linewidth = 0.6) +
+        ggplot2::geom_point(size = 1.0) +
+        ggplot2::facet_grid(scheme ~ direction) +
+        ggplot2::scale_x_log10(
+            breaks = sort(unique(unascertained$n_causal)),
+            labels = format(sort(unique(unascertained$n_causal)),
+                            big.mark = ",", trim = TRUE)) +
+        ggplot2::labs(x = paste0("Number of Causal Variants (realised rare ",
+                                 "fraction ", realised, ")"))
+
+    patchwork::wrap_plots(upper, lower, ncol = 1, heights = c(4, 1.35)) +
+        patchwork::plot_layout(guides = "collect") &
+        ggplot2::theme(legend.position = "bottom")
+}

@@ -1,7 +1,7 @@
 # simulation/06_allele_frequencies.R
 #
 # Computes the per-population allele frequency of every simulated variant, split
-# into the common and the rare pool. Produces the data behind S3, S7 and S8 Figs.
+# into the common and the rare pool. Produces the data behind S3 and S7 Figs.
 #
 # These three figures are all about where a variant's frequency sits in one
 # population relative to another, and in particular about variants that

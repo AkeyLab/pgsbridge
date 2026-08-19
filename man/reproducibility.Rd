@@ -79,7 +79,7 @@ where the manuscript states 0.997.
 
 
 \verb{scripts/coalescent/01_simulate_genotypes.py} accepts a \code{--seed}, but the run
-that produced the genotypes behind Figures 2 to 4 and S1 to S8 was made
+that produced the genotypes behind Figures 2 to 4 and S1 to S8 Figs was made
 before that option existed and its seed was not recorded.  Any rerun
 therefore produces a statistically equivalent but numerically different set
 of genotypes, and every downstream result inherits that.  Results here are
