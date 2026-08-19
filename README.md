@@ -1,5 +1,11 @@
 # pgsbridge
 
+Code for the paper **"Population-genetic and environmental determinants of
+polygenic score transferability"** by Kaiqian Zhang, John D. Storey and
+Joshua M. Akey. Everything needed to reproduce the paper's figures is here:
+the closed form as an R package, the simulations behind every figure, and the
+replicate-level results they produced.
+
 **Interactive companion to the manuscript:
 [akeylab.github.io/pgsbridge](https://akeylab.github.io/pgsbridge/)** — a
 seven-section page that evaluates the closed form live, and shows the paper's
