@@ -12,7 +12,7 @@ reader is never left guessing whether a mismatch is their mistake.
 
 
 All eleven figures redraw from the replicate-level results in \verb{data/} by
-calling \code{\link[=figure_01]{figure_01()}} through \code{\link[=figure_S7]{figure_S7()}}, with no genotypes and no
+calling \code{\link[=figure_01]{figure_01()}} through \code{\link[=figure_S8]{figure_S8()}}, with no genotypes and no
 cluster.  The simulation scripts regenerate those results from the coalescent
 genotypes: \code{\link[=figure_02]{figure_02()}}'s inputs have been checked directly against the
 distributed files and agree within Monte Carlo error at every heritability.

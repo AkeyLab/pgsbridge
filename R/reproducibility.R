@@ -7,7 +7,7 @@
 #' @section What reproduces:
 #'
 #' All eleven figures redraw from the replicate-level results in `data/` by
-#' calling [figure_01()] through [figure_S7()], with no genotypes and no
+#' calling [figure_01()] through [figure_S8()], with no genotypes and no
 #' cluster.  The simulation scripts regenerate those results from the coalescent
 #' genotypes: [figure_02()]'s inputs have been checked directly against the
 #' distributed files and agree within Monte Carlo error at every heritability.

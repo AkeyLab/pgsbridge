@@ -137,6 +137,7 @@ figure_02("data")
 | S5 Fig | `figure_S5()` | `04_traits_rare_and_common.R` |
 | S6 Fig | `figure_S6()` | `04_traits_rare_and_common.R` |
 | S7 Fig | `figure_S7()` | `06_allele_frequencies.R` |
+| S8 Fig | `figure_S8()` | `07_ascertainment_schemes.R` |
 
 `scripts/figures/` holds one script per figure that calls the function and
 writes a PDF and a PNG into `output/`. From the repository root:
@@ -170,10 +171,14 @@ order they run, each with a matching `.slurm` wrapper.
 | `04_traits_rare_and_common.R` | Figure 3, S4 to S6 Figs |
 | `05_heritability_decomposition.R` | Figure 4 |
 | `06_allele_frequencies.R` | S3 and S7 Figs |
+| `07_ascertainment_schemes.R` | S8 Fig |
 
 Step 1 is self-contained and simulates its own genotypes with `bnpsd`. Steps 2
-to 6 read the PLINK files from `scripts/coalescent/`, whose location is
-`PRS_GENOTYPES` in `scripts/config.R`. `vignette("reproducing-the-figures")`
+to 7 read the PLINK files from `scripts/coalescent/`, whose location is
+`PRS_GENOTYPES` in `scripts/config.R`. Step 7 also requires that the three
+per-population panels share one coded allele, because it adds allele counts
+across populations; `coalescent/02_prepare_genotypes.sh` guarantees that with
+`--keep-allele-order`, and step 7 checks it and stops if they disagree. `vignette("reproducing-the-figures")`
 walks through both paths.
 
 ## Citations
