@@ -27,7 +27,11 @@
 #                        the rule used for Figure 3, and it is also the global
 #                        allele-frequency rule, since pooling the three samples
 #                        and computing one frequency over 6,000 alleles is the
-#                        same calculation.
+#                        same calculation. Because it IS the Figure 3 rule, this
+#                        scheme is not simulated again: its rows are summarised
+#                        from Figure 3's own replicates, so the Model 4a panel of
+#                        S8 Fig and Figure 3 are the same numbers rather than two
+#                        independent draws that differ by Monte Carlo error.
 #   Model 4b random      no ascertainment. Causal variants are drawn uniformly
 #                        from the whole panel; the Model 4a split is applied
 #                        afterwards only to decide which of them get the larger
@@ -258,6 +262,24 @@ PAIR_LABELS <- vapply(ORDERED_PAIRS, paste, character(1), collapse = "-")
 
 rows <- list()
 for (scheme in names(schemes)) {
+  if (scheme == "model4a_pooled") {
+    # Not re-simulated: this is the Figure 3 rule, so it is the Figure 3
+    # replicates, summarised with the same estimator as everything else.
+    for (fraction in RARE_FRACTIONS) {
+      ftag <- sprintf("0%d", round(fraction * 10))
+      for (s in EFFECT_RATIOS) {
+        path <- file.path(PRS_DATA, "transferability_rare_variants", "h2_0.1",
+                          sprintf("transdf_mloci1000_h201_rare%s_s%d.RDS", ftag, s))
+        df <- readRDS(path); df$pop_comb <- as.character(df$pop_comb)
+        g <- group_summary(df, value = "emp_tau", groups = "pop_comb")
+        g$model <- scheme; g$ratio <- s; g$fraction <- fraction
+        g$n_causal <- N_CAUSAL; g$rare_share <- fraction
+        rows[[length(rows) + 1L]] <- g
+      }
+    }
+    cat("model4a_pooled taken from the Figure 3 replicates\n")
+    next
+  }
   if (scheme == "model4b_random") {
     for (m in RANDOM_N_CAUSAL) for (s in EFFECT_RATIOS) {
       rows[[length(rows) + 1L]] <- run_cell(scheme, 0L, 0L, s, n_draw = m)
@@ -279,7 +301,9 @@ for (scheme in names(schemes)) {
 results <- do.call(rbind, rows)
 output_dir <- file.path(PRS_DATA, "ascertainment")
 dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
-write.csv(results, file.path(output_dir, "transferability_by_scheme.csv"),
+keep <- c("model", "pop_comb", "ratio", "fraction", "n_causal",
+          "rare_share", "emp_tau", "se", "ci", "n")
+write.csv(results[, keep], file.path(output_dir, "transferability_by_scheme.csv"),
           row.names = FALSE)
 write.csv(pool_sizes, file.path(output_dir, "pool_sizes.csv"), row.names = FALSE)
 cat("wrote", file.path(output_dir, "transferability_by_scheme.csv"), "\n")
