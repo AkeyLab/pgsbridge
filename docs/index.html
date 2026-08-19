@@ -678,9 +678,9 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
       The two panels are the two directions of the same pair, which is what makes the asymmetry
       legible.</p>
     <p class="section-sub">One choice sits underneath all of this: what counts as a rare variant.
-      Our paper pools the three samples and calls a variant rare below a frequency of 0.01 in the
+      Our paper pools the three populations and calls a variant rare below a frequency of 0.01 in the
       pool. That is a modelling choice, not a property of the trait, and a variant that is rare in
-      the pool need not be rare in any single sample. The first control lets you replace it with
+      the pool need not be rare in any single population. The first control lets you replace it with
       four alternatives. We are not proposing any of them as more realistic than ours; deciding a
       causal variant's frequency class inside one population is not an obviously biological model.
       We include them because the choice turns out to matter, and it seemed better to show that
@@ -719,16 +719,16 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
           <h4 style="margin:0 0 8px">What the five schemes are telling us</h4>
           <p class="small">Move through them and one thing is hard to miss: the size of the
             asymmetry changes, and under one scheme its direction changes. Deciding rare on the
-            European sample roughly doubles the gap. Requiring a variant to fall in the same class
-            in all three samples closes it almost completely. Drawing causal variants at random,
+            European population roughly doubles the gap. Requiring a variant to fall in the same class
+            in all three populations closes it almost completely. Drawing causal variants at random,
             with no frequency criterion at all, lands close to where our pooled choice lands, which
             is reassuring, since most variants in the panel are rare in the pool anyway. Deciding
-            rare on the African sample turns the asymmetry around: transfer from Africa to Europe
+            rare on the African population turns the asymmetry around: transfer from Africa to Europe
             now exceeds one, and the reverse falls below it.</p>
           <p class="small">None of this escapes the equation at the top of this page. In every
             scheme the number we measure is the one
             <span data-tex="T_{A\to B} = \mathrm{PA}_B/\mathrm{PA}_A"></span> gives from the
-            additive genetic variance the chosen causal variants happen to carry in each sample.
+            additive genetic variance the chosen causal variants happen to carry in each population.
             Conditioning on a variant being common in one population selects variants that drifted
             up in that population, so that population carries more of the variance and its ceiling
             rises. What the ascertainment decides is which population the mechanism favours, not
@@ -1633,13 +1633,13 @@ const rareAt = (h2, ratio, frac, pair) =>
    samples; these are the five we compared. The order is the paper's own. */
 const SCHEMES = [
   { key: 'model1_allthree', short: 'Model 1',  name: 'rare in all three',
-    blurb: 'A variant is common only if it clears 0.01 in every sample, and rare only if it falls below 0.01 in every sample. Variants common in one sample and rare in another are used by neither pool.' },
+    blurb: 'A variant is common only if it clears 0.01 in every population, and rare only if it falls below 0.01 in every population. Variants common in one population and rare in another are used by neither pool.' },
   { key: 'model2_european', short: 'Model 2',  name: 'European only',
-    blurb: 'Common and rare are decided on the European sample alone, among the variants that segregate there.' },
+    blurb: 'Common and rare are decided on the European population alone, among the variants that segregate there.' },
   { key: 'model3_african',  short: 'Model 3',  name: 'African only',
-    blurb: 'The same rule applied to the African sample.' },
+    blurb: 'The same rule applied to the African population.' },
   { key: 'model4a_pooled',  short: 'Model 4a', name: 'pooled, our paper',
-    blurb: 'The three samples are pooled and one frequency is computed over all 6,000 alleles. This is the choice our paper makes, and it is what every other section of this page shows.' },
+    blurb: 'The three populations are pooled and one frequency is computed over all 6,000 alleles. This is the choice our paper makes, and it is what every other section of this page shows.' },
   { key: 'model4b_random',  short: 'Model 4b', name: 'no ascertainment',
     blurb: 'Causal variants are drawn from the whole panel without looking at frequency at all. Nothing chooses a rare fraction here: drawing this way realises one near 0.88 whatever else is done, so the curves do not depend on the slider and are drawn flat.' }
 ];
@@ -1688,7 +1688,7 @@ function buildPanel6() {
   $('panel-6').innerHTML =
     '<div class="panel-out"><div class="l">Highest transferability</div>' +
     '<div class="v" id="s6-best"></div><div class="s" id="s6-best-sub"></div></div>' +
-    '<label class="fld"><span>heritability fixed in the European sample</span>' +
+    '<label class="fld"><span>heritability fixed in the European population</span>' +
       '<span class="seg" id="s6-h2">' + h2opts + '</span></label>' +
     '<label class="fld"><span>number of causal variants <span class="muted">(S1 Fig)</span></span>' +
       '<span class="seg" id="s6-m">' + mopts + '</span></label>' +
@@ -1850,7 +1850,7 @@ function buildPanel7() {
       '<span class="seg wrapped" id="s7-scheme">' + schemeOpts + '</span></label>' +
     '<p class="small muted" id="s7-scheme-note" style="margin:0 0 10px"></p>' +
     '<label class="fld"><span>population pair</span><select id="s7-pair">' + pairOpts + '</select></label>' +
-    '<label class="fld"><span>heritability fixed in the European sample</span>' +
+    '<label class="fld"><span>heritability fixed in the European population</span>' +
       '<span class="seg" id="s7-h2">' + h2opts + '</span></label>' +
     '<label class="fld"><span>rare-to-common effect-size ratio</span>' +
       '<span class="seg" id="s7-ratio">' + ratioOpts + '</span></label>' +
@@ -1860,7 +1860,7 @@ function buildPanel7() {
       '" aria-label="fraction of the 1,000 causal variants that are rare">' +
       '<input type="number" id="s7-fracn" min="0.1" max="0.9" step="0.1" value="' + sim.frac +
       '" aria-label="fraction of causal variants that are rare, typed">' +
-      '<span class="row-def">the fraction of the 1,000 causal variants drawn from the rare pool, which is defined on the three samples pooled</span></div>' +
+      '<span class="row-def">the fraction of the 1,000 causal variants drawn from the rare pool, which is defined on the three populations pooled</span></div>' +
     '<label class="fld"><span>vertical scale</span><span class="seg" id="s7-scale">' +
       '<button type="button" data-fit="1">fit to view</button>' +
       '<button type="button" data-fit="0">same at every setting</button></span></label>' +
