@@ -24,7 +24,7 @@
 # relative sizes of the effects are therefore whatever the normal draw gave, and
 # only their overall scale is fixed by the heritability target.
 #
-# Accuracy is measured on a random subsample of `EVALUATION_SIZE` individuals
+# Accuracy is measured on all `EVALUATION_SIZE` individuals of each population
 # from each population rather than on all of them, as in
 # 02_traits_common_variants.R.
 #
@@ -43,7 +43,7 @@ POPULATIONS <- c(AFR = "afr_common", EUR = "eur_common", ASN = "asn_common")
 CALIBRATION_POPULATION <- "EUR"
 
 N_REPLICATES <- 1000
-EVALUATION_SIZE <- 180            # individuals used to measure accuracy
+EVALUATION_SIZE <- 1000          # every individual: nothing is fitted, so none is held out
 INTERCEPT <- 1
 NOISE_VARIANCE <- 1
 

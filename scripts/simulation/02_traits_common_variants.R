@@ -27,7 +27,7 @@
 # The heritability target is set in the European sample and the other two
 # populations take whatever heritability the same effect sizes produce in them.
 #
-# Accuracy is measured on a random subsample of `EVALUATION_SIZE` individuals
+# Accuracy is measured on all `EVALUATION_SIZE` individuals of each population
 # from each population rather than on all of them.
 #
 # Runtime: several hours for the full sweep. Use 02_traits_common_variants.slurm.
@@ -44,7 +44,7 @@ POPULATIONS <- c(AFR = "afr_common", EUR = "eur_common", ASN = "asn_common")
 CALIBRATION_POPULATION <- "EUR"   # the population whose heritability is fixed
 
 N_REPLICATES <- 1000
-EVALUATION_SIZE <- 180            # individuals used to measure accuracy
+EVALUATION_SIZE <- 1000          # every individual: nothing is fitted, so none is held out
 INTERCEPT <- 1
 NOISE_VARIANCE <- 1               # tau^2; the heritability target fixes sigma^2
 
