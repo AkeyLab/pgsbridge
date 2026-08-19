@@ -23,9 +23,9 @@
    our own figures use, so a colour means the same thing here as it does
    in the paper. The assignments come straight from repo_build/R/theme.R.
 
-     vermillion  discovery population A, and the African sample
-     blue        target population B, and the European sample, and common variants
-     green       the East Asian sample, and the genetic share of variance in the
+     vermillion  discovery population A, and the African population
+     blue        target population B, and the European population, and common variants
+     green       the East Asian population, and the genetic share of variance in the
                  single-population section where no A/B distinction exists
      orange      rare variants
      purple      transferability itself, the quantity the page is about
@@ -48,9 +48,9 @@
   --text-primary: #0b0b0b;  --text-secondary: #52514e;  --text-muted: #898781;
   --grid: #e1e0d9;  --axis: #b9b8ad;  --border: rgba(11,11,11,0.10);
 
-  --c-disc:  #D55E00;   /* discovery population A   ·  African sample   */
-  --c-targ:  #0072B2;   /* target population B      ·  European sample  */
-  --c-asn:   #009E73;   /* East Asian sample                            */
+  --c-disc:  #D55E00;   /* discovery population A · African population  */
+  --c-targ:  #0072B2;   /* target population B    · European population */
+  --c-asn:   #009E73;   /* East Asian population                         */
   --c-gen:   #009E73;   /* genetic share of variance (section 1 only)   */
   --c-env:   #8d8b84;   /* non-genetic share of variance                */
   --c-T:     #8E4585;   /* transferability, the result                  */
@@ -344,7 +344,7 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
       the whole of the theory. The first says that a population's ceiling is fixed by just three
       quantities: the additive genetic variance <span data-tex="\sigma^2"></span>, meaning how much
       of the trait is heritable; the average self-kinship <span data-tex="\overline{\Phi}"></span>,
-      which summarises relatedness and structure within the sample; and the non-genetic variance
+      which summarises relatedness and structure within the population; and the non-genetic variance
       <span data-tex="\tau^2"></span>, which is everything about the trait that no genotype can
       reach. The second says that transferability from a discovery population A to a target
       population B is the target's ceiling divided by the discovery population's. We take the first expression apart in section 1 and the second in
@@ -609,8 +609,8 @@ table.data thead th { color: var(--text-secondary); font-weight: 600; border-bot
   <section id="s6" data-tone="6">
     <div class="section-head"><span class="section-num">06</span><h2>Out of Africa, and a reversed direction</h2></div>
     <p class="section-sub">Now we let demographic history set the allele frequencies rather than
-      specifying them ourselves. We simulated African, European and East Asian samples under an
-      Out-of-Africa coalescent model. The individuals within each sample are unrelated, so every
+      specifying them ourselves. We simulated African, European and East Asian populations under an
+      Out-of-Africa coalescent model. The individuals within each population are unrelated, so every
       population has average self-kinship one half, and transferability is exactly the ratio of
       heritabilities. Every difference below therefore comes from demography alone.</p>
     <div class="sec-grid">
@@ -900,7 +900,7 @@ const KIND = {
   s: { name: 'additive genetic variance', tex: '\\sigma^2', part: 'gen',
        blurb: 'How much of the trait is heritable. It is set by the causal effect sizes together with the allele frequencies, so demography enters here.' },
   p: { name: 'average self-kinship', tex: '\\overline{\\Phi}', part: 'gen',
-       blurb: 'The chance an individual’s two alleles at a site are identical by descent, averaged over the sample. Exactly one half when the sample is unrelated and in Hardy–Weinberg equilibrium, and larger under inbreeding or structure.' },
+       blurb: 'The chance an individual’s two alleles at a site are identical by descent, averaged over the population. Exactly one half when individuals are unrelated and in Hardy–Weinberg equilibrium, and larger under inbreeding or structure.' },
   t: { name: 'non-genetic variance', tex: '\\tau^2', part: 'env',
        blurb: 'Everything that varies the trait and cannot be read from the genotype. No predictor built from genotype can touch it.' }
 };
@@ -1630,7 +1630,7 @@ const rareAt = (h2, ratio, frac, pair) =>
 
 /* Which variants count as common and which count as rare is a modelling choice,
    not a property of the trait. Our paper makes one choice, pooling the three
-   samples; these are the five we compared. The order is the paper's own. */
+   populations; these are the five we compared. The order is the paper's own. */
 const SCHEMES = [
   { key: 'model1_allthree', short: 'Model 1',  name: 'rare in all three',
     blurb: 'A variant is common only if it clears 0.01 in every population, and rare only if it falls below 0.01 in every population. Variants common in one population and rare in another are used by neither pool.' },
@@ -1795,10 +1795,10 @@ function drawSection6() {
 
   const intoAfr = rows.filter(r => r.targ === 'AFR').map(r => r.mean);
   const outAfr = rows.filter(r => r.disc === 'AFR').map(r => r.mean);
-  $('s6-ours').innerHTML = 'Transferability into the African sample is ' +
+  $('s6-ours').innerHTML = 'Transferability into the African population is ' +
     fmt(Math.min.apply(null, intoAfr), 3) + ' to ' + fmt(Math.max.apply(null, intoAfr), 3) +
     ', and out of it ' + fmt(Math.min.apply(null, outAfr), 3) + ' to ' +
-    fmt(Math.max.apply(null, outAfr), 3) + '. Every transfer <i>into</i> the African sample beats ' +
+    fmt(Math.max.apply(null, outAfr), 3) + '. Every transfer <i>into</i> the African population beats ' +
     'every transfer <i>out</i> of it, and the strongest of all is ' + POP_LONG[rows[0].disc] +
     ' into ' + POP_LONG[rows[0].targ] + '.';
 }
@@ -1817,9 +1817,9 @@ function drawMechanism(rows) {
 
   const tiles = [
     { c: 'var(--text-muted)', label: '1 · demography', value: 'no bottleneck in Africa',
-      note: 'The Out-of-Africa expansion passed the European and East Asian ancestors through a bottleneck; the African sample did not.' },
+      note: 'The Out-of-Africa expansion passed the European and East Asian ancestors through a bottleneck; the African population did not.' },
     { c: 'var(--c-disc)', label: '2 · allele frequencies', value: fmt(hetOf('AFR') / hetOf('EUR'), 2) + '×',
-      note: 'Mean p(1−p) over the shared common panel is ' + fmt(hetOf('AFR'), 4) + ' in the African sample against ' +
+      note: 'Mean p(1−p) over the shared common panel is ' + fmt(hetOf('AFR'), 4) + ' in the African population against ' +
             fmt(hetOf('EUR'), 4) + ' in the European one. This is the quantity additive genetic variance is proportional to.' },
     { c: 'var(--c-T)', label: '3 · heritability', value: fmt(h2.AFR, 3) + ' vs ' + fmt(h2.EUR, 3),
       note: 'With effect sizes shared, more variance at the causal sites means more heritability. African ' +
